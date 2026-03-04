@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\InvoiceController;
 
 Route::get('/', function () {
     return view('home');
@@ -30,4 +31,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/companies/{id}/suppliers', [SupplierController::class, 'store']);
     Route::get('/companies/{id}/accounts/create', [AccountController::class, 'create']);
     Route::post('/companies/{id}/accounts', [AccountController::class, 'store']);
+    Route::get('/companies/{companyId}/clients/{clientId}/invoices/create', [InvoiceController::class, 'create']);
+    Route::post('/companies/{companyId}/clients/{clientId}/invoices', [InvoiceController::class, 'store']);
 });
