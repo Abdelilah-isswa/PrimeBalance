@@ -42,4 +42,9 @@ class Company extends Model
     {
         return $this->hasMany(Bill::class);
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

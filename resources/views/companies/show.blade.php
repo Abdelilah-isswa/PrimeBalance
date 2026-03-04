@@ -16,6 +16,9 @@
         <a href="/companies/{{ $company->id }}/bills">
             <button type="button" style="margin-top: 0.5rem; margin-left: 0.5rem;">View Bills History</button>
         </a>
+        <a href="/companies/{{ $company->id }}/transactions">
+            <button type="button" style="margin-top: 0.5rem; margin-left: 0.5rem;">View Transactions</button>
+        </a>
     </div>
 
     <h2>Categories</h2>

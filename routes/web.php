@@ -9,6 +9,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\BillController;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', function () {
     return view('home');
@@ -42,4 +43,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/companies/{companyId}/suppliers/{supplierId}/bills', [BillController::class, 'store']);
     Route::get('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'showPayment']);
     Route::post('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'pay']);
+    Route::get('/companies/{companyId}/transactions', [TransactionController::class, 'index']);
 });
