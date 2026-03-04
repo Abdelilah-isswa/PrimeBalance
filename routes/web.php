@@ -6,6 +6,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\AccountController;
 
 Route::get('/', function () {
     return view('home');
@@ -27,4 +28,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/companies/{id}/clients', [ClientController::class, 'store']);
     Route::get('/companies/{id}/suppliers/create', [SupplierController::class, 'create']);
     Route::post('/companies/{id}/suppliers', [SupplierController::class, 'store']);
+    Route::get('/companies/{id}/accounts/create', [AccountController::class, 'create']);
+    Route::post('/companies/{id}/accounts', [AccountController::class, 'store']);
 });
