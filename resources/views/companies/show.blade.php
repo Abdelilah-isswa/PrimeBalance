@@ -67,4 +67,21 @@
             @endforeach
         </ul>
     @endif
+
+    <h2>Accounts</h2>
+    @if($company->pivot->role === 'owner')
+        <a href="/companies/{{ $company->id }}/accounts/create" style="display: inline-block; margin-bottom: 1rem;">
+            <button type="button">Add Account</button>
+        </a>
+    @endif
+
+    @if($company->accounts->isEmpty())
+        <p>No accounts yet.</p>
+    @else
+        <ul>
+            @foreach($company->accounts as $account)
+                <li>{{ $account->name }} - Balance: {{ $account->balance }} - {{ $account->is_active ? 'Active' : 'Inactive' }}</li>
+            @endforeach
+        </ul>
+    @endif
 @endsection
