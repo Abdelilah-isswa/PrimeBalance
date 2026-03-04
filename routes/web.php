@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/companies/{id}/suppliers', [SupplierController::class, 'store']);
     Route::get('/companies/{id}/accounts/create', [AccountController::class, 'create']);
     Route::post('/companies/{id}/accounts', [AccountController::class, 'store']);
+    Route::get('/companies/{companyId}/invoices', [InvoiceController::class, 'index']);
     Route::get('/companies/{companyId}/clients/{clientId}/invoices/create', [InvoiceController::class, 'create']);
     Route::post('/companies/{companyId}/clients/{clientId}/invoices', [InvoiceController::class, 'store']);
 });

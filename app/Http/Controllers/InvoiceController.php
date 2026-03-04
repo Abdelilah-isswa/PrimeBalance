@@ -8,6 +8,14 @@ use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
 {
+    public function index($companyId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        $invoices = $company->invoices()->with('client')->get();
+        
+        return view('invoices.index', compact('company', 'invoices'));
+    }
+
     public function create($companyId, $clientId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);

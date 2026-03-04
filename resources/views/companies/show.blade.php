@@ -10,6 +10,9 @@
         <p><strong>Currency:</strong> {{ $company->currency }}</p>
         <p><strong>Start Date:</strong> {{ $company->start_date }}</p>
         <p><strong>Your Role:</strong> {{ $company->pivot->role }}</p>
+        <a href="/companies/{{ $company->id }}/invoices">
+            <button type="button" style="margin-top: 0.5rem;">View Invoices History</button>
+        </a>
     </div>
 
     <h2>Categories</h2>
