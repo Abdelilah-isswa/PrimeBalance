@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\BillController;
 
 Route::get('/', function () {
     return view('home');
@@ -34,4 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/companies/{companyId}/invoices', [InvoiceController::class, 'index']);
     Route::get('/companies/{companyId}/clients/{clientId}/invoices/create', [InvoiceController::class, 'create']);
     Route::post('/companies/{companyId}/clients/{clientId}/invoices', [InvoiceController::class, 'store']);
+    Route::get('/companies/{companyId}/bills', [BillController::class, 'index']);
+    Route::get('/companies/{companyId}/suppliers/{supplierId}/bills/create', [BillController::class, 'create']);
+    Route::post('/companies/{companyId}/suppliers/{supplierId}/bills', [BillController::class, 'store']);
 });

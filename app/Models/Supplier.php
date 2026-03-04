@@ -12,4 +12,9 @@ class Supplier extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function bills()
+    {
+        return $this->hasMany(Bill::class);
+    }
 }
