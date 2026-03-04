@@ -33,4 +33,21 @@
             @endforeach
         </ul>
     @endif
+
+    <h2>Clients</h2>
+    @if($company->pivot->role === 'owner')
+        <a href="/companies/{{ $company->id }}/clients/create" style="display: inline-block; margin-bottom: 1rem;">
+            <button type="button">Add Client</button>
+        </a>
+    @endif
+
+    @if($company->clients->isEmpty())
+        <p>No clients yet.</p>
+    @else
+        <ul>
+            @foreach($company->clients as $client)
+                <li>{{ $client->name }} - {{ $client->email }} - {{ $client->phone }}</li>
+            @endforeach
+        </ul>
+    @endif
 @endsection
