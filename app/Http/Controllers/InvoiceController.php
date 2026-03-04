@@ -51,4 +51,54 @@ class InvoiceController extends Controller
 
         return redirect("/companies/{$companyId}");
     }
+
+    public function showReceivePayment($companyId, $invoiceId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can receive payments');
+        }
+
+        $invoice = $company->invoices()->findOrFail($invoiceId);
+        $accounts = $company->accounts()->where('is_active', true)->get();
+        $categories = $company->categories;
+
+        return view('invoices.receive', compact('company', 'invoice', 'accounts', 'categories'));
+    }
+
+    public function receivePayment(Request $request, $companyId, $invoiceId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can receive payments');
+        }
+
+        $invoice = $company->invoices()->findOrFail($invoiceId);
+
+        $request->validate([
+            'account_id' => 'required|exists:accounts,id',
+            'category_id' => 'nullable|exists:categories,id',
+            'date' => 'required|date',
+        ]);
+
+        $account = \App\Models\Account::findOrFail($request->account_id);
+        
+        \App\Models\Transaction::create([
+            'company_id' => $companyId,
+            'account_id' => $request->account_id,
+            'category_id' => $request->category_id,
+            'type' => 'income',
+            'amount' => $invoice->total_amount,
+            'description' => 'Payment received for invoice #' . $invoice->id . ' - ' . $invoice->client->name,
+            'date' => $request->date,
+            'invoice_id' => $invoice->id,
+        ]);
+
+        $account->increment('balance', $invoice->total_amount);
+        $invoice->update(['status' => 'paid']);
+
+        return redirect("/companies/{$companyId}/invoices")->with('success', 'Payment received successfully');
+    }
 }

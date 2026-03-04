@@ -51,4 +51,54 @@ class BillController extends Controller
 
         return redirect("/companies/{$companyId}");
     }
+
+    public function showPayment($companyId, $billId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can pay bills');
+        }
+
+        $bill = $company->bills()->findOrFail($billId);
+        $accounts = $company->accounts()->where('is_active', true)->get();
+        $categories = $company->categories;
+
+        return view('bills.pay', compact('company', 'bill', 'accounts', 'categories'));
+    }
+
+    public function pay(Request $request, $companyId, $billId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can pay bills');
+        }
+
+        $bill = $company->bills()->findOrFail($billId);
+
+        $request->validate([
+            'account_id' => 'required|exists:accounts,id',
+            'category_id' => 'nullable|exists:categories,id',
+            'date' => 'required|date',
+        ]);
+
+        $account = \App\Models\Account::findOrFail($request->account_id);
+
+        \App\Models\Transaction::create([
+            'company_id' => $companyId,
+            'account_id' => $request->account_id,
+            'category_id' => $request->category_id,
+            'type' => 'expense',
+            'amount' => $bill->total_amount,
+            'description' => 'Payment for bill #' . $bill->id . ' - ' . $bill->supplier->name,
+            'date' => $request->date,
+            'bill_id' => $bill->id,
+        ]);
+
+        $account->decrement('balance', $bill->total_amount);
+        $bill->update(['status' => 'paid']);
+
+        return redirect("/companies/{$companyId}/bills")->with('success', 'Bill paid successfully');
+    }
 }

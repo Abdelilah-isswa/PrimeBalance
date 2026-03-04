@@ -35,7 +35,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/companies/{companyId}/invoices', [InvoiceController::class, 'index']);
     Route::get('/companies/{companyId}/clients/{clientId}/invoices/create', [InvoiceController::class, 'create']);
     Route::post('/companies/{companyId}/clients/{clientId}/invoices', [InvoiceController::class, 'store']);
+    Route::get('/companies/{companyId}/invoices/{invoiceId}/receive', [InvoiceController::class, 'showReceivePayment']);
+    Route::post('/companies/{companyId}/invoices/{invoiceId}/receive', [InvoiceController::class, 'receivePayment']);
     Route::get('/companies/{companyId}/bills', [BillController::class, 'index']);
     Route::get('/companies/{companyId}/suppliers/{supplierId}/bills/create', [BillController::class, 'create']);
     Route::post('/companies/{companyId}/suppliers/{supplierId}/bills', [BillController::class, 'store']);
+    Route::get('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'showPayment']);
+    Route::post('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'pay']);
 });

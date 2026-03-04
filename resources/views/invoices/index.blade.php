@@ -16,6 +16,7 @@
                     <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Total Amount</th>
                     <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Status</th>
                     <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Date</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,6 +27,13 @@
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $company->currency }} {{ $invoice->total_amount }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ ucfirst($invoice->status) }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $invoice->created_at->format('Y-m-d') }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">
+                            @if($invoice->status !== 'paid' && $company->pivot->role === 'owner')
+                                <a href="/companies/{{ $company->id }}/invoices/{{ $invoice->id }}/receive">
+                                    <button type="button" style="padding: 0.25rem 0.5rem; font-size: 0.9rem;">Receive Payment</button>
+                                </a>
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
