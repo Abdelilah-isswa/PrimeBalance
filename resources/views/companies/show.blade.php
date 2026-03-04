@@ -13,6 +13,9 @@
         <a href="/companies/{{ $company->id }}/invoices">
             <button type="button" style="margin-top: 0.5rem;">View Invoices History</button>
         </a>
+        <a href="/companies/{{ $company->id }}/bills">
+            <button type="button" style="margin-top: 0.5rem; margin-left: 0.5rem;">View Bills History</button>
+        </a>
     </div>
 
     <h2>Categories</h2>
@@ -73,7 +76,14 @@
     @else
         <ul>
             @foreach($company->suppliers as $supplier)
-                <li>{{ $supplier->name }} - {{ $supplier->email }} - {{ $supplier->phone }}</li>
+                <li>
+                    {{ $supplier->name }} - {{ $supplier->email }} - {{ $supplier->phone }}
+                    @if($company->pivot->role === 'owner')
+                        <a href="/companies/{{ $company->id }}/suppliers/{{ $supplier->id }}/bills/create">
+                            <button type="button" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.9rem;">Add Bill</button>
+                        </a>
+                    @endif
+                </li>
             @endforeach
         </ul>
     @endif
