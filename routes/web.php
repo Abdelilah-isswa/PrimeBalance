@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\SupplierController;
 
 Route::get('/', function () {
     return view('home');
@@ -24,4 +25,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/companies/{id}/categories', [CategoryController::class, 'store']);
     Route::get('/companies/{id}/clients/create', [ClientController::class, 'create']);
     Route::post('/companies/{id}/clients', [ClientController::class, 'store']);
+    Route::get('/companies/{id}/suppliers/create', [SupplierController::class, 'create']);
+    Route::post('/companies/{id}/suppliers', [SupplierController::class, 'store']);
 });

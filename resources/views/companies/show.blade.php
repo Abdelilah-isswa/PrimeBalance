@@ -50,4 +50,21 @@
             @endforeach
         </ul>
     @endif
+
+    <h2>Suppliers</h2>
+    @if($company->pivot->role === 'owner')
+        <a href="/companies/{{ $company->id }}/suppliers/create" style="display: inline-block; margin-bottom: 1rem;">
+            <button type="button">Add Supplier</button>
+        </a>
+    @endif
+
+    @if($company->suppliers->isEmpty())
+        <p>No suppliers yet.</p>
+    @else
+        <ul>
+            @foreach($company->suppliers as $supplier)
+                <li>{{ $supplier->name }} - {{ $supplier->email }} - {{ $supplier->phone }}</li>
+            @endforeach
+        </ul>
+    @endif
 @endsection
