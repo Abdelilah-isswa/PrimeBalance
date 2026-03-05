@@ -179,8 +179,8 @@
 
     <h2>Accounts</h2>
     @if($company->pivot->role === 'owner')
-        <a href="/companies/{{ $company->id }}/accounts/create" style="display: inline-block; margin-bottom: 1rem;">
-            <button type="button">Add Account</button>
+        <a href="/companies/{{ $company->id }}/accounts" style="display: inline-block; margin-bottom: 1rem;">
+            <button type="button">Manage Accounts</button>
         </a>
     @endif
 
