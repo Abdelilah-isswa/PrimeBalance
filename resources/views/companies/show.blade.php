@@ -50,17 +50,6 @@
     </div>
 
     <h2>Categories</h2>
-    @if($company->pivot->role === 'owner')
-        <form method="POST" action="/companies/{{ $company->id }}/categories" style="margin-bottom: 1rem;">
-            @csrf
-            <div style="display: flex; gap: 0.5rem;">
-                <input type="text" name="name" placeholder="Category name" required style="flex: 1;">
-                <button type="submit">Add Category</button>
-            </div>
-            @error('name')<span>{{ $message }}</span>@enderror
-        </form>
-    @endif
-
     <a href="/companies/{{ $company->id }}/categories">
         <button type="button" style="margin-bottom: 1rem;">Manage Categories</button>
     </a>

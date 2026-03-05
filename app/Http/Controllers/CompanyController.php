@@ -37,6 +37,40 @@ class CompanyController extends Controller
         ));
     }
 
+    public function edit($id)
+    {
+        $company = Auth::user()->companies()->findOrFail($id);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can edit company');
+        }
+
+        return view('companies.edit', compact('company'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $company = Auth::user()->companies()->findOrFail($id);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can update company');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string',
+            'currency' => 'required|string|max:10',
+        ]);
+
+        $company->update([
+            'name' => $request->name,
+            'address' => $request->address,
+            'currency' => $request->currency,
+        ]);
+
+        return redirect("/companies/{$id}")->with('success', 'Company updated successfully');
+    }
+
     public function create()
     {
         return view('companies.create');
