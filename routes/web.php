@@ -44,4 +44,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'showPayment']);
     Route::post('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'pay']);
     Route::get('/companies/{companyId}/transactions', [TransactionController::class, 'index']);
+    Route::get('/companies/{companyId}/transactions/create', [TransactionController::class, 'create']);
+    Route::post('/companies/{companyId}/transactions', [TransactionController::class, 'store']);
 });

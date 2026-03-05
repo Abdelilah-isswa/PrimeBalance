@@ -5,6 +5,12 @@
 @section('content')
     <h1>Transactions - {{ $company->name }}</h1>
     
+    @if($company->pivot->role === 'owner')
+        <a href="/companies/{{ $company->id }}/transactions/create" style="display: inline-block; margin-bottom: 1rem;">
+            <button type="button">Add Transaction</button>
+        </a>
+    @endif
+    
     @if($transactions->isEmpty())
         <p>No transactions yet.</p>
     @else
