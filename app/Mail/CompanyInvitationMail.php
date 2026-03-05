@@ -13,12 +13,14 @@ class CompanyInvitationMail extends Mailable
     public $company;
     public $role;
     public $inviterName;
+    public $token;
 
-    public function __construct($company, $role, $inviterName)
+    public function __construct($company, $role, $inviterName, $token)
     {
         $this->company = $company;
         $this->role = $role;
         $this->inviterName = $inviterName;
+        $this->token = $token;
     }
 
     public function build()

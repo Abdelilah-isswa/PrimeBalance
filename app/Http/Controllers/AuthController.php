@@ -49,6 +49,14 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+        
+        // Check if there's a pending invitation
+        if (session('invitation_token')) {
+            $token = session('invitation_token');
+            session()->forget('invitation_token');
+            return redirect('/invitations/accept/' . $token);
+        }
+        
         return redirect('/');
     }
 

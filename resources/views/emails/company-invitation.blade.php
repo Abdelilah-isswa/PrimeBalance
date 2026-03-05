@@ -21,13 +21,13 @@
             
             <p><strong>{{ $inviterName }}</strong> has invited you to join <strong>{{ $company->name }}</strong> as a <strong>{{ $role }}</strong>.</p>
             
-            <p>If you already have an account, please log in and you will see the company in your companies list.</p>
+            <p>Click the button below to accept this invitation:</p>
             
-            <p>If you don't have an account yet, please register first:</p>
+            <a href="{{ config('app.url') }}/invitations/{{ $token }}" class="button">View Invitation</a>
             
-            <a href="{{ config('app.url') }}/register" class="button">Register Now</a>
+            <p>This invitation will expire in 7 days.</p>
             
-            <p>After registration or login, the company owner will need to add you to the company.</p>
+            <p>If you don't have an account, you'll be asked to register or login first.</p>
             
             <p><strong>Company Details:</strong></p>
             <p>

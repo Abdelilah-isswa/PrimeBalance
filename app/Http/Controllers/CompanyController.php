@@ -110,29 +110,98 @@ class CompanyController extends Controller
             'role' => 'required|in:owner,accountant,standard_user,viewer',
         ]);
 
-        // Check if user exists
+        // Check if user already exists and is in company
         $user = \App\Models\User::where('email', $request->email)->first();
-        
-        if ($user) {
-            // Check if already in company
-            if ($company->users()->where('user_id', $user->id)->exists()) {
-                return back()->with('error', 'User is already a member of this company');
-            }
-            
-            // Add user to company
-            $company->users()->attach($user->id, ['role' => $request->role]);
-            
-            return back()->with('success', 'User added to company successfully');
-        } else {
-            // Send invitation email
-            \Mail::to($request->email)->send(new \App\Mail\CompanyInvitationMail(
-                $company,
-                $request->role,
-                Auth::user()->name
-            ));
-            
-            return back()->with('success', 'Invitation sent to ' . $request->email);
+        if ($user && $company->users()->where('user_id', $user->id)->exists()) {
+            return back()->with('error', 'User is already a member of this company');
         }
+
+        // Check if there's already a pending invitation
+        $existingInvitation = \App\Models\Invitation::where('company_id', $id)
+            ->where('email', $request->email)
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if ($existingInvitation) {
+            return back()->with('error', 'An invitation has already been sent to this email');
+        }
+
+        // Create invitation
+        $token = \Str::random(64);
+        $invitation = \App\Models\Invitation::create([
+            'company_id' => $id,
+            'email' => $request->email,
+            'role' => $request->role,
+            'token' => $token,
+            'invited_by' => Auth::id(),
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        // Send invitation email
+        \Mail::to($request->email)->send(new \App\Mail\CompanyInvitationMail(
+            $company,
+            $request->role,
+            Auth::user()->name,
+            $token
+        ));
+
+        return back()->with('success', 'Invitation sent to ' . $request->email);
+    }
+
+    public function showInvitation($token)
+    {
+        $invitation = \App\Models\Invitation::where('token', $token)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        if ($invitation->isExpired()) {
+            $invitation->update(['status' => 'expired']);
+            return view('invitations.expired');
+        }
+
+        return view('invitations.accept', compact('invitation'));
+    }
+
+    public function acceptInvitation($token)
+    {
+        $invitation = \App\Models\Invitation::where('token', $token)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        if ($invitation->isExpired()) {
+            $invitation->update(['status' => 'expired']);
+            return redirect('/login')->with('error', 'This invitation has expired');
+        }
+
+        // Check if user is logged in
+        if (!Auth::check()) {
+            // Store invitation token in session and redirect to login
+            session(['invitation_token' => $token]);
+            return redirect('/login')->with('message', 'Please login or register to accept the invitation');
+        }
+
+        // Check if logged-in user email matches invitation
+        if (Auth::user()->email !== $invitation->email) {
+            return redirect('/')->with('error', 'This invitation was sent to ' . $invitation->email);
+        }
+
+        // Add user to company
+        $invitation->company->users()->attach(Auth::id(), ['role' => $invitation->role]);
+        $invitation->update(['status' => 'accepted']);
+
+        return redirect('/companies/' . $invitation->company_id)->with('success', 'You have joined ' . $invitation->company->name);
+    }
+
+    public function declineInvitation($token)
+    {
+        $invitation = \App\Models\Invitation::where('token', $token)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $invitation->update(['status' => 'expired']);
+
+        return redirect('/login')->with('message', 'Invitation declined');
     }
 
     public function create()
