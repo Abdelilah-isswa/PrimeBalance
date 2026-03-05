@@ -21,13 +21,13 @@
             </thead>
             <tbody>
                 @foreach($invoices as $invoice)
-                    <tr>
+                    <tr style="cursor: pointer;" onclick="window.location='/companies/{{ $company->id }}/invoices/{{ $invoice->id }}'">
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $invoice->id }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $invoice->client->name }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $company->currency }} {{ $invoice->total_amount }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ ucfirst($invoice->status) }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $invoice->created_at->format('Y-m-d') }}</td>
-                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;" onclick="event.stopPropagation();">
                             @if($invoice->status !== 'paid' && $company->pivot->role === 'owner')
                                 <a href="/companies/{{ $company->id }}/invoices/{{ $invoice->id }}/receive">
                                     <button type="button" style="padding: 0.25rem 0.5rem; font-size: 0.9rem;">Receive Payment</button>

@@ -50,6 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/companies/{companyId}/invoices', [InvoiceController::class, 'index']);
     Route::get('/companies/{companyId}/clients/{clientId}/invoices/create', [InvoiceController::class, 'create']);
     Route::post('/companies/{companyId}/clients/{clientId}/invoices', [InvoiceController::class, 'store']);
+    Route::get('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'show']);
+    Route::get('/companies/{companyId}/invoices/{invoiceId}/edit', [InvoiceController::class, 'edit']);
+    Route::put('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'update']);
+    Route::delete('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'destroy']);
     Route::get('/companies/{companyId}/invoices/{invoiceId}/receive', [InvoiceController::class, 'showReceivePayment']);
     Route::post('/companies/{companyId}/invoices/{invoiceId}/receive', [InvoiceController::class, 'receivePayment']);
     Route::get('/companies/{companyId}/bills', [BillController::class, 'index']);

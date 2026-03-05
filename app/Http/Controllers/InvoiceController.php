@@ -106,4 +106,62 @@ class InvoiceController extends Controller
 
         return redirect("/companies/{$companyId}/invoices")->with('success', 'Payment received successfully');
     }
+
+    public function show($companyId, $invoiceId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
+        
+        return view('invoices.show', compact('company', 'invoice'));
+    }
+
+    public function edit($companyId, $invoiceId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can edit invoices');
+        }
+
+        $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
+        
+        return view('invoices.edit', compact('company', 'invoice'));
+    }
+
+    public function update(Request $request, $companyId, $invoiceId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can update invoices');
+        }
+
+        $invoice = $company->invoices()->findOrFail($invoiceId);
+
+        $request->validate([
+            'total_amount' => 'required|numeric|min:0',
+            'status' => 'required|in:draft,sent,paid,cancelled',
+        ]);
+
+        $invoice->update([
+            'total_amount' => $request->total_amount,
+            'status' => $request->status,
+        ]);
+
+        return redirect("/companies/{$companyId}/invoices/{$invoiceId}")->with('success', 'Invoice updated successfully');
+    }
+
+    public function destroy($companyId, $invoiceId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can delete invoices');
+        }
+
+        $invoice = $company->invoices()->findOrFail($invoiceId);
+        $invoice->delete();
+
+        return redirect("/companies/{$companyId}/invoices")->with('success', 'Invoice deleted successfully');
+    }
 }
