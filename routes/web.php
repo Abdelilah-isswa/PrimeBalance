@@ -12,7 +12,15 @@ use App\Http\Controllers\BillController;
 use App\Http\Controllers\TransactionController;
 
 Route::get('/', function () {
-    return view('home');
+    $companies = Auth::user()->companies;
+    
+    if ($companies->count() === 0) {
+        return redirect('/companies/create');
+    } elseif ($companies->count() === 1) {
+        return redirect('/companies/' . $companies->first()->id);
+    } else {
+        return redirect('/companies');
+    }
 })->middleware('auth');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

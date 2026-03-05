@@ -10,6 +10,11 @@
         <p><strong>Currency:</strong> {{ $company->currency }}</p>
         <p><strong>Start Date:</strong> {{ $company->start_date }}</p>
         <p><strong>Your Role:</strong> {{ $company->pivot->role }}</p>
+        @if($company->pivot->role === 'owner')
+            <a href="/companies/{{ $company->id }}/edit">
+                <button type="button" style="margin-top: 0.5rem;">Manage Company</button>
+            </a>
+        @endif
         <a href="/companies/{{ $company->id }}/invoices">
             <button type="button" style="margin-top: 0.5rem;">View Invoices History</button>
         </a>

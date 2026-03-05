@@ -30,6 +30,17 @@
             @auth
                 <a href="/">Home</a>
                 <a href="/companies">My Companies</a>
+                @php
+                    $userCompanies = Auth::user()->companies;
+                @endphp
+                @if($userCompanies->count() > 0)
+                    <select onchange="if(this.value) window.location.href=this.value" style="padding: 0.5rem; border: 1px solid white; border-radius: 4px; background: #555; color: white; cursor: pointer;">
+                        <option value="">Switch Company</option>
+                        @foreach($userCompanies as $comp)
+                            <option value="/companies/{{ $comp->id }}">{{ $comp->name }}</option>
+                        @endforeach
+                    </select>
+                @endif
                 <a href="/companies/create">Create Company</a>
                 <form method="POST" action="/logout" style="display: inline;">
                     @csrf

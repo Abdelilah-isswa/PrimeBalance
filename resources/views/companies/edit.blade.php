@@ -5,7 +5,15 @@
 @section('content')
     <h1>Manage Company</h1>
     
-    <form method="POST" action="/companies/{{ $company->id }}">
+    <div id="view-mode" style="margin: 2rem 0;">
+        <p><strong>Name:</strong> <span id="display-name">{{ $company->name }}</span></p>
+        <p><strong>Address:</strong> <span id="display-address">{{ $company->address }}</span></p>
+        <p><strong>Currency:</strong> <span id="display-currency">{{ $company->currency }}</span></p>
+        <p><strong>Start Date:</strong> {{ $company->start_date }}</p>
+        <button type="button" onclick="showEditMode()" style="margin-top: 1rem;">Update</button>
+    </div>
+
+    <form id="edit-mode" method="POST" action="/companies/{{ $company->id }}" style="display: none;">
         @csrf
         @method('PUT')
         <div>
@@ -32,15 +40,23 @@
             </select>
             @error('currency')<span>{{ $message }}</span>@enderror
         </div>
-        <div>
-            <label>Start Date:</label>
-            <input type="text" value="{{ $company->start_date }}" disabled>
-            <small style="display: block; color: #666;">Start date cannot be changed</small>
-        </div>
-        <button type="submit">Update Company</button>
+        <button type="submit" style="margin-right: 0.5rem;">Save</button>
+        <button type="button" onclick="showViewMode()">Cancel</button>
     </form>
     
     <a href="/companies/{{ $company->id }}" style="display: inline-block; margin-top: 1rem;">
         <button type="button">Back to Company</button>
     </a>
+
+    <script>
+        function showEditMode() {
+            document.getElementById('view-mode').style.display = 'none';
+            document.getElementById('edit-mode').style.display = 'block';
+        }
+
+        function showViewMode() {
+            document.getElementById('view-mode').style.display = 'block';
+            document.getElementById('edit-mode').style.display = 'none';
+        }
+    </script>
 @endsection
