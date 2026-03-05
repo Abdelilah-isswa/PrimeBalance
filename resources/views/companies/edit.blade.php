@@ -22,6 +22,27 @@
         @endif
     </div>
 
+    @if(!$company->end_date)
+    <h2>Invite User</h2>
+    <form method="POST" action="/companies/{{ $company->id }}/invite" style="margin: 1rem 0;">
+        @csrf
+        <div>
+            <label>Email:</label>
+            <input type="email" name="email" required>
+        </div>
+        <div>
+            <label>Role:</label>
+            <select name="role" required>
+                <option value="owner">Owner</option>
+                <option value="accountant">Accountant</option>
+                <option value="standard_user">Standard User</option>
+                <option value="viewer">Viewer</option>
+            </select>
+        </div>
+        <button type="submit">Send Invitation</button>
+    </form>
+    @endif
+
     <form id="edit-mode" method="POST" action="/companies/{{ $company->id }}" style="display: none;">
         @csrf
         @method('PUT')

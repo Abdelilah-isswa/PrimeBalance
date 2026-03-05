@@ -97,6 +97,44 @@ class CompanyController extends Controller
         return redirect('/companies')->with('success', 'Company deactivated successfully');
     }
 
+    public function inviteUser(Request $request, $id)
+    {
+        $company = Auth::user()->companies()->findOrFail($id);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can invite users');
+        }
+
+        $request->validate([
+            'email' => 'required|email',
+            'role' => 'required|in:owner,accountant,standard_user,viewer',
+        ]);
+
+        // Check if user exists
+        $user = \App\Models\User::where('email', $request->email)->first();
+        
+        if ($user) {
+            // Check if already in company
+            if ($company->users()->where('user_id', $user->id)->exists()) {
+                return back()->with('error', 'User is already a member of this company');
+            }
+            
+            // Add user to company
+            $company->users()->attach($user->id, ['role' => $request->role]);
+            
+            return back()->with('success', 'User added to company successfully');
+        } else {
+            // Send invitation email
+            \Mail::to($request->email)->send(new \App\Mail\CompanyInvitationMail(
+                $company,
+                $request->role,
+                Auth::user()->name
+            ));
+            
+            return back()->with('success', 'Invitation sent to ' . $request->email);
+        }
+    }
+
     public function create()
     {
         return view('companies.create');
