@@ -10,7 +10,16 @@
         <p><strong>Address:</strong> <span id="display-address">{{ $company->address }}</span></p>
         <p><strong>Currency:</strong> <span id="display-currency">{{ $company->currency }}</span></p>
         <p><strong>Start Date:</strong> {{ $company->start_date }}</p>
+        @if($company->end_date)
+            <p><strong>End Date:</strong> {{ $company->end_date }} <span style="color: red;">(Deactivated)</span></p>
+        @endif
         <button type="button" onclick="showEditMode()" style="margin-top: 1rem;">Update</button>
+        @if(!$company->end_date)
+            <form method="POST" action="/companies/{{ $company->id }}/deactivate" style="display: inline; margin-left: 0.5rem;" onsubmit="return confirm('Are you sure you want to deactivate this company? This will set the end date to today.')">
+                @csrf
+                <button type="submit" style="background: #c62828;">Deactivate Company</button>
+            </form>
+        @endif
     </div>
 
     <form id="edit-mode" method="POST" action="/companies/{{ $company->id }}" style="display: none;">

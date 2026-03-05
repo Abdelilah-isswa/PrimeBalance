@@ -71,6 +71,19 @@ class CompanyController extends Controller
         return redirect("/companies/{$id}")->with('success', 'Company updated successfully');
     }
 
+    public function deactivate($id)
+    {
+        $company = Auth::user()->companies()->findOrFail($id);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can deactivate company');
+        }
+
+        $company->update(['end_date' => now()->toDateString()]);
+
+        return redirect('/companies')->with('success', 'Company deactivated successfully');
+    }
+
     public function create()
     {
         return view('companies.create');
