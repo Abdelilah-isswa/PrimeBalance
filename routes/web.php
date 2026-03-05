@@ -26,7 +26,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/companies/create', [CompanyController::class, 'create']);
     Route::post('/companies', [CompanyController::class, 'store']);
     Route::get('/companies/{id}', [CompanyController::class, 'show']);
+    Route::get('/companies/{id}/categories', [CategoryController::class, 'index']);
     Route::post('/companies/{id}/categories', [CategoryController::class, 'store']);
+    Route::put('/companies/{companyId}/categories/{categoryId}', [CategoryController::class, 'update']);
+    Route::delete('/companies/{companyId}/categories/{categoryId}', [CategoryController::class, 'destroy']);
     Route::get('/companies/{id}/clients/create', [ClientController::class, 'create']);
     Route::post('/companies/{id}/clients', [ClientController::class, 'store']);
     Route::get('/companies/{id}/suppliers/create', [SupplierController::class, 'create']);

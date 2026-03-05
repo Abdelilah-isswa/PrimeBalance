@@ -61,6 +61,10 @@
         </form>
     @endif
 
+    <a href="/companies/{{ $company->id }}/categories">
+        <button type="button" style="margin-bottom: 1rem;">Manage Categories</button>
+    </a>
+
     @if($company->categories->isEmpty())
         <p>No categories yet.</p>
     @else
