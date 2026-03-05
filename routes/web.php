@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/companies/{id}', [CompanyController::class, 'update']);
     Route::post('/companies/{id}/deactivate', [CompanyController::class, 'deactivate']);
     Route::post('/companies/{id}/invite', [CompanyController::class, 'inviteUser']);
+    Route::delete('/companies/{companyId}/users/{userId}', [CompanyController::class, 'removeUser']);
     Route::get('/companies/{id}/categories', [CategoryController::class, 'index']);
     Route::post('/companies/{id}/categories', [CategoryController::class, 'store']);
     Route::put('/companies/{companyId}/categories/{categoryId}', [CategoryController::class, 'update']);

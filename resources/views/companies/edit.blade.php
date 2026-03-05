@@ -51,6 +51,9 @@
                 <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Email</th>
                 <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Role</th>
                 <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Joined</th>
+                @if($userRole === 'owner')
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Action</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -60,6 +63,17 @@
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->email }}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ ucfirst(str_replace('_', ' ', $user->pivot->role)) }}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->pivot->created_at->format('Y-m-d') }}</td>
+                @if($userRole === 'owner')
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">
+                    @if($user->id !== auth()->id())
+                    <form method="POST" action="/companies/{{ $company->id }}/users/{{ $user->id }}" style="display: inline;" onsubmit="return confirm('Remove {{ $user->name }} from this company?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" style="background: #c62828; padding: 0.25rem 0.5rem;">Remove</button>
+                    </form>
+                    @endif
+                </td>
+                @endif
             </tr>
             @endforeach
         </tbody>

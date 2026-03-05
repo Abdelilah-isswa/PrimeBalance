@@ -58,7 +58,8 @@ class CompanyController extends Controller
             abort(403, 'Only owners can edit company');
         }
 
-        return view('companies.edit', compact('company'));
+        $userRole = $company->pivot->role;
+        return view('companies.edit', compact('company', 'userRole'));
     }
 
     public function update(Request $request, $id)
@@ -230,5 +231,22 @@ class CompanyController extends Controller
         $company->users()->attach(Auth::id(), ['role' => 'owner']);
 
         return redirect('/')->with('success', 'Company created successfully');
+    }
+
+    public function removeUser($companyId, $userId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can remove users');
+        }
+
+        if ($userId == Auth::id()) {
+            return back()->with('error', 'You cannot remove yourself');
+        }
+
+        $company->users()->detach($userId);
+
+        return back()->with('success', 'User removed from company');
     }
 }
