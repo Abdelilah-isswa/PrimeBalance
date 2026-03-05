@@ -101,4 +101,62 @@ class BillController extends Controller
 
         return redirect("/companies/{$companyId}/bills")->with('success', 'Bill paid successfully');
     }
+
+    public function show($companyId, $billId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        $bill = $company->bills()->with('supplier')->findOrFail($billId);
+        
+        return view('bills.show', compact('company', 'bill'));
+    }
+
+    public function edit($companyId, $billId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can edit bills');
+        }
+
+        $bill = $company->bills()->with('supplier')->findOrFail($billId);
+        
+        return view('bills.edit', compact('company', 'bill'));
+    }
+
+    public function update(Request $request, $companyId, $billId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can update bills');
+        }
+
+        $bill = $company->bills()->findOrFail($billId);
+
+        $request->validate([
+            'total_amount' => 'required|numeric|min:0',
+            'status' => 'required|in:draft,sent,paid,cancelled',
+        ]);
+
+        $bill->update([
+            'total_amount' => $request->total_amount,
+            'status' => $request->status,
+        ]);
+
+        return redirect("/companies/{$companyId}/bills/{$billId}")->with('success', 'Bill updated successfully');
+    }
+
+    public function destroy($companyId, $billId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can delete bills');
+        }
+
+        $bill = $company->bills()->findOrFail($billId);
+        $bill->delete();
+
+        return redirect("/companies/{$companyId}/bills")->with('success', 'Bill deleted successfully');
+    }
 }
