@@ -21,6 +21,34 @@
         </a>
     </div>
 
+    <h2>Dashboard</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
+        <div style="padding: 1rem; background: #e8f5e9; border-radius: 4px;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #2e7d32;">Total Income</h3>
+            <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #2e7d32;">{{ $company->currency }} {{ number_format($totalIncome, 2) }}</p>
+        </div>
+        <div style="padding: 1rem; background: #ffebee; border-radius: 4px;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #c62828;">Total Expense</h3>
+            <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #c62828;">{{ $company->currency }} {{ number_format($totalExpense, 2) }}</p>
+        </div>
+        <div style="padding: 1rem; background: {{ $netProfit >= 0 ? '#e3f2fd' : '#fff3e0' }}; border-radius: 4px;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: {{ $netProfit >= 0 ? '#1565c0' : '#e65100' }};">Net Profit</h3>
+            <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: {{ $netProfit >= 0 ? '#1565c0' : '#e65100' }};">{{ $company->currency }} {{ number_format($netProfit, 2) }}</p>
+        </div>
+        <div style="padding: 1rem; background: #f3e5f5; border-radius: 4px;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #6a1b9a;">Bank Balance</h3>
+            <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #6a1b9a;">{{ $company->currency }} {{ number_format($bankBalance, 2) }}</p>
+        </div>
+        <div style="padding: 1rem; background: #fff9c4; border-radius: 4px;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #f57f17;">Unpaid Invoices</h3>
+            <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #f57f17;">{{ $unpaidInvoices }}</p>
+        </div>
+        <div style="padding: 1rem; background: #fce4ec; border-radius: 4px;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #c2185b;">Unpaid Bills</h3>
+            <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #c2185b;">{{ $unpaidBills }}</p>
+        </div>
+    </div>
+
     <h2>Categories</h2>
     @if($company->pivot->role === 'owner')
         <form method="POST" action="/companies/{{ $company->id }}/categories" style="margin-bottom: 1rem;">

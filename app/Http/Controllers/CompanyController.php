@@ -17,7 +17,24 @@ class CompanyController extends Controller
     public function show($id)
     {
         $company = Auth::user()->companies()->findOrFail($id);
-        return view('companies.show', compact('company'));
+        
+        // Dashboard metrics
+        $totalIncome = $company->transactions()->where('type', 'income')->sum('amount');
+        $totalExpense = $company->transactions()->where('type', 'expense')->sum('amount');
+        $netProfit = $totalIncome - $totalExpense;
+        $bankBalance = $company->accounts()->sum('balance');
+        $unpaidInvoices = $company->invoices()->whereIn('status', ['draft', 'sent'])->count();
+        $unpaidBills = $company->bills()->whereIn('status', ['draft', 'sent'])->count();
+        
+        return view('companies.show', compact(
+            'company', 
+            'totalIncome', 
+            'totalExpense', 
+            'netProfit', 
+            'bankBalance', 
+            'unpaidInvoices', 
+            'unpaidBills'
+        ));
     }
 
     public function create()
