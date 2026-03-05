@@ -35,7 +35,7 @@
                 @endphp
                 @if($userCompanies->count() > 0)
                     <select onchange="if(this.value) window.location.href=this.value" style="padding: 0.5rem; border: 1px solid white; border-radius: 4px; background: #555; color: white; cursor: pointer;">
-                        <option value="">Switch Company</option>
+                        <option value=""></option>
                         @foreach($userCompanies as $comp)
                             <option value="/companies/{{ $comp->id }}">{{ $comp->name }}</option>
                         @endforeach
