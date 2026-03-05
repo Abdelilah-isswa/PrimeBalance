@@ -58,6 +58,7 @@
         </thead>
         <tbody>
             @foreach($company->users as $user)
+            @if(!$user->pivot->left_at)
             <tr>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->name }}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->email }}</td>
@@ -75,6 +76,7 @@
                 </td>
                 @endif
             </tr>
+            @endif
             @endforeach
         </tbody>
     </table>

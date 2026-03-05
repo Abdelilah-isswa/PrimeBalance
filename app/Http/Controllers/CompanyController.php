@@ -245,7 +245,7 @@ class CompanyController extends Controller
             return back()->with('error', 'You cannot remove yourself');
         }
 
-        $company->users()->detach($userId);
+        $company->users()->updateExistingPivot($userId, ['left_at' => now()]);
 
         return back()->with('success', 'User removed from company');
     }
