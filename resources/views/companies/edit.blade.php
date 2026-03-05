@@ -23,7 +23,7 @@
     </div>
 
     @if(!$company->end_date)
-    <h2>Invite User</h2>
+    <h2 id="invite">Invite User</h2>
     <form method="POST" action="/companies/{{ $company->id }}/invite" style="margin: 1rem 0;">
         @csrf
         <div>

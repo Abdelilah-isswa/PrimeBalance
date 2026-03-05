@@ -18,6 +18,9 @@
                 <a href="/companies/{{ $company->id }}/edit">
                     <button type="button" style="margin-top: 0.5rem;">Manage Company</button>
                 </a>
+                <a href="/companies/{{ $company->id }}/edit#invite">
+                    <button type="button" style="margin-top: 0.5rem; margin-left: 0.5rem;">Invite Users</button>
+                </a>
             @endif
             <a href="/companies/{{ $company->id }}/invoices">
                 <button type="button" style="margin-top: 0.5rem;">View Invoices History</button>
