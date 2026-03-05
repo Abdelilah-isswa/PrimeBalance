@@ -43,6 +43,28 @@
     </form>
     @endif
 
+    <h2>Company Users</h2>
+    <table style="width: 100%; margin: 1rem 0; border-collapse: collapse;">
+        <thead>
+            <tr style="background: #f5f5f5;">
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Name</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Email</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Role</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($company->users as $user)
+            <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->name }}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->email }}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ ucfirst(str_replace('_', ' ', $user->pivot->role)) }}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->pivot->created_at->format('Y-m-d') }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
     <form id="edit-mode" method="POST" action="/companies/{{ $company->id }}" style="display: none;">
         @csrf
         @method('PUT')
