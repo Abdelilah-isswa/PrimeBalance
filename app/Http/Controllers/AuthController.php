@@ -23,6 +23,26 @@ class AuthController extends Controller
 
         if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
+            
+            // Check if there's a pending invitation
+            if (session('invitation_token')) {
+                $token = session('invitation_token');
+                session()->forget('invitation_token');
+                
+                $invitation = \App\Models\Invitation::where('token', $token)
+                    ->where('status', 'pending')
+                    ->where('email', Auth::user()->email)
+                    ->first();
+                
+                if ($invitation && !$invitation->isExpired()) {
+                    if (!$invitation->company->users()->where('user_id', Auth::id())->exists()) {
+                        $invitation->company->users()->attach(Auth::id(), ['role' => $invitation->role]);
+                    }
+                    $invitation->update(['status' => 'accepted']);
+                    return redirect('/companies/' . $invitation->company_id)->with('success', 'You have joined ' . $invitation->company->name);
+                }
+            }
+            
             return redirect()->intended('/');
         }
 
@@ -54,7 +74,17 @@ class AuthController extends Controller
         if (session('invitation_token')) {
             $token = session('invitation_token');
             session()->forget('invitation_token');
-            return redirect('/invitations/accept/' . $token);
+            
+            $invitation = \App\Models\Invitation::where('token', $token)
+                ->where('status', 'pending')
+                ->where('email', $user->email)
+                ->first();
+            
+            if ($invitation && !$invitation->isExpired()) {
+                $invitation->company->users()->attach($user->id, ['role' => $invitation->role]);
+                $invitation->update(['status' => 'accepted']);
+                return redirect('/companies/' . $invitation->company_id)->with('success', 'You have joined ' . $invitation->company->name);
+            }
         }
         
         return redirect('/');

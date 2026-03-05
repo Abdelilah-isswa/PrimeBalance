@@ -186,8 +186,11 @@ class CompanyController extends Controller
             return redirect('/')->with('error', 'This invitation was sent to ' . $invitation->email);
         }
 
-        // Add user to company
-        $invitation->company->users()->attach(Auth::id(), ['role' => $invitation->role]);
+        // Check if user is already in the company
+        if (!$invitation->company->users()->where('user_id', Auth::id())->exists()) {
+            $invitation->company->users()->attach(Auth::id(), ['role' => $invitation->role]);
+        }
+        
         $invitation->update(['status' => 'accepted']);
 
         return redirect('/companies/' . $invitation->company_id)->with('success', 'You have joined ' . $invitation->company->name);
