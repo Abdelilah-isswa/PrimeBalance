@@ -21,6 +21,12 @@
             </select>
             @error('status')<span>{{ $message }}</span>@enderror
         </div>
+        <div>
+            <label>
+                <input type="checkbox" name="send_email" value="1">
+                Send invoice by email to {{ $client->email }}
+            </label>
+        </div>
         <button type="submit">Create Invoice</button>
     </form>
 @endsection

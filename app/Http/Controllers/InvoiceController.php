@@ -40,16 +40,21 @@ class InvoiceController extends Controller
         $request->validate([
             'total_amount' => 'required|numeric|min:0',
             'status' => 'required|in:draft,sent,paid,cancelled',
+            'send_email' => 'boolean',
         ]);
 
-        Invoice::create([
+        $invoice = Invoice::create([
             'company_id' => $companyId,
             'client_id' => $clientId,
             'total_amount' => $request->total_amount,
             'status' => $request->status,
         ]);
 
-        return redirect("/companies/{$companyId}");
+        if ($request->has('send_email') && $request->send_email) {
+            \Mail::to($invoice->client->email)->send(new \App\Mail\InvoiceMail($invoice));
+        }
+
+        return redirect("/companies/{$companyId}")->with('success', 'Invoice created' . ($request->has('send_email') && $request->send_email ? ' and sent to client' : ''));
     }
 
     public function showReceivePayment($companyId, $invoiceId)

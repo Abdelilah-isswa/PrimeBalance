@@ -3,27 +3,34 @@
 @section('title', $company->name)
 
 @section('content')
-    <h1>{{ $company->name }}</h1>
+    <h1>{{ $company->name }} @if($company->end_date)<span style="color: red; font-size: 1rem;">(Deactivated)</span>@endif</h1>
     
     <div style="margin: 2rem 0;">
         <p><strong>Address:</strong> {{ $company->address }}</p>
         <p><strong>Currency:</strong> {{ $company->currency }}</p>
         <p><strong>Start Date:</strong> {{ $company->start_date }}</p>
-        <p><strong>Your Role:</strong> {{ $company->pivot->role }}</p>
-        @if($company->pivot->role === 'owner')
-            <a href="/companies/{{ $company->id }}/edit">
-                <button type="button" style="margin-top: 0.5rem;">Manage Company</button>
-            </a>
+        @if($company->end_date)
+            <p><strong>End Date:</strong> {{ $company->end_date }}</p>
         @endif
-        <a href="/companies/{{ $company->id }}/invoices">
-            <button type="button" style="margin-top: 0.5rem;">View Invoices History</button>
-        </a>
-        <a href="/companies/{{ $company->id }}/bills">
-            <button type="button" style="margin-top: 0.5rem; margin-left: 0.5rem;">View Bills History</button>
-        </a>
-        <a href="/companies/{{ $company->id }}/transactions">
-            <button type="button" style="margin-top: 0.5rem; margin-left: 0.5rem;">View Transactions</button>
-        </a>
+        <p><strong>Your Role:</strong> {{ $company->pivot->role }}</p>
+        @if(!$company->end_date)
+            @if($company->pivot->role === 'owner')
+                <a href="/companies/{{ $company->id }}/edit">
+                    <button type="button" style="margin-top: 0.5rem;">Manage Company</button>
+                </a>
+            @endif
+            <a href="/companies/{{ $company->id }}/invoices">
+                <button type="button" style="margin-top: 0.5rem;">View Invoices History</button>
+            </a>
+            <a href="/companies/{{ $company->id }}/bills">
+                <button type="button" style="margin-top: 0.5rem; margin-left: 0.5rem;">View Bills History</button>
+            </a>
+            <a href="/companies/{{ $company->id }}/transactions">
+                <button type="button" style="margin-top: 0.5rem; margin-left: 0.5rem;">View Transactions</button>
+            </a>
+        @else
+            <p style="margin-top: 1rem; color: #666;"><em>This company is deactivated. No actions can be performed.</em></p>
+        @endif
     </div>
 
     <h2>Dashboard</h2>
@@ -53,6 +60,8 @@
             <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #c2185b;">{{ $unpaidBills }}</p>
         </div>
     </div>
+
+    @if(!$company->end_date)
 
     <h2>Categories</h2>
     <a href="/companies/{{ $company->id }}/categories">
@@ -132,5 +141,6 @@
                 <li>{{ $account->name }} - Balance: {{ $account->balance }} - {{ $account->is_active ? 'Active' : 'Inactive' }}</li>
             @endforeach
         </ul>
+    @endif
     @endif
 @endsection
