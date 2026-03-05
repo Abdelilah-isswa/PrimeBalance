@@ -14,13 +14,24 @@ class CompanyController extends Controller
         return view('companies.index', compact('companies'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $company = Auth::user()->companies()->findOrFail($id);
         
+        // Get date range from request
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        
+        // Build query based on date range
+        $transactionsQuery = $company->transactions();
+        
+        if ($startDate && $endDate) {
+            $transactionsQuery->whereBetween('date', [$startDate, $endDate]);
+        }
+        
         // Dashboard metrics
-        $totalIncome = $company->transactions()->where('type', 'income')->sum('amount');
-        $totalExpense = $company->transactions()->where('type', 'expense')->sum('amount');
+        $totalIncome = (clone $transactionsQuery)->where('type', 'income')->sum('amount');
+        $totalExpense = (clone $transactionsQuery)->where('type', 'expense')->sum('amount');
         $netProfit = $totalIncome - $totalExpense;
         $bankBalance = $company->accounts()->sum('balance');
         $unpaidInvoices = $company->invoices()->whereIn('status', ['draft', 'sent'])->count();
@@ -33,7 +44,9 @@ class CompanyController extends Controller
             'netProfit', 
             'bankBalance', 
             'unpaidInvoices', 
-            'unpaidBills'
+            'unpaidBills',
+            'startDate',
+            'endDate'
         ));
     }
 

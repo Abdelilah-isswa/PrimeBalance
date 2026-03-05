@@ -34,6 +34,54 @@
     </div>
 
     <h2>Dashboard</h2>
+    <form method="GET" action="/companies/{{ $company->id }}" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: end;">
+        <div>
+            <label><strong>From:</strong></label>
+            <input type="date" name="start_date" id="start_date" value="{{ $startDate }}" max="{{ date('Y-m-d') }}" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;" onchange="updateEndDateMin()">
+        </div>
+        <div>
+            <label><strong>To:</strong></label>
+            <input type="date" name="end_date" id="end_date" value="{{ $endDate }}" max="{{ date('Y-m-d') }}" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <button type="submit" style="padding: 0.5rem 1rem;">Filter</button>
+        @if($startDate || $endDate)
+            <a href="/companies/{{ $company->id }}">
+                <button type="button" style="padding: 0.5rem 1rem; background: #666;">Clear</button>
+            </a>
+        @endif
+    </form>
+    <script>
+        function updateEndDateMin() {
+            const startDate = document.getElementById('start_date').value;
+            const endDateInput = document.getElementById('end_date');
+            if (startDate) {
+                endDateInput.min = startDate;
+                if (endDateInput.value && endDateInput.value < startDate) {
+                    endDateInput.value = startDate;
+                }
+            }
+        }
+        // Set initial min on page load
+        updateEndDateMin();
+        
+        // Validate form before submit
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            
+            if ((startDate && !endDate) || (!startDate && endDate)) {
+                e.preventDefault();
+                alert('Please select both start and end dates');
+                return false;
+            }
+            
+            if (startDate && endDate && startDate > endDate) {
+                e.preventDefault();
+                alert('End date must be after start date');
+                return false;
+            }
+        });
+    </script>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
         <div style="padding: 1rem; background: #e8f5e9; border-radius: 4px;">
             <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #2e7d32;">Total Income</h3>
