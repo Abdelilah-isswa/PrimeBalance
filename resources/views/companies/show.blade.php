@@ -105,6 +105,7 @@
         <div style="padding: 1rem; background: #fff9c4; border-radius: 4px;">
             <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #f57f17;">Unpaid Invoices</h3>
             <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #f57f17;">{{ $unpaidInvoices }}</p>
+            <a href="/companies/{{ $company->id }}/clients/balances" style="display: inline-block; margin-top: 0.5rem; color: #f57f17; text-decoration: underline; font-size: 0.9rem;">View Client Balances</a>
         </div>
         <div style="padding: 1rem; background: #fce4ec; border-radius: 4px;">
             <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #c2185b;">Unpaid Bills</h3>

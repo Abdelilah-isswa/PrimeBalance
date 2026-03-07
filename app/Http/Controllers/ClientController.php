@@ -82,4 +82,36 @@ class ClientController extends Controller
 
         return redirect("/companies/{$companyId}")->with('success', 'Client updated');
     }
+
+    public function destroy($companyId, $clientId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can delete clients');
+        }
+
+        $client = $company->clients()->findOrFail($clientId);
+        
+        if ($client->invoices()->exists()) {
+            return back()->with('error', 'Cannot delete client with invoices');
+        }
+        
+        $client->delete();
+        return redirect("/companies/{$companyId}")->with('success', 'Client deleted');
+    }
+
+    public function balances($companyId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        $clients = $company->clients()->with('invoices')->get()->map(function($client) {
+            $totalInvoiced = $client->invoices->sum('total_amount');
+            $totalPaid = $client->invoices->where('status', 'paid')->sum('total_amount');
+            $client->balance = $totalPaid - $totalInvoiced;
+            return $client;
+        });
+        
+        return view('clients.balances', compact('company', 'clients'));
+    }
 }

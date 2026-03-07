@@ -33,4 +33,12 @@
             <button type="button">Cancel</button>
         </a>
     </form>
+
+    @if(!$client->invoices()->exists())
+    <form method="POST" action="/companies/{{ $company->id }}/clients/{{ $client->id }}" style="margin-top: 2rem;" onsubmit="return confirm('Delete this client?')">
+        @csrf
+        @method('DELETE')
+        <button type="submit" style="background: #c62828;">Delete Client</button>
+    </form>
+    @endif
 @endsection

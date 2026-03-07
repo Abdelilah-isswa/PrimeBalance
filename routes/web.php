@@ -49,8 +49,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/companies/{companyId}/categories/{categoryId}', [CategoryController::class, 'destroy']);
     Route::get('/companies/{id}/clients/create', [ClientController::class, 'create']);
     Route::post('/companies/{id}/clients', [ClientController::class, 'store']);
+    Route::get('/companies/{id}/clients/balances', [ClientController::class, 'balances']);
     Route::get('/companies/{companyId}/clients/{clientId}/edit', [ClientController::class, 'edit']);
     Route::put('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'update']);
+    Route::delete('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'destroy']);
     Route::get('/companies/{id}/suppliers/create', [SupplierController::class, 'create']);
     Route::post('/companies/{id}/suppliers', [SupplierController::class, 'store']);
     Route::get('/companies/{id}/accounts', [AccountController::class, 'index']);
