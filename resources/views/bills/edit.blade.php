@@ -19,8 +19,9 @@
             <label>Status:</label>
             <select name="status" required>
                 <option value="draft" {{ $bill->status === 'draft' ? 'selected' : '' }}>Draft</option>
-                <option value="sent" {{ $bill->status === 'sent' ? 'selected' : '' }}>Sent</option>
+                <option value="unpaid" {{ $bill->status === 'unpaid' ? 'selected' : '' }}>Unpaid</option>
                 <option value="paid" {{ $bill->status === 'paid' ? 'selected' : '' }}>Paid</option>
+                <option value="overdue" {{ $bill->status === 'overdue' ? 'selected' : '' }}>Overdue</option>
                 <option value="cancelled" {{ $bill->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
             </select>
             @error('status')<span>{{ $message }}</span>@enderror

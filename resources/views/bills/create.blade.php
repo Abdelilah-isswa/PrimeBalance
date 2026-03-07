@@ -15,8 +15,9 @@
             <label>Status:</label>
             <select name="status" required>
                 <option value="draft">Draft</option>
-                <option value="sent">Sent</option>
+                <option value="unpaid">Unpaid</option>
                 <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
                 <option value="cancelled">Cancelled</option>
             </select>
             @error('status')<span>{{ $message }}</span>@enderror
