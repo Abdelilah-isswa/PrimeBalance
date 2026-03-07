@@ -10,6 +10,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\DocumentController;
 
 Route::get('/', function () {
     $companies = Auth::user()->companies;
@@ -65,10 +66,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/companies/{companyId}/accounts/{accountId}/edit', [AccountController::class, 'edit']);
     Route::put('/companies/{companyId}/accounts/{accountId}', [AccountController::class, 'update']);
     Route::delete('/companies/{companyId}/accounts/{accountId}', [AccountController::class, 'destroy']);
+    Route::get('/companies/{id}/documents', [DocumentController::class, 'index']);
     Route::get('/companies/{companyId}/invoices', [InvoiceController::class, 'index']);
     Route::get('/companies/{companyId}/clients/{clientId}/invoices/create', [InvoiceController::class, 'create']);
     Route::post('/companies/{companyId}/clients/{clientId}/invoices', [InvoiceController::class, 'store']);
     Route::get('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'show']);
+    Route::get('/companies/{companyId}/invoices/{invoiceId}/pdf', [InvoiceController::class, 'downloadPdf']);
     Route::get('/companies/{companyId}/invoices/{invoiceId}/edit', [InvoiceController::class, 'edit']);
     Route::put('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'update']);
     Route::delete('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'destroy']);

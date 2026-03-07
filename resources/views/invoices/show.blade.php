@@ -15,6 +15,9 @@
 
     @if($company->pivot->role === 'owner')
         <div style="margin: 1rem 0;">
+            <a href="/companies/{{ $company->id }}/invoices/{{ $invoice->id }}/pdf" target="_blank">
+                <button type="button" style="background: #1565c0;">Download PDF</button>
+            </a>
             <a href="/companies/{{ $company->id }}/invoices/{{ $invoice->id }}/edit">
                 <button type="button">Edit Invoice</button>
             </a>

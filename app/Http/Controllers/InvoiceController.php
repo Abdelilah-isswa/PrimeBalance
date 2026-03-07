@@ -164,4 +164,13 @@ class InvoiceController extends Controller
 
         return redirect("/companies/{$companyId}/invoices")->with('success', 'Invoice deleted successfully');
     }
+
+    public function downloadPdf($companyId, $invoiceId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
+        
+        $pdf = \PDF::loadView('invoices.pdf', compact('company', 'invoice'));
+        return $pdf->download('invoice-' . $invoice->id . '.pdf');
+    }
 }
