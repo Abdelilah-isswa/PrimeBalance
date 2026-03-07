@@ -144,6 +144,9 @@
                 <li>
                     {{ $client->name }} - {{ $client->email }} - {{ $client->phone }}
                     @if($company->pivot->role === 'owner')
+                        <a href="/companies/{{ $company->id }}/clients/{{ $client->id }}/edit">
+                            <button type="button" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.9rem;">Edit</button>
+                        </a>
                         <a href="/companies/{{ $company->id }}/clients/{{ $client->id }}/invoices/create">
                             <button type="button" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.9rem;">Add Invoice</button>
                         </a>

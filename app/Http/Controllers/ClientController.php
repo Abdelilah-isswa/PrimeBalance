@@ -44,4 +44,42 @@ class ClientController extends Controller
 
         return redirect("/companies/{$companyId}");
     }
+
+    public function edit($companyId, $clientId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can edit clients');
+        }
+
+        $client = $company->clients()->findOrFail($clientId);
+        return view('clients.edit', compact('company', 'client'));
+    }
+
+    public function update(Request $request, $companyId, $clientId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can update clients');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'address' => 'required|string',
+            'phone' => 'required|string',
+        ]);
+
+        $client = $company->clients()->findOrFail($clientId);
+        $client->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'address' => $request->address,
+            'phone' => $request->phone,
+        ]);
+
+        return redirect("/companies/{$companyId}")->with('success', 'Client updated');
+    }
 }
