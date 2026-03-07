@@ -249,4 +249,25 @@ class CompanyController extends Controller
 
         return back()->with('success', 'User removed from company');
     }
+
+    public function updateUserRole(Request $request, $companyId, $userId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        if ($company->pivot->role !== 'owner') {
+            abort(403, 'Only owners can change user roles');
+        }
+
+        if ($userId == Auth::id()) {
+            return back()->with('error', 'You cannot change your own role');
+        }
+
+        $request->validate([
+            'role' => 'required|in:owner,accountant,standard_user,viewer',
+        ]);
+
+        $company->users()->updateExistingPivot($userId, ['role' => $request->role]);
+
+        return back()->with('success', 'User role updated');
+    }
 }

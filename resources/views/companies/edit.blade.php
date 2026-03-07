@@ -52,7 +52,7 @@
                 <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Role</th>
                 <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Joined</th>
                 @if($userRole === 'owner')
-                <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Action</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Actions</th>
                 @endif
             </tr>
         </thead>
@@ -62,7 +62,22 @@
             <tr>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->name }}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->email }}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ ucfirst(str_replace('_', ' ', $user->pivot->role)) }}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">
+                    @if($userRole === 'owner' && $user->id !== auth()->id())
+                    <form method="POST" action="/companies/{{ $company->id }}/users/{{ $user->id }}/role" style="display: inline;">
+                        @csrf
+                        @method('PUT')
+                        <select name="role" onchange="this.form.submit()" style="padding: 0.25rem;">
+                            <option value="owner" {{ $user->pivot->role === 'owner' ? 'selected' : '' }}>Owner</option>
+                            <option value="accountant" {{ $user->pivot->role === 'accountant' ? 'selected' : '' }}>Accountant</option>
+                            <option value="standard_user" {{ $user->pivot->role === 'standard_user' ? 'selected' : '' }}>Standard User</option>
+                            <option value="viewer" {{ $user->pivot->role === 'viewer' ? 'selected' : '' }}>Viewer</option>
+                        </select>
+                    </form>
+                    @else
+                    {{ ucfirst(str_replace('_', ' ', $user->pivot->role)) }}
+                    @endif
+                </td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">{{ $user->pivot->created_at->format('Y-m-d') }}</td>
                 @if($userRole === 'owner')
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">
