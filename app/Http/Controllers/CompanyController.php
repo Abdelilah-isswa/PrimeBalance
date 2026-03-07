@@ -58,6 +58,10 @@ class CompanyController extends Controller
             abort(403, 'Only owners can edit company');
         }
 
+        $company->load(['users' => function($query) {
+            $query->whereNull('company_user.left_at');
+        }]);
+        
         $userRole = $company->pivot->role;
         return view('companies.edit', compact('company', 'userRole'));
     }
