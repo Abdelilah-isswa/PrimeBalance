@@ -172,6 +172,9 @@
                 <li>
                     {{ $supplier->name }} - {{ $supplier->email }} - {{ $supplier->phone }}
                     @if($company->pivot->role === 'owner')
+                        <a href="/companies/{{ $company->id }}/suppliers/{{ $supplier->id }}/edit">
+                            <button type="button" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.9rem;">Edit</button>
+                        </a>
                         <a href="/companies/{{ $company->id }}/suppliers/{{ $supplier->id }}/bills/create">
                             <button type="button" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.9rem;">Add Bill</button>
                         </a>
