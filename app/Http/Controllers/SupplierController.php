@@ -100,4 +100,18 @@ class SupplierController extends Controller
         $supplier->delete();
         return redirect("/companies/{$companyId}")->with('success', 'Supplier deleted');
     }
+
+    public function balances($companyId)
+    {
+        $company = Auth::user()->companies()->findOrFail($companyId);
+        
+        $suppliers = $company->suppliers()->with('bills')->get()->map(function($supplier) {
+            $totalBilled = $supplier->bills->sum('total_amount');
+            $totalPaid = $supplier->bills->where('status', 'paid')->sum('total_amount');
+            $supplier->balance = $totalPaid - $totalBilled;
+            return $supplier;
+        });
+        
+        return view('suppliers.balances', compact('company', 'suppliers'));
+    }
 }

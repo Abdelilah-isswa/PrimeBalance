@@ -110,6 +110,7 @@
         <div style="padding: 1rem; background: #fce4ec; border-radius: 4px;">
             <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #c2185b;">Unpaid Bills</h3>
             <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #c2185b;">{{ $unpaidBills }}</p>
+            <a href="/companies/{{ $company->id }}/suppliers/balances" style="display: inline-block; margin-top: 0.5rem; color: #c2185b; text-decoration: underline; font-size: 0.9rem;">View Supplier Balances</a>
         </div>
     </div>
 
