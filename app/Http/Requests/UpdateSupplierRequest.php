@@ -2,14 +2,16 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSupplierRequest extends FormRequest
 {
+    use HasCompanyAuthorization;
+    
     public function authorize(): bool
     {
-        $company = $this->user()->companies()->find($this->route('companyId'));
-        return $company && $company->pivot->role === 'owner';
+        return $this->isCompanyOwner($this->route('companyId'));
     }
 
     public function rules(): array

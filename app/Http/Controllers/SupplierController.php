@@ -6,11 +6,14 @@ use App\Services\SupplierService;
 use App\Models\Supplier;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SupplierController extends Controller
 {
+    use HasCompanyAuthorization;
+    
     protected $supplierService;
 
     public function __construct(SupplierService $supplierService)
@@ -20,12 +23,7 @@ class SupplierController extends Controller
 
     public function create($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create suppliers');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'create suppliers');
         return view('suppliers.create', compact('company'));
     }
 
@@ -38,19 +36,14 @@ class SupplierController extends Controller
 
     public function edit($companyId, $supplierId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can edit suppliers');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'edit suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         return view('suppliers.edit', compact('company', 'supplier'));
     }
 
     public function update(UpdateSupplierRequest $request, $companyId, $supplierId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyAsOwner($companyId, 'update suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         $this->supplierService->updateSupplier($supplier, $request->validated());
         return redirect("/companies/{$companyId}")->with('success', 'Supplier updated');
@@ -58,12 +51,7 @@ class SupplierController extends Controller
 
     public function destroy($companyId, $supplierId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can delete suppliers');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'delete suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         
         if (!$this->supplierService->deleteSupplier($supplier)) {
@@ -75,8 +63,7 @@ class SupplierController extends Controller
 
     public function balances($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
+        $company = $this->getAuthorizedCompany($companyId);
         $suppliers = $company->suppliers()->with('bills')->get();
         $suppliers = $this->supplierService->calculateSupplierBalances($suppliers);
         

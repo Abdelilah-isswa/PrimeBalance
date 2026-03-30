@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DocumentController extends Controller
 {
+    use HasCompanyAuthorization;
+    
     public function index(Request $request, $companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $type = $request->get('type', 'invoices');
         
         if ($type === 'bills') {

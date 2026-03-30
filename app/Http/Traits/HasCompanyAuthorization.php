@@ -5,6 +5,8 @@ namespace App\Http\Traits;
 use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Foundation\Http\FormRequest;
+
 trait HasCompanyAuthorization
 {
     /**

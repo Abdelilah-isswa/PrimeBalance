@@ -6,11 +6,14 @@ use App\Services\CategoryService;
 use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
+    use HasCompanyAuthorization;
+    
     protected $categoryService;
 
     public function __construct(CategoryService $categoryService)
@@ -20,7 +23,7 @@ class CategoryController extends Controller
 
     public function index($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $categories = $company->categories;
         
         return view('categories.index', compact('company', 'categories'));
@@ -35,7 +38,7 @@ class CategoryController extends Controller
 
     public function update(UpdateCategoryRequest $request, $companyId, $categoryId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->updateCategory($category, $request->validated());
         return redirect("/companies/{$companyId}/categories");
@@ -43,12 +46,7 @@ class CategoryController extends Controller
 
     public function destroy($companyId, $categoryId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can delete categories');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'delete categories');
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->deleteCategory($category);
 

@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Services\TransactionService;
 use App\Http\Requests\StoreTransactionRequest;
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
+    use HasCompanyAuthorization;
+    
     protected $transactionService;
 
     public function __construct(TransactionService $transactionService)
@@ -18,7 +21,7 @@ class TransactionController extends Controller
 
     public function index($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $transactions = $company->transactions()
             ->with(['account', 'category', 'invoice.client', 'bill.supplier'])
             ->orderBy('date', 'desc')
@@ -29,12 +32,7 @@ class TransactionController extends Controller
 
     public function create($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create transactions');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'create transactions');
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
 

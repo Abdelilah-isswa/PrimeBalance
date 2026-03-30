@@ -7,11 +7,14 @@ use App\Models\Bill;
 use App\Http\Requests\StoreBillRequest;
 use App\Http\Requests\UpdateBillRequest;
 use App\Http\Requests\PayBillRequest;
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BillController extends Controller
 {
+    use HasCompanyAuthorization;
+    
     protected $billService;
 
     public function __construct(BillService $billService)
@@ -21,7 +24,7 @@ class BillController extends Controller
 
     public function index($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $bills = $company->bills()->with('supplier')->get();
         
         return view('bills.index', compact('company', 'bills'));
@@ -29,12 +32,7 @@ class BillController extends Controller
 
     public function create($companyId, $supplierId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create bills');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'create bills');
         $supplier = $company->suppliers()->findOrFail($supplierId);
 
         return view('bills.create', compact('company', 'supplier'));
@@ -54,12 +52,7 @@ class BillController extends Controller
 
     public function showPayment($companyId, $billId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can pay bills');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'pay bills');
         $bill = $company->bills()->findOrFail($billId);
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
@@ -69,7 +62,7 @@ class BillController extends Controller
 
     public function pay(PayBillRequest $request, $companyId, $billId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->payBill($bill, $request->validated());
         return redirect("/companies/{$companyId}/bills")->with('success', 'Bill paid successfully');
@@ -77,7 +70,7 @@ class BillController extends Controller
 
     public function show($companyId, $billId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $bill = $company->bills()->with('supplier')->findOrFail($billId);
         
         return view('bills.show', compact('company', 'bill'));
@@ -85,12 +78,7 @@ class BillController extends Controller
 
     public function edit($companyId, $billId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can edit bills');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'edit bills');
         $bill = $company->bills()->with('supplier')->findOrFail($billId);
         
         return view('bills.edit', compact('company', 'bill'));
@@ -98,7 +86,7 @@ class BillController extends Controller
 
     public function update(UpdateBillRequest $request, $companyId, $billId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->updateBill($bill, $request->validated());
         return redirect("/companies/{$companyId}/bills/{$billId}")->with('success', 'Bill updated successfully');
@@ -106,12 +94,7 @@ class BillController extends Controller
 
     public function destroy($companyId, $billId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can delete bills');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'delete bills');
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->deleteBill($bill);
 

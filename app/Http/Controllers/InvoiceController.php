@@ -7,11 +7,14 @@ use App\Models\Invoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Http\Requests\ReceivePaymentRequest;
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
 {
+    use HasCompanyAuthorization;
+    
     protected $invoiceService;
 
     public function __construct(InvoiceService $invoiceService)
@@ -21,7 +24,7 @@ class InvoiceController extends Controller
 
     public function index($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $invoices = $company->invoices()->with('client')->get();
         
         return view('invoices.index', compact('company', 'invoices'));
@@ -29,12 +32,7 @@ class InvoiceController extends Controller
 
     public function create($companyId, $clientId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create invoices');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'create invoices');
         $client = $company->clients()->findOrFail($clientId);
 
         return view('invoices.create', compact('company', 'client'));
@@ -55,12 +53,7 @@ class InvoiceController extends Controller
 
     public function showReceivePayment($companyId, $invoiceId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can receive payments');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'receive payments');
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
@@ -70,7 +63,7 @@ class InvoiceController extends Controller
 
     public function receivePayment(ReceivePaymentRequest $request, $companyId, $invoiceId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $this->invoiceService->receivePayment($invoice, $request->validated());
         return redirect("/companies/{$companyId}/invoices")->with('success', 'Payment received successfully');
@@ -78,7 +71,7 @@ class InvoiceController extends Controller
 
     public function show($companyId, $invoiceId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
         
         return view('invoices.show', compact('company', 'invoice'));
@@ -86,12 +79,7 @@ class InvoiceController extends Controller
 
     public function edit($companyId, $invoiceId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can edit invoices');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'edit invoices');
         $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
         
         return view('invoices.edit', compact('company', 'invoice'));
@@ -99,7 +87,7 @@ class InvoiceController extends Controller
 
     public function update(UpdateInvoiceRequest $request, $companyId, $invoiceId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $this->invoiceService->updateInvoice($invoice, $request->validated());
         return redirect("/companies/{$companyId}/invoices/{$invoiceId}")->with('success', 'Invoice updated successfully');
@@ -107,12 +95,7 @@ class InvoiceController extends Controller
 
     public function destroy($companyId, $invoiceId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can delete invoices');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'delete invoices');
         $invoice = $company->invoices()->findOrFail($invoiceId);
         
         if (!$this->invoiceService->deleteInvoice($invoice)) {
@@ -124,7 +107,7 @@ class InvoiceController extends Controller
 
     public function downloadPdf($companyId, $invoiceId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
         
         $pdf = \PDF::loadView('invoices.pdf', compact('company', 'invoice'));

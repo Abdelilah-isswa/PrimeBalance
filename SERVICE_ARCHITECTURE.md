@@ -1,13 +1,33 @@
-# Service Layer Architecture with Form Requests
+# Service Layer Architecture with Form Requests and Authorization Trait
 
-This document outlines the refactored controller structure using the Service Layer pattern combined with Form Request classes to improve code readability, maintainability, and separation of concerns.
+This document outlines the refactored controller structure using the Service Layer pattern combined with Form Request classes and a centralized authorization trait to improve code readability, maintainability, and separation of concerns.
 
 ## Architecture Overview
 
-The application now follows a three-layer architecture:
-1. **Form Requests** - Handle validation and authorization
-2. **Services** - Contain business logic
-3. **Controllers** - Handle HTTP requests/responses
+The application now follows a four-layer architecture:
+1. **Authorization Trait** - Centralized company authorization logic
+2. **Form Requests** - Handle validation and authorization
+3. **Services** - Contain business logic
+4. **Controllers** - Handle HTTP requests/responses
+
+## Authorization Trait
+
+### HasCompanyAuthorization Trait
+**Location:** `app/Http/Traits/HasCompanyAuthorization.php`
+
+**Purpose:** Eliminates duplicate authorization logic across controllers
+
+**Methods:**
+- `getAuthorizedCompany(int $companyId): Company` - Get company with user access verification
+- `getCompanyAsOwner(int $companyId, string $action): Company` - Get company with owner verification
+- `isCompanyOwner(int $companyId): bool` - Check if user is company owner
+- `getCompanyWithRole(int $companyId, array|string $roles, string $action): Company` - Get company with role verification
+
+**Benefits:**
+- **DRY Principle** - No more duplicate authorization code
+- **Consistent Error Messages** - Standardized, descriptive error messages
+- **Maintainability** - Single source of truth for authorization logic
+- **Flexibility** - Support for multiple roles and custom error messages
 
 ## Form Request Classes
 
@@ -264,8 +284,19 @@ All controllers have been refactored to:
 
 ## Controller Examples
 
-### Before Refactoring
+### Before Refactoring (80+ lines with duplicates)
 ```php
+public function create($companyId)
+{
+    $company = Auth::user()->companies()->findOrFail($companyId);
+    
+    if ($company->pivot->role !== 'owner') {
+        abort(403, 'Only owners can create clients');
+    }
+
+    return view('clients.create', compact('company'));
+}
+
 public function store(Request $request, $companyId)
 {
     $company = Auth::user()->companies()->findOrFail($companyId);
@@ -293,8 +324,16 @@ public function store(Request $request, $companyId)
 }
 ```
 
-### After Refactoring (with Services + Form Requests)
+### After Refactoring (6 lines total)
 ```php
+use HasCompanyAuthorization;
+
+public function create($companyId)
+{
+    $company = $this->getCompanyAsOwner($companyId, 'create clients');
+    return view('clients.create', compact('company'));
+}
+
 public function store(StoreClientRequest $request, $companyId)
 {
     $data = array_merge($request->validated(), ['company_id' => $companyId]);
@@ -306,16 +345,17 @@ public function store(StoreClientRequest $request, $companyId)
 ## Complete Architecture Flow
 
 1. **Request hits Controller**
-2. **Form Request validates and authorizes**
-3. **Controller calls Service method**
-4. **Service handles business logic**
-5. **Controller returns response**
+2. **Authorization Trait verifies company access**
+3. **Form Request validates and authorizes**
+4. **Controller calls Service method**
+5. **Service handles business logic**
+6. **Controller returns response**
 
 ```
-HTTP Request → Form Request → Controller → Service → Database
-                    ↓              ↓         ↓
-              Validation &    HTTP Logic   Business
-              Authorization              Logic
+HTTP Request → Authorization Trait → Form Request → Controller → Service → Database
+                      ↓                ↓              ↓         ↓
+                Company Access    Validation &    HTTP Logic   Business
+                Verification      Authorization              Logic
 ```
 
 This architecture makes the codebase more maintainable, testable, and follows Laravel best practices for organizing business logic.

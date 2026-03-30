@@ -6,14 +6,11 @@ use App\Services\ClientService;
 use App\Models\Client;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
-use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ClientController extends Controller
 {
-    use HasCompanyAuthorization;
-    
     protected $clientService;
 
     public function __construct(ClientService $clientService)
@@ -23,7 +20,7 @@ class ClientController extends Controller
 
     public function create($companyId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'create clients');
+        $company = Auth::user()->companies()->findOrFail($companyId);
         return view('clients.create', compact('company'));
     }
 
@@ -36,14 +33,14 @@ class ClientController extends Controller
 
     public function edit($companyId, $clientId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'edit clients');
+        $company = Auth::user()->companies()->findOrFail($companyId);
         $client = $company->clients()->findOrFail($clientId);
         return view('clients.edit', compact('company', 'client'));
     }
 
     public function update(UpdateClientRequest $request, $companyId, $clientId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'update clients');
+        $company = Auth::user()->companies()->findOrFail($companyId);
         $client = $company->clients()->findOrFail($clientId);
         $this->clientService->updateClient($client, $request->validated());
         return redirect("/companies/{$companyId}")->with('success', 'Client updated');
@@ -51,7 +48,7 @@ class ClientController extends Controller
 
     public function destroy($companyId, $clientId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'delete clients');
+        $company = Auth::user()->companies()->findOrFail($companyId);
         $client = $company->clients()->findOrFail($clientId);
         
         if (!$this->clientService->deleteClient($client)) {
@@ -63,7 +60,7 @@ class ClientController extends Controller
 
     public function balances($companyId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = Auth::user()->companies()->findOrFail($companyId);
         $clients = $company->clients()->with('invoices')->get();
         $clients = $this->clientService->calculateClientBalances($clients);
         
