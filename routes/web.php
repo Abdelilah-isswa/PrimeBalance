@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\CompanyUserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SupplierController;
@@ -29,9 +31,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.store');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/invitations/{token}', [CompanyController::class, 'showInvitation'])->name('invitations.show');
-Route::post('/invitations/{token}/accept', [CompanyController::class, 'acceptInvitation'])->name('invitations.accept');
-Route::post('/invitations/{token}/decline', [CompanyController::class, 'declineInvitation'])->name('invitations.decline');
+Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
+Route::post('/invitations/{token}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
+Route::post('/invitations/{token}/decline', [InvitationController::class, 'decline'])->name('invitations.decline');
 
 Route::middleware('auth')->group(function () {
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
@@ -41,9 +43,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/companies/{id}/edit', [CompanyController::class, 'edit'])->name('companies.edit');
     Route::put('/companies/{id}', [CompanyController::class, 'update'])->name('companies.update');
     Route::post('/companies/{id}/deactivate', [CompanyController::class, 'deactivate'])->name('companies.deactivate');
-    Route::post('/companies/{id}/invite', [CompanyController::class, 'inviteUser'])->name('companies.invite');
-    Route::delete('/companies/{companyId}/users/{userId}', [CompanyController::class, 'removeUser'])->name('companies.users.remove');
-    Route::put('/companies/{companyId}/users/{userId}/role', [CompanyController::class, 'updateUserRole'])->name('companies.users.role');
+    Route::post('/companies/{id}/invite', [InvitationController::class, 'store'])->name('companies.invite');
+    Route::get('/companies/{id}/users', [CompanyUserController::class, 'index'])->name('companies.users.index');
+    Route::delete('/companies/{companyId}/users/{userId}', [CompanyUserController::class, 'destroy'])->name('companies.users.remove');
+    Route::put('/companies/{companyId}/users/{userId}/role', [CompanyUserController::class, 'updateRole'])->name('companies.users.role');
     
     Route::get('/companies/{id}/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/companies/{id}/categories', [CategoryController::class, 'store'])->name('categories.store');

@@ -3,12 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\CompanyService;
-use App\Models\Company;
-use App\Models\Invitation;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
-use App\Http\Requests\InviteUserRequest;
-use App\Http\Requests\UpdateUserRoleRequest;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,15 +42,21 @@ class CompanyController extends Controller
         ));
     }
 
+    public function create()
+    {
+        return view('companies.create');
+    }
+
+    public function store(StoreCompanyRequest $request)
+    {
+        $this->companyService->createCompany($request->validated());
+        return redirect()->route('home')->with('success', 'Company created successfully');
+    }
+
     public function edit($id)
     {
         $company = $this->getCompanyForOwner($id, 'edit company');
-        $company->load(['users' => function($query) {
-            $query->whereNull('company_user.left_at');
-        }]);
-        
-        $userRole = $company->pivot->role;
-        return view('companies.edit', compact('company', 'userRole'));
+        return view('companies.edit', compact('company'));
     }
 
     public function update(UpdateCompanyRequest $request, $id)
@@ -69,102 +71,5 @@ class CompanyController extends Controller
         $company = $this->getCompanyForOwner($id, 'deactivate company');
         $this->companyService->deactivateCompany($company);
         return redirect()->route('companies.index')->with('success', 'Company deactivated successfully');
-    }
-
-    public function inviteUser(InviteUserRequest $request, $id)
-    {
-        $company = $this->getCompanyForMember($id);
-        $result = $this->companyService->inviteUser($company, $request->email, $request->role);
-        
-        if ($result['success']) {
-            return back()->with('success', $result['message']);
-        }
-        
-        return back()->with('error', $result['message']);
-    }
-
-    public function showInvitation($token)
-    {
-        $invitation = \App\Models\Invitation::where('token', $token)
-            ->where('status', 'pending')
-            ->firstOrFail();
-
-        if ($invitation->isExpired()) {
-            $invitation->update(['status' => 'expired']);
-            return view('invitations.expired');
-        }
-
-        return view('invitations.accept', compact('invitation'));
-    }
-
-    public function acceptInvitation($token)
-    {
-        $invitation = Invitation::where('token', $token)
-            ->where('status', 'pending')
-            ->firstOrFail();
-
-        if ($invitation->isExpired()) {
-            $invitation->update(['status' => 'expired']);
-            return redirect()->route('login')->with('error', 'This invitation has expired');
-        }
-
-        if (!Auth::check()) {
-            session(['invitation_token' => $token]);
-            return redirect()->route('login')->with('message', 'Please login or register to accept the invitation');
-        }
-
-        $result = $this->companyService->acceptInvitation($invitation);
-        
-        if ($result['success']) {
-            return redirect()->route('companies.show', $invitation->company_id)->with('success', $result['message']);
-        }
-        
-        return redirect()->route('home')->with('error', $result['message']);
-    }
-
-    public function declineInvitation($token)
-    {
-        $invitation = Invitation::where('token', $token)
-            ->where('status', 'pending')
-            ->firstOrFail();
-
-        $invitation->update(['status' => 'expired']);
-
-        return redirect()->route('login')->with('message', 'Invitation declined');
-    }
-
-    public function create()
-    {
-        return view('companies.create');
-    }
-
-    public function store(StoreCompanyRequest $request)
-    {
-        $this->companyService->createCompany($request->validated());
-        return redirect()->route('home')->with('success', 'Company created successfully');
-    }
-
-    public function removeUser($companyId, $userId)
-    {
-        $company = $this->getCompanyForOwner($companyId, 'remove users');
-        $result = $this->companyService->removeUser($company, $userId);
-        
-        if ($result['success']) {
-            return back()->with('success', $result['message']);
-        }
-        
-        return back()->with('error', $result['message']);
-    }
-
-    public function updateUserRole(UpdateUserRoleRequest $request, $companyId, $userId)
-    {
-        $company = $this->getCompanyForMember($companyId);
-        $result = $this->companyService->updateUserRole($company, $userId, $request->role);
-        
-        if ($result['success']) {
-            return back()->with('success', $result['message']);
-        }
-        
-        return back()->with('error', $result['message']);
     }
 }
