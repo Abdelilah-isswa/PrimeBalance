@@ -33,7 +33,7 @@ class CategoryController extends Controller
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
         $this->categoryService->createCategory($data);
-        return redirect("/companies/{$companyId}/categories");
+        return redirect()->route('categories.index', $companyId);
     }
 
     public function update(UpdateCategoryRequest $request, $companyId, $categoryId)
@@ -41,7 +41,7 @@ class CategoryController extends Controller
         $company = $this->getAuthorizedCompany($companyId);
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->updateCategory($category, $request->validated());
-        return redirect("/companies/{$companyId}/categories");
+        return redirect()->route('categories.index', $companyId);
     }
 
     public function destroy($companyId, $categoryId)
@@ -50,6 +50,6 @@ class CategoryController extends Controller
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->deleteCategory($category);
 
-        return redirect("/companies/{$companyId}/categories");
+        return redirect()->route('categories.index', $companyId);
     }
 }

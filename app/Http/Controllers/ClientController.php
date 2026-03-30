@@ -28,7 +28,7 @@ class ClientController extends Controller
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
         $this->clientService->createClient($data);
-        return redirect("/companies/{$companyId}");
+        return redirect()->route('companies.show', $companyId);
     }
 
     public function edit($companyId, $clientId)
@@ -43,7 +43,7 @@ class ClientController extends Controller
         $company = Auth::user()->companies()->findOrFail($companyId);
         $client = $company->clients()->findOrFail($clientId);
         $this->clientService->updateClient($client, $request->validated());
-        return redirect("/companies/{$companyId}")->with('success', 'Client updated');
+        return redirect()->route('companies.show', $companyId)->with('success', 'Client updated');
     }
 
     public function destroy($companyId, $clientId)
@@ -55,7 +55,7 @@ class ClientController extends Controller
             return back()->with('error', 'Cannot delete client with invoices');
         }
         
-        return redirect("/companies/{$companyId}")->with('success', 'Client deleted');
+        return redirect()->route('companies.show', $companyId)->with('success', 'Client deleted');
     }
 
     public function balances($companyId)

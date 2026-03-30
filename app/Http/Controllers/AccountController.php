@@ -35,7 +35,7 @@ class AccountController extends Controller
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
         $this->accountService->createAccount($data);
-        return redirect("/companies/{$companyId}/accounts")->with('success', 'Account created');
+        return redirect()->route('accounts.index', $companyId)->with('success', 'Account created');
     }
 
     public function edit($companyId, $accountId)
@@ -50,7 +50,7 @@ class AccountController extends Controller
         $company = Auth::user()->companies()->findOrFail($companyId);
         $account = $company->accounts()->findOrFail($accountId);
         $this->accountService->updateAccount($account, $request->validated());
-        return redirect("/companies/{$companyId}/accounts")->with('success', 'Account updated');
+        return redirect()->route('accounts.index', $companyId)->with('success', 'Account updated');
     }
 
     public function destroy($companyId, $accountId)
@@ -58,6 +58,6 @@ class AccountController extends Controller
         $company = Auth::user()->companies()->findOrFail($companyId);
         $account = $company->accounts()->findOrFail($accountId);
         $result = $this->accountService->deleteOrArchiveAccount($account);
-        return redirect("/companies/{$companyId}/accounts")->with('success', $result['message']);
+        return redirect()->route('accounts.index', $companyId)->with('success', $result['message']);
     }
 }

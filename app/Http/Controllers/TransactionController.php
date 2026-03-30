@@ -43,6 +43,6 @@ class TransactionController extends Controller
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
         $this->transactionService->createTransaction($data);
-        return redirect("/companies/{$companyId}/transactions")->with('success', 'Transaction created successfully');
+        return redirect()->route('transactions.index', $companyId)->with('success', 'Transaction created successfully');
     }
 }

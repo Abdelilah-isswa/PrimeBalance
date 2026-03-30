@@ -47,7 +47,7 @@ class BillController extends Controller
 
         $this->billService->createBill($data);
 
-        return redirect("/companies/{$companyId}");
+        return redirect()->route('companies.show', $companyId);
     }
 
     public function showPayment($companyId, $billId)
@@ -65,7 +65,7 @@ class BillController extends Controller
         $company = $this->getAuthorizedCompany($companyId);
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->payBill($bill, $request->validated());
-        return redirect("/companies/{$companyId}/bills")->with('success', 'Bill paid successfully');
+        return redirect()->route('bills.index', $companyId)->with('success', 'Bill paid successfully');
     }
 
     public function show($companyId, $billId)
@@ -89,7 +89,7 @@ class BillController extends Controller
         $company = $this->getAuthorizedCompany($companyId);
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->updateBill($bill, $request->validated());
-        return redirect("/companies/{$companyId}/bills/{$billId}")->with('success', 'Bill updated successfully');
+        return redirect()->route('bills.show', [$companyId, $billId])->with('success', 'Bill updated successfully');
     }
 
     public function destroy($companyId, $billId)
@@ -98,6 +98,6 @@ class BillController extends Controller
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->deleteBill($bill);
 
-        return redirect("/companies/{$companyId}/bills")->with('success', 'Bill deleted successfully');
+        return redirect()->route('bills.index', $companyId)->with('success', 'Bill deleted successfully');
     }
 }

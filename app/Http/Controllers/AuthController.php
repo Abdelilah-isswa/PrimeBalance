@@ -31,7 +31,7 @@ class AuthController extends Controller
                 return redirect($redirectUrl)->with('success', 'You have joined the company');
             }
             
-            return redirect()->intended('/');
+            return redirect()->intended(route('home'));
         }
 
         return back()->withErrors(['email' => 'Invalid credentials']);
@@ -52,12 +52,12 @@ class AuthController extends Controller
             return redirect($redirectUrl)->with('success', 'You have joined the company');
         }
         
-        return redirect('/');
+        return redirect()->route('home');
     }
 
     public function logout(Request $request)
     {
         $this->authService->logout();
-        return redirect('/login');
+        return redirect()->route('login');
     }
 }

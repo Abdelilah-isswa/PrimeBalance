@@ -31,7 +31,7 @@ class SupplierController extends Controller
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
         $this->supplierService->createSupplier($data);
-        return redirect("/companies/{$companyId}");
+        return redirect()->route('companies.show', $companyId);
     }
 
     public function edit($companyId, $supplierId)
@@ -46,7 +46,7 @@ class SupplierController extends Controller
         $company = $this->getCompanyAsOwner($companyId, 'update suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         $this->supplierService->updateSupplier($supplier, $request->validated());
-        return redirect("/companies/{$companyId}")->with('success', 'Supplier updated');
+        return redirect()->route('companies.show', $companyId)->with('success', 'Supplier updated');
     }
 
     public function destroy($companyId, $supplierId)
@@ -58,7 +58,7 @@ class SupplierController extends Controller
             return back()->with('error', 'Cannot delete supplier with bills');
         }
         
-        return redirect("/companies/{$companyId}")->with('success', 'Supplier deleted');
+        return redirect()->route('companies.show', $companyId)->with('success', 'Supplier deleted');
     }
 
     public function balances($companyId)

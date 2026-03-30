@@ -48,7 +48,7 @@ class InvoiceController extends Controller
         $invoice = $this->invoiceService->createInvoice($data);
 
         $message = 'Invoice created' . ($request->has('send_email') && $request->send_email ? ' and sent to client' : '');
-        return redirect("/companies/{$companyId}")->with('success', $message);
+        return redirect()->route('companies.show', $companyId)->with('success', $message);
     }
 
     public function showReceivePayment($companyId, $invoiceId)
@@ -66,7 +66,7 @@ class InvoiceController extends Controller
         $company = $this->getAuthorizedCompany($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $this->invoiceService->receivePayment($invoice, $request->validated());
-        return redirect("/companies/{$companyId}/invoices")->with('success', 'Payment received successfully');
+        return redirect()->route('invoices.index', $companyId)->with('success', 'Payment received successfully');
     }
 
     public function show($companyId, $invoiceId)
@@ -90,7 +90,7 @@ class InvoiceController extends Controller
         $company = $this->getAuthorizedCompany($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $this->invoiceService->updateInvoice($invoice, $request->validated());
-        return redirect("/companies/{$companyId}/invoices/{$invoiceId}")->with('success', 'Invoice updated successfully');
+        return redirect()->route('invoices.show', [$companyId, $invoiceId])->with('success', 'Invoice updated successfully');
     }
 
     public function destroy($companyId, $invoiceId)
@@ -102,7 +102,7 @@ class InvoiceController extends Controller
             return back()->with('error', 'Cannot delete invoice with payments');
         }
 
-        return redirect("/companies/{$companyId}/invoices")->with('success', 'Invoice deleted successfully');
+        return redirect()->route('invoices.index', $companyId)->with('success', 'Invoice deleted successfully');
     }
 
     public function downloadPdf($companyId, $invoiceId)

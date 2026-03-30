@@ -16,77 +16,85 @@ Route::get('/', function () {
     $companies = Auth::user()->companies;
     
     if ($companies->count() === 0) {
-        return redirect('/companies/create');
+        return redirect()->route('companies.create');
     } elseif ($companies->count() === 1) {
-        return redirect('/companies/' . $companies->first()->id);
+        return redirect()->route('companies.show', $companies->first()->id);
     } else {
-        return redirect('/companies');
+        return redirect()->route('companies.index');
     }
-})->middleware('auth');
+})->middleware('auth')->name('home');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login.store');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/invitations/{token}', [CompanyController::class, 'showInvitation']);
-Route::post('/invitations/{token}/accept', [CompanyController::class, 'acceptInvitation']);
-Route::post('/invitations/{token}/decline', [CompanyController::class, 'declineInvitation']);
+Route::get('/invitations/{token}', [CompanyController::class, 'showInvitation'])->name('invitations.show');
+Route::post('/invitations/{token}/accept', [CompanyController::class, 'acceptInvitation'])->name('invitations.accept');
+Route::post('/invitations/{token}/decline', [CompanyController::class, 'declineInvitation'])->name('invitations.decline');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/companies', [CompanyController::class, 'index']);
-    Route::get('/companies/create', [CompanyController::class, 'create']);
-    Route::post('/companies', [CompanyController::class, 'store']);
-    Route::get('/companies/{id}', [CompanyController::class, 'show']);
-    Route::get('/companies/{id}/edit', [CompanyController::class, 'edit']);
-    Route::put('/companies/{id}', [CompanyController::class, 'update']);
-    Route::post('/companies/{id}/deactivate', [CompanyController::class, 'deactivate']);
-    Route::post('/companies/{id}/invite', [CompanyController::class, 'inviteUser']);
-    Route::delete('/companies/{companyId}/users/{userId}', [CompanyController::class, 'removeUser']);
-    Route::put('/companies/{companyId}/users/{userId}/role', [CompanyController::class, 'updateUserRole']);
-    Route::get('/companies/{id}/categories', [CategoryController::class, 'index']);
-    Route::post('/companies/{id}/categories', [CategoryController::class, 'store']);
-    Route::put('/companies/{companyId}/categories/{categoryId}', [CategoryController::class, 'update']);
-    Route::delete('/companies/{companyId}/categories/{categoryId}', [CategoryController::class, 'destroy']);
-    Route::get('/companies/{id}/clients/create', [ClientController::class, 'create']);
-    Route::post('/companies/{id}/clients', [ClientController::class, 'store']);
-    Route::get('/companies/{id}/clients/balances', [ClientController::class, 'balances']);
-    Route::get('/companies/{companyId}/clients/{clientId}/edit', [ClientController::class, 'edit']);
-    Route::put('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'update']);
-    Route::delete('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'destroy']);
-    Route::get('/companies/{id}/suppliers/create', [SupplierController::class, 'create']);
-    Route::post('/companies/{id}/suppliers', [SupplierController::class, 'store']);
-    Route::get('/companies/{id}/suppliers/balances', [SupplierController::class, 'balances']);
-    Route::get('/companies/{companyId}/suppliers/{supplierId}/edit', [SupplierController::class, 'edit']);
-    Route::put('/companies/{companyId}/suppliers/{supplierId}', [SupplierController::class, 'update']);
-    Route::delete('/companies/{companyId}/suppliers/{supplierId}', [SupplierController::class, 'destroy']);
-    Route::get('/companies/{id}/accounts', [AccountController::class, 'index']);
-    Route::get('/companies/{id}/accounts/create', [AccountController::class, 'create']);
-    Route::post('/companies/{id}/accounts', [AccountController::class, 'store']);
-    Route::get('/companies/{companyId}/accounts/{accountId}/edit', [AccountController::class, 'edit']);
-    Route::put('/companies/{companyId}/accounts/{accountId}', [AccountController::class, 'update']);
-    Route::delete('/companies/{companyId}/accounts/{accountId}', [AccountController::class, 'destroy']);
-    Route::get('/companies/{id}/documents', [DocumentController::class, 'index']);
-    Route::get('/companies/{companyId}/invoices', [InvoiceController::class, 'index']);
-    Route::get('/companies/{companyId}/clients/{clientId}/invoices/create', [InvoiceController::class, 'create']);
-    Route::post('/companies/{companyId}/clients/{clientId}/invoices', [InvoiceController::class, 'store']);
-    Route::get('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'show']);
-    Route::get('/companies/{companyId}/invoices/{invoiceId}/pdf', [InvoiceController::class, 'downloadPdf']);
-    Route::get('/companies/{companyId}/invoices/{invoiceId}/edit', [InvoiceController::class, 'edit']);
-    Route::put('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'update']);
-    Route::delete('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'destroy']);
-    Route::get('/companies/{companyId}/invoices/{invoiceId}/receive', [InvoiceController::class, 'showReceivePayment']);
-    Route::post('/companies/{companyId}/invoices/{invoiceId}/receive', [InvoiceController::class, 'receivePayment']);
-    Route::get('/companies/{companyId}/bills', [BillController::class, 'index']);
-    Route::get('/companies/{companyId}/suppliers/{supplierId}/bills/create', [BillController::class, 'create']);
-    Route::post('/companies/{companyId}/suppliers/{supplierId}/bills', [BillController::class, 'store']);
-    Route::get('/companies/{companyId}/bills/{billId}', [BillController::class, 'show']);
-    Route::get('/companies/{companyId}/bills/{billId}/edit', [BillController::class, 'edit']);
-    Route::put('/companies/{companyId}/bills/{billId}', [BillController::class, 'update']);
-    Route::delete('/companies/{companyId}/bills/{billId}', [BillController::class, 'destroy']);
-    Route::get('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'showPayment']);
-    Route::post('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'pay']);
-    Route::get('/companies/{companyId}/transactions', [TransactionController::class, 'index']);
-    Route::get('/companies/{companyId}/transactions/create', [TransactionController::class, 'create']);
-    Route::post('/companies/{companyId}/transactions', [TransactionController::class, 'store']);
+    Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
+    Route::get('/companies/create', [CompanyController::class, 'create'])->name('companies.create');
+    Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
+    Route::get('/companies/{id}', [CompanyController::class, 'show'])->name('companies.show');
+    Route::get('/companies/{id}/edit', [CompanyController::class, 'edit'])->name('companies.edit');
+    Route::put('/companies/{id}', [CompanyController::class, 'update'])->name('companies.update');
+    Route::post('/companies/{id}/deactivate', [CompanyController::class, 'deactivate'])->name('companies.deactivate');
+    Route::post('/companies/{id}/invite', [CompanyController::class, 'inviteUser'])->name('companies.invite');
+    Route::delete('/companies/{companyId}/users/{userId}', [CompanyController::class, 'removeUser'])->name('companies.users.remove');
+    Route::put('/companies/{companyId}/users/{userId}/role', [CompanyController::class, 'updateUserRole'])->name('companies.users.role');
+    
+    Route::get('/companies/{id}/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('/companies/{id}/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/companies/{companyId}/categories/{categoryId}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/companies/{companyId}/categories/{categoryId}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    
+    Route::get('/companies/{id}/clients/create', [ClientController::class, 'create'])->name('clients.create');
+    Route::post('/companies/{id}/clients', [ClientController::class, 'store'])->name('clients.store');
+    Route::get('/companies/{id}/clients/balances', [ClientController::class, 'balances'])->name('clients.balances');
+    Route::get('/companies/{companyId}/clients/{clientId}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+    Route::put('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'update'])->name('clients.update');
+    Route::delete('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'destroy'])->name('clients.destroy');
+    
+    Route::get('/companies/{id}/suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');
+    Route::post('/companies/{id}/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+    Route::get('/companies/{id}/suppliers/balances', [SupplierController::class, 'balances'])->name('suppliers.balances');
+    Route::get('/companies/{companyId}/suppliers/{supplierId}/edit', [SupplierController::class, 'edit'])->name('suppliers.edit');
+    Route::put('/companies/{companyId}/suppliers/{supplierId}', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('/companies/{companyId}/suppliers/{supplierId}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+    
+    Route::get('/companies/{id}/accounts', [AccountController::class, 'index'])->name('accounts.index');
+    Route::get('/companies/{id}/accounts/create', [AccountController::class, 'create'])->name('accounts.create');
+    Route::post('/companies/{id}/accounts', [AccountController::class, 'store'])->name('accounts.store');
+    Route::get('/companies/{companyId}/accounts/{accountId}/edit', [AccountController::class, 'edit'])->name('accounts.edit');
+    Route::put('/companies/{companyId}/accounts/{accountId}', [AccountController::class, 'update'])->name('accounts.update');
+    Route::delete('/companies/{companyId}/accounts/{accountId}', [AccountController::class, 'destroy'])->name('accounts.destroy');
+    
+    Route::get('/companies/{id}/documents', [DocumentController::class, 'index'])->name('documents.index');
+    
+    Route::get('/companies/{companyId}/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/companies/{companyId}/clients/{clientId}/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('/companies/{companyId}/clients/{clientId}/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/companies/{companyId}/invoices/{invoiceId}/pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.pdf');
+    Route::get('/companies/{companyId}/invoices/{invoiceId}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+    Route::put('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'update'])->name('invoices.update');
+    Route::delete('/companies/{companyId}/invoices/{invoiceId}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    Route::get('/companies/{companyId}/invoices/{invoiceId}/receive', [InvoiceController::class, 'showReceivePayment'])->name('invoices.receive');
+    Route::post('/companies/{companyId}/invoices/{invoiceId}/receive', [InvoiceController::class, 'receivePayment'])->name('invoices.receive.store');
+    
+    Route::get('/companies/{companyId}/bills', [BillController::class, 'index'])->name('bills.index');
+    Route::get('/companies/{companyId}/suppliers/{supplierId}/bills/create', [BillController::class, 'create'])->name('bills.create');
+    Route::post('/companies/{companyId}/suppliers/{supplierId}/bills', [BillController::class, 'store'])->name('bills.store');
+    Route::get('/companies/{companyId}/bills/{billId}', [BillController::class, 'show'])->name('bills.show');
+    Route::get('/companies/{companyId}/bills/{billId}/edit', [BillController::class, 'edit'])->name('bills.edit');
+    Route::put('/companies/{companyId}/bills/{billId}', [BillController::class, 'update'])->name('bills.update');
+    Route::delete('/companies/{companyId}/bills/{billId}', [BillController::class, 'destroy'])->name('bills.destroy');
+    Route::get('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'showPayment'])->name('bills.pay');
+    Route::post('/companies/{companyId}/bills/{billId}/pay', [BillController::class, 'pay'])->name('bills.pay.store');
+    
+    Route::get('/companies/{companyId}/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/companies/{companyId}/transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
+    Route::post('/companies/{companyId}/transactions', [TransactionController::class, 'store'])->name('transactions.store');
 });

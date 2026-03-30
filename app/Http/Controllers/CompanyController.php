@@ -61,14 +61,14 @@ class CompanyController extends Controller
     {
         $company = $this->getAuthorizedCompany($id);
         $this->companyService->updateCompany($company, $request->validated());
-        return redirect("/companies/{$id}")->with('success', 'Company updated successfully');
+        return redirect()->route('companies.show', $id)->with('success', 'Company updated successfully');
     }
 
     public function deactivate($id)
     {
         $company = $this->getCompanyAsOwner($id, 'deactivate company');
         $this->companyService->deactivateCompany($company);
-        return redirect('/companies')->with('success', 'Company deactivated successfully');
+        return redirect()->route('companies.index')->with('success', 'Company deactivated successfully');
     }
 
     public function inviteUser(InviteUserRequest $request, $id)
@@ -105,22 +105,21 @@ class CompanyController extends Controller
 
         if ($invitation->isExpired()) {
             $invitation->update(['status' => 'expired']);
-            return redirect('/login')->with('error', 'This invitation has expired');
+            return redirect()->route('login')->with('error', 'This invitation has expired');
         }
 
-        // Check if user is logged in
         if (!Auth::check()) {
             session(['invitation_token' => $token]);
-            return redirect('/login')->with('message', 'Please login or register to accept the invitation');
+            return redirect()->route('login')->with('message', 'Please login or register to accept the invitation');
         }
 
         $result = $this->companyService->acceptInvitation($invitation);
         
         if ($result['success']) {
-            return redirect($result['redirect'])->with('success', $result['message']);
+            return redirect()->route('companies.show', $invitation->company_id)->with('success', $result['message']);
         }
         
-        return redirect('/')->with('error', $result['message']);
+        return redirect()->route('home')->with('error', $result['message']);
     }
 
     public function declineInvitation($token)
@@ -131,7 +130,7 @@ class CompanyController extends Controller
 
         $invitation->update(['status' => 'expired']);
 
-        return redirect('/login')->with('message', 'Invitation declined');
+        return redirect()->route('login')->with('message', 'Invitation declined');
     }
 
     public function create()
@@ -142,7 +141,7 @@ class CompanyController extends Controller
     public function store(StoreCompanyRequest $request)
     {
         $this->companyService->createCompany($request->validated());
-        return redirect('/')->with('success', 'Company created successfully');
+        return redirect()->route('home')->with('success', 'Company created successfully');
     }
 
     public function removeUser($companyId, $userId)
