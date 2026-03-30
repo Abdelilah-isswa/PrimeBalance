@@ -23,7 +23,7 @@ class CategoryController extends Controller
 
     public function index($companyId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $categories = $company->categories;
         
         return view('categories.index', compact('company', 'categories'));
@@ -38,7 +38,7 @@ class CategoryController extends Controller
 
     public function update(UpdateCategoryRequest $request, $companyId, $categoryId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->updateCategory($category, $request->validated());
         return redirect()->route('categories.index', $companyId);
@@ -46,7 +46,7 @@ class CategoryController extends Controller
 
     public function destroy($companyId, $categoryId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'delete categories');
+        $company = $this->getCompanyForOwner($companyId, 'delete categories');
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->deleteCategory($category);
 

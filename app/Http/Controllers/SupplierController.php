@@ -23,7 +23,7 @@ class SupplierController extends Controller
 
     public function create($companyId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'create suppliers');
+        $company = $this->getCompanyForOwner($companyId, 'create suppliers');
         return view('suppliers.create', compact('company'));
     }
 
@@ -36,14 +36,14 @@ class SupplierController extends Controller
 
     public function edit($companyId, $supplierId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'edit suppliers');
+        $company = $this->getCompanyForOwner($companyId, 'edit suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         return view('suppliers.edit', compact('company', 'supplier'));
     }
 
     public function update(UpdateSupplierRequest $request, $companyId, $supplierId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'update suppliers');
+        $company = $this->getCompanyForOwner($companyId, 'update suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         $this->supplierService->updateSupplier($supplier, $request->validated());
         return redirect()->route('companies.show', $companyId)->with('success', 'Supplier updated');
@@ -51,7 +51,7 @@ class SupplierController extends Controller
 
     public function destroy($companyId, $supplierId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'delete suppliers');
+        $company = $this->getCompanyForOwner($companyId, 'delete suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         
         if (!$this->supplierService->deleteSupplier($supplier)) {
@@ -63,7 +63,7 @@ class SupplierController extends Controller
 
     public function balances($companyId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $suppliers = $company->suppliers()->with('bills')->get();
         $suppliers = $this->supplierService->calculateSupplierBalances($suppliers);
         

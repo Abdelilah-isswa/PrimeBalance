@@ -24,7 +24,7 @@ class InvoiceController extends Controller
 
     public function index($companyId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $invoices = $company->invoices()->with('client')->get();
         
         return view('invoices.index', compact('company', 'invoices'));
@@ -32,7 +32,7 @@ class InvoiceController extends Controller
 
     public function create($companyId, $clientId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'create invoices');
+        $company = $this->getCompanyForOwner($companyId, 'create invoices');
         $client = $company->clients()->findOrFail($clientId);
 
         return view('invoices.create', compact('company', 'client'));
@@ -53,7 +53,7 @@ class InvoiceController extends Controller
 
     public function showReceivePayment($companyId, $invoiceId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'receive payments');
+        $company = $this->getCompanyForOwner($companyId, 'receive payments');
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
@@ -63,7 +63,7 @@ class InvoiceController extends Controller
 
     public function receivePayment(ReceivePaymentRequest $request, $companyId, $invoiceId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $this->invoiceService->receivePayment($invoice, $request->validated());
         return redirect()->route('invoices.index', $companyId)->with('success', 'Payment received successfully');
@@ -71,7 +71,7 @@ class InvoiceController extends Controller
 
     public function show($companyId, $invoiceId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
         
         return view('invoices.show', compact('company', 'invoice'));
@@ -79,7 +79,7 @@ class InvoiceController extends Controller
 
     public function edit($companyId, $invoiceId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'edit invoices');
+        $company = $this->getCompanyForOwner($companyId, 'edit invoices');
         $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
         
         return view('invoices.edit', compact('company', 'invoice'));
@@ -87,7 +87,7 @@ class InvoiceController extends Controller
 
     public function update(UpdateInvoiceRequest $request, $companyId, $invoiceId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $this->invoiceService->updateInvoice($invoice, $request->validated());
         return redirect()->route('invoices.show', [$companyId, $invoiceId])->with('success', 'Invoice updated successfully');
@@ -95,7 +95,7 @@ class InvoiceController extends Controller
 
     public function destroy($companyId, $invoiceId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'delete invoices');
+        $company = $this->getCompanyForOwner($companyId, 'delete invoices');
         $invoice = $company->invoices()->findOrFail($invoiceId);
         
         if (!$this->invoiceService->deleteInvoice($invoice)) {
@@ -107,7 +107,7 @@ class InvoiceController extends Controller
 
     public function downloadPdf($companyId, $invoiceId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
         
         $pdf = \PDF::loadView('invoices.pdf', compact('company', 'invoice'));

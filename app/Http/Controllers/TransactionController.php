@@ -21,7 +21,7 @@ class TransactionController extends Controller
 
     public function index($companyId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $transactions = $company->transactions()
             ->with(['account', 'category', 'invoice.client', 'bill.supplier'])
             ->orderBy('date', 'desc')
@@ -32,7 +32,7 @@ class TransactionController extends Controller
 
     public function create($companyId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'create transactions');
+        $company = $this->getCompanyForOwner($companyId, 'create transactions');
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
 

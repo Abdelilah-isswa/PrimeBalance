@@ -10,9 +10,9 @@ use Illuminate\Foundation\Http\FormRequest;
 trait HasCompanyAuthorization
 {
     /**
-     * Get company and ensure user has access to it
+     * Get company and ensure user has access to it (any member)
      */
-    protected function getAuthorizedCompany(int $companyId): Company
+    protected function getCompanyForMember(int $companyId): Company
     {
         return Auth::user()->companies()->findOrFail($companyId);
     }
@@ -20,9 +20,9 @@ trait HasCompanyAuthorization
     /**
      * Get company and ensure user is owner
      */
-    protected function getCompanyAsOwner(int $companyId, string $action = 'perform this action'): Company
+    protected function getCompanyForOwner(int $companyId, string $action = 'perform this action'): Company
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         
         if ($company->pivot->role !== 'owner') {
             abort(403, "Only owners can {$action}");
@@ -43,9 +43,12 @@ trait HasCompanyAuthorization
     /**
      * Get company and ensure user has specific role(s)
      */
+    /**
+     * Get company and ensure user has specific role(s)
+     */
     protected function getCompanyWithRole(int $companyId, array|string $roles, string $action = 'perform this action'): Company
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $roles = is_array($roles) ? $roles : [$roles];
         
         if (!in_array($company->pivot->role, $roles)) {

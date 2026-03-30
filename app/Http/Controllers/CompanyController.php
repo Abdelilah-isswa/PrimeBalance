@@ -32,7 +32,7 @@ class CompanyController extends Controller
 
     public function show(Request $request, $id)
     {
-        $company = $this->getAuthorizedCompany($id);
+        $company = $this->getCompanyForMember($id);
         
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
@@ -48,7 +48,7 @@ class CompanyController extends Controller
 
     public function edit($id)
     {
-        $company = $this->getCompanyAsOwner($id, 'edit company');
+        $company = $this->getCompanyForOwner($id, 'edit company');
         $company->load(['users' => function($query) {
             $query->whereNull('company_user.left_at');
         }]);
@@ -59,21 +59,21 @@ class CompanyController extends Controller
 
     public function update(UpdateCompanyRequest $request, $id)
     {
-        $company = $this->getAuthorizedCompany($id);
+        $company = $this->getCompanyForMember($id);
         $this->companyService->updateCompany($company, $request->validated());
         return redirect()->route('companies.show', $id)->with('success', 'Company updated successfully');
     }
 
     public function deactivate($id)
     {
-        $company = $this->getCompanyAsOwner($id, 'deactivate company');
+        $company = $this->getCompanyForOwner($id, 'deactivate company');
         $this->companyService->deactivateCompany($company);
         return redirect()->route('companies.index')->with('success', 'Company deactivated successfully');
     }
 
     public function inviteUser(InviteUserRequest $request, $id)
     {
-        $company = $this->getAuthorizedCompany($id);
+        $company = $this->getCompanyForMember($id);
         $result = $this->companyService->inviteUser($company, $request->email, $request->role);
         
         if ($result['success']) {
@@ -146,7 +146,7 @@ class CompanyController extends Controller
 
     public function removeUser($companyId, $userId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'remove users');
+        $company = $this->getCompanyForOwner($companyId, 'remove users');
         $result = $this->companyService->removeUser($company, $userId);
         
         if ($result['success']) {
@@ -158,7 +158,7 @@ class CompanyController extends Controller
 
     public function updateUserRole(UpdateUserRoleRequest $request, $companyId, $userId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $result = $this->companyService->updateUserRole($company, $userId, $request->role);
         
         if ($result['success']) {

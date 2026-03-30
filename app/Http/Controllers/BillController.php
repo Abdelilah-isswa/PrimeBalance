@@ -24,7 +24,7 @@ class BillController extends Controller
 
     public function index($companyId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $bills = $company->bills()->with('supplier')->get();
         
         return view('bills.index', compact('company', 'bills'));
@@ -32,7 +32,7 @@ class BillController extends Controller
 
     public function create($companyId, $supplierId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'create bills');
+        $company = $this->getCompanyForOwner($companyId, 'create bills');
         $supplier = $company->suppliers()->findOrFail($supplierId);
 
         return view('bills.create', compact('company', 'supplier'));
@@ -52,7 +52,7 @@ class BillController extends Controller
 
     public function showPayment($companyId, $billId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'pay bills');
+        $company = $this->getCompanyForOwner($companyId, 'pay bills');
         $bill = $company->bills()->findOrFail($billId);
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
@@ -62,7 +62,7 @@ class BillController extends Controller
 
     public function pay(PayBillRequest $request, $companyId, $billId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->payBill($bill, $request->validated());
         return redirect()->route('bills.index', $companyId)->with('success', 'Bill paid successfully');
@@ -70,7 +70,7 @@ class BillController extends Controller
 
     public function show($companyId, $billId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->with('supplier')->findOrFail($billId);
         
         return view('bills.show', compact('company', 'bill'));
@@ -78,7 +78,7 @@ class BillController extends Controller
 
     public function edit($companyId, $billId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'edit bills');
+        $company = $this->getCompanyForOwner($companyId, 'edit bills');
         $bill = $company->bills()->with('supplier')->findOrFail($billId);
         
         return view('bills.edit', compact('company', 'bill'));
@@ -86,7 +86,7 @@ class BillController extends Controller
 
     public function update(UpdateBillRequest $request, $companyId, $billId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->updateBill($bill, $request->validated());
         return redirect()->route('bills.show', [$companyId, $billId])->with('success', 'Bill updated successfully');
@@ -94,7 +94,7 @@ class BillController extends Controller
 
     public function destroy($companyId, $billId)
     {
-        $company = $this->getCompanyAsOwner($companyId, 'delete bills');
+        $company = $this->getCompanyForOwner($companyId, 'delete bills');
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->deleteBill($bill);
 
