@@ -9,11 +9,14 @@ use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Http\Requests\InviteUserRequest;
 use App\Http\Requests\UpdateUserRoleRequest;
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
+    use HasCompanyAuthorization;
+    
     protected $companyService;
 
     public function __construct(CompanyService $companyService)
@@ -29,7 +32,7 @@ class CompanyController extends Controller
 
     public function show(Request $request, $id)
     {
-        $company = Auth::user()->companies()->findOrFail($id);
+        $company = $this->getAuthorizedCompany($id);
         
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
@@ -45,12 +48,7 @@ class CompanyController extends Controller
 
     public function edit($id)
     {
-        $company = Auth::user()->companies()->findOrFail($id);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can edit company');
-        }
-
+        $company = $this->getCompanyAsOwner($id, 'edit company');
         $company->load(['users' => function($query) {
             $query->whereNull('company_user.left_at');
         }]);
@@ -61,27 +59,21 @@ class CompanyController extends Controller
 
     public function update(UpdateCompanyRequest $request, $id)
     {
-        $company = Auth::user()->companies()->findOrFail($id);
+        $company = $this->getAuthorizedCompany($id);
         $this->companyService->updateCompany($company, $request->validated());
         return redirect("/companies/{$id}")->with('success', 'Company updated successfully');
     }
 
     public function deactivate($id)
     {
-        $company = Auth::user()->companies()->findOrFail($id);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can deactivate company');
-        }
-
+        $company = $this->getCompanyAsOwner($id, 'deactivate company');
         $this->companyService->deactivateCompany($company);
-
         return redirect('/companies')->with('success', 'Company deactivated successfully');
     }
 
     public function inviteUser(InviteUserRequest $request, $id)
     {
-        $company = Auth::user()->companies()->findOrFail($id);
+        $company = $this->getAuthorizedCompany($id);
         $result = $this->companyService->inviteUser($company, $request->email, $request->role);
         
         if ($result['success']) {
@@ -155,12 +147,7 @@ class CompanyController extends Controller
 
     public function removeUser($companyId, $userId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can remove users');
-        }
-
+        $company = $this->getCompanyAsOwner($companyId, 'remove users');
         $result = $this->companyService->removeUser($company, $userId);
         
         if ($result['success']) {
@@ -172,7 +159,7 @@ class CompanyController extends Controller
 
     public function updateUserRole(UpdateUserRoleRequest $request, $companyId, $userId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getAuthorizedCompany($companyId);
         $result = $this->companyService->updateUserRole($company, $userId, $request->role);
         
         if ($result['success']) {

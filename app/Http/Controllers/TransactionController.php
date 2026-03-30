@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\TransactionService;
+use App\Http\Requests\StoreTransactionRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -40,29 +41,10 @@ class TransactionController extends Controller
         return view('transactions.create', compact('company', 'accounts', 'categories'));
     }
 
-    public function store(Request $request, $companyId)
+    public function store(StoreTransactionRequest $request, $companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create transactions');
-        }
-
-        $request->validate([
-            'account_id' => 'required|exists:accounts,id',
-            'category_id' => 'nullable|exists:categories,id',
-            'type' => 'required|in:income,expense',
-            'amount' => 'required|numeric|min:0',
-            'description' => 'required|string',
-            'date' => 'required|date',
-        ]);
-
-        $data = array_merge($request->only('account_id', 'category_id', 'type', 'amount', 'description', 'date'), [
-            'company_id' => $companyId,
-        ]);
-
+        $data = array_merge($request->validated(), ['company_id' => $companyId]);
         $this->transactionService->createTransaction($data);
-
         return redirect("/companies/{$companyId}/transactions")->with('success', 'Transaction created successfully');
     }
 }

@@ -1,8 +1,111 @@
-# Service Layer Architecture
+# Service Layer Architecture with Form Requests
 
-This document outlines the refactored controller structure using the Service Layer pattern to improve code readability, maintainability, and separation of concerns.
+This document outlines the refactored controller structure using the Service Layer pattern combined with Form Request classes to improve code readability, maintainability, and separation of concerns.
 
-## Services Created
+## Architecture Overview
+
+The application now follows a three-layer architecture:
+1. **Form Requests** - Handle validation and authorization
+2. **Services** - Contain business logic
+3. **Controllers** - Handle HTTP requests/responses
+
+## Form Request Classes
+
+### Authentication Requests
+- `LoginRequest` - Login validation
+- `RegisterRequest` - User registration validation
+
+### Company Management Requests
+- `StoreCompanyRequest` - Company creation validation
+- `UpdateCompanyRequest` - Company update validation with owner authorization
+- `InviteUserRequest` - User invitation validation with owner authorization
+- `UpdateUserRoleRequest` - User role update validation with owner authorization
+
+### Account Management Requests
+- `StoreAccountRequest` - Account creation validation with owner authorization
+- `UpdateAccountRequest` - Account update validation with owner authorization
+
+### Client Management Requests
+- `StoreClientRequest` - Client creation validation with owner authorization
+- `UpdateClientRequest` - Client update validation with owner authorization
+
+### Supplier Management Requests
+- `StoreSupplierRequest` - Supplier creation validation with owner authorization
+- `UpdateSupplierRequest` - Supplier update validation with owner authorization
+
+### Invoice Management Requests
+- `StoreInvoiceRequest` - Invoice creation validation with owner authorization
+- `UpdateInvoiceRequest` - Invoice update validation with owner authorization
+- `ReceivePaymentRequest` - Payment receipt validation with owner authorization
+
+### Bill Management Requests
+- `StoreBillRequest` - Bill creation validation with owner authorization
+- `UpdateBillRequest` - Bill update validation with owner authorization
+- `PayBillRequest` - Bill payment validation with owner authorization
+
+### Transaction Management Requests
+- `StoreTransactionRequest` - Transaction creation validation with owner authorization
+
+### Category Management Requests
+- `StoreCategoryRequest` - Category creation validation with owner authorization
+- `UpdateCategoryRequest` - Category update validation with owner authorization
+
+## Form Request Benefits
+
+### 1. **Centralized Validation**
+- All validation rules are defined in dedicated classes
+- Consistent validation across the application
+- Easy to modify and maintain validation logic
+
+### 2. **Authorization Integration**
+- Authorization logic is built into Form Requests
+- Automatic permission checking before controller methods execute
+- Cleaner controller methods without repetitive authorization code
+
+### 3. **Data Preparation**
+- `prepareForValidation()` method allows data transformation before validation
+- Automatic handling of checkbox values (e.g., `is_active` fields)
+
+### 4. **Type Safety**
+- `validated()` method returns only validated data
+- Prevents mass assignment vulnerabilities
+- Clear data contracts between requests and services
+
+### 5. **Cleaner Controllers**
+- Controllers are now extremely thin and focused
+- No validation or authorization logic in controllers
+- Easy to read and understand controller methods
+
+## Example Form Request Structure
+
+```php
+class StoreClientRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        $company = $this->user()->companies()->find($this->route('companyId'));
+        return $company && $company->pivot->role === 'owner';
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'address' => 'required|string',
+            'phone' => 'required|string',
+        ];
+    }
+
+    public function prepareForValidation(): void
+    {
+        // Transform data before validation if needed
+        $this->merge([
+            'is_active' => $this->has('is_active'),
+        ]);
+    }
+}
+```
 
 ### 1. AuthService
 **Location:** `app/Services/AuthService.php`
@@ -159,37 +262,60 @@ All controllers have been refactored to:
 - Focus on request validation and response formatting
 - Handle HTTP-specific concerns (redirects, flash messages, etc.)
 
-## Usage Example
+## Controller Examples
 
+### Before Refactoring
 ```php
-// Before (in Controller)
 public function store(Request $request, $companyId)
 {
-    // Validation
-    // Complex business logic
-    // Database operations
-    // Email sending
-    // Response handling
-}
-
-// After (in Controller)
-public function store(Request $request, $companyId)
-{
-    $request->validate([...]);
+    $company = Auth::user()->companies()->findOrFail($companyId);
     
-    $result = $this->service->createEntity($request->validated());
-    
-    return redirect()->back()->with('success', 'Created successfully');
-}
+    if ($company->pivot->role !== 'owner') {
+        abort(403, 'Only owners can create clients');
+    }
 
-// Business logic moved to Service
-public function createEntity(array $data): Entity
-{
-    // All business logic here
-    // Database operations
-    // Email sending
-    // Return entity
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email',
+        'address' => 'required|string',
+        'phone' => 'required|string',
+    ]);
+
+    Client::create([
+        'company_id' => $companyId,
+        'name' => $request->name,
+        'email' => $request->email,
+        'address' => $request->address,
+        'phone' => $request->phone,
+    ]);
+
+    return redirect("/companies/{$companyId}");
 }
+```
+
+### After Refactoring (with Services + Form Requests)
+```php
+public function store(StoreClientRequest $request, $companyId)
+{
+    $data = array_merge($request->validated(), ['company_id' => $companyId]);
+    $this->clientService->createClient($data);
+    return redirect("/companies/{$companyId}");
+}
+```
+
+## Complete Architecture Flow
+
+1. **Request hits Controller**
+2. **Form Request validates and authorizes**
+3. **Controller calls Service method**
+4. **Service handles business logic**
+5. **Controller returns response**
+
+```
+HTTP Request → Form Request → Controller → Service → Database
+                    ↓              ↓         ↓
+              Validation &    HTTP Logic   Business
+              Authorization              Logic
 ```
 
 This architecture makes the codebase more maintainable, testable, and follows Laravel best practices for organizing business logic.

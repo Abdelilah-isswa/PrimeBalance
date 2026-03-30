@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\SupplierService;
 use App\Models\Supplier;
+use App\Http\Requests\StoreSupplierRequest;
+use App\Http\Requests\UpdateSupplierRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,27 +29,10 @@ class SupplierController extends Controller
         return view('suppliers.create', compact('company'));
     }
 
-    public function store(Request $request, $companyId)
+    public function store(StoreSupplierRequest $request, $companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create suppliers');
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'address' => 'required|string',
-            'phone' => 'required|string',
-        ]);
-
-        $data = array_merge($request->only('name', 'email', 'address', 'phone'), [
-            'company_id' => $companyId,
-        ]);
-
+        $data = array_merge($request->validated(), ['company_id' => $companyId]);
         $this->supplierService->createSupplier($data);
-
         return redirect("/companies/{$companyId}");
     }
 
@@ -63,24 +48,11 @@ class SupplierController extends Controller
         return view('suppliers.edit', compact('company', 'supplier'));
     }
 
-    public function update(Request $request, $companyId, $supplierId)
+    public function update(UpdateSupplierRequest $request, $companyId, $supplierId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can update suppliers');
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'address' => 'required|string',
-            'phone' => 'required|string',
-        ]);
-
         $supplier = $company->suppliers()->findOrFail($supplierId);
-        $this->supplierService->updateSupplier($supplier, $request->only('name', 'email', 'address', 'phone'));
-
+        $this->supplierService->updateSupplier($supplier, $request->validated());
         return redirect("/companies/{$companyId}")->with('success', 'Supplier updated');
     }
 

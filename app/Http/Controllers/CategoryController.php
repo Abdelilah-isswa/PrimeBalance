@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\CategoryService;
 use App\Models\Category;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,43 +26,18 @@ class CategoryController extends Controller
         return view('categories.index', compact('company', 'categories'));
     }
 
-    public function store(Request $request, $companyId)
+    public function store(StoreCategoryRequest $request, $companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create categories');
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $data = array_merge($request->only('name'), [
-            'company_id' => $companyId,
-        ]);
-
+        $data = array_merge($request->validated(), ['company_id' => $companyId]);
         $this->categoryService->createCategory($data);
-
         return redirect("/companies/{$companyId}/categories");
     }
 
-    public function update(Request $request, $companyId, $categoryId)
+    public function update(UpdateCategoryRequest $request, $companyId, $categoryId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can update categories');
-        }
-
         $category = $company->categories()->findOrFail($categoryId);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $this->categoryService->updateCategory($category, $request->only('name'));
-
+        $this->categoryService->updateCategory($category, $request->validated());
         return redirect("/companies/{$companyId}/categories");
     }
 

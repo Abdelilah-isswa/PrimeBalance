@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Services\BillService;
 use App\Models\Bill;
+use App\Http\Requests\StoreBillRequest;
+use App\Http\Requests\UpdateBillRequest;
+use App\Http\Requests\PayBillRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -37,20 +40,9 @@ class BillController extends Controller
         return view('bills.create', compact('company', 'supplier'));
     }
 
-    public function store(Request $request, $companyId, $supplierId)
+    public function store(StoreBillRequest $request, $companyId, $supplierId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create bills');
-        }
-
-        $request->validate([
-            'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:draft,sent,paid,cancelled',
-        ]);
-
-        $data = array_merge($request->only('total_amount', 'status'), [
+        $data = array_merge($request->validated(), [
             'company_id' => $companyId,
             'supplier_id' => $supplierId,
         ]);
@@ -75,24 +67,11 @@ class BillController extends Controller
         return view('bills.pay', compact('company', 'bill', 'accounts', 'categories'));
     }
 
-    public function pay(Request $request, $companyId, $billId)
+    public function pay(PayBillRequest $request, $companyId, $billId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can pay bills');
-        }
-
         $bill = $company->bills()->findOrFail($billId);
-
-        $request->validate([
-            'account_id' => 'required|exists:accounts,id',
-            'category_id' => 'nullable|exists:categories,id',
-            'date' => 'required|date',
-        ]);
-
-        $this->billService->payBill($bill, $request->only('account_id', 'category_id', 'date'));
-
+        $this->billService->payBill($bill, $request->validated());
         return redirect("/companies/{$companyId}/bills")->with('success', 'Bill paid successfully');
     }
 
@@ -117,23 +96,11 @@ class BillController extends Controller
         return view('bills.edit', compact('company', 'bill'));
     }
 
-    public function update(Request $request, $companyId, $billId)
+    public function update(UpdateBillRequest $request, $companyId, $billId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can update bills');
-        }
-
         $bill = $company->bills()->findOrFail($billId);
-
-        $request->validate([
-            'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:draft,sent,paid,cancelled',
-        ]);
-
-        $this->billService->updateBill($bill, $request->only('total_amount', 'status'));
-
+        $this->billService->updateBill($bill, $request->validated());
         return redirect("/companies/{$companyId}/bills/{$billId}")->with('success', 'Bill updated successfully');
     }
 
