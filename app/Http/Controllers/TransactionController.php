@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
+    protected $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
+
     public function index($companyId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
@@ -49,23 +57,11 @@ class TransactionController extends Controller
             'date' => 'required|date',
         ]);
 
-        $account = \App\Models\Account::findOrFail($request->account_id);
-
-        \App\Models\Transaction::create([
+        $data = array_merge($request->only('account_id', 'category_id', 'type', 'amount', 'description', 'date'), [
             'company_id' => $companyId,
-            'account_id' => $request->account_id,
-            'category_id' => $request->category_id,
-            'type' => $request->type,
-            'amount' => $request->amount,
-            'description' => $request->description,
-            'date' => $request->date,
         ]);
 
-        if ($request->type === 'income') {
-            $account->increment('balance', $request->amount);
-        } else {
-            $account->decrement('balance', $request->amount);
-        }
+        $this->transactionService->createTransaction($data);
 
         return redirect("/companies/{$companyId}/transactions")->with('success', 'Transaction created successfully');
     }

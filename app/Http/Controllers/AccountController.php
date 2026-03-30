@@ -2,12 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AccountService;
 use App\Models\Account;
+use App\Http\Requests\StoreAccountRequest;
+use App\Http\Requests\UpdateAccountRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
+    protected $accountService;
+
+    public function __construct(AccountService $accountService)
+    {
+        $this->accountService = $accountService;
+    }
+
     public function index($companyId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
@@ -26,27 +36,10 @@ class AccountController extends Controller
         return view('accounts.create', compact('company'));
     }
 
-    public function store(Request $request, $companyId)
+    public function store(StoreAccountRequest $request, $companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create accounts');
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'balance' => 'required|numeric',
-            'is_active' => 'boolean',
-        ]);
-
-        Account::create([
-            'company_id' => $companyId,
-            'name' => $request->name,
-            'balance' => $request->balance,
-            'is_active' => $request->has('is_active'),
-        ]);
-
+        $data = array_merge($request->validated(), ['company_id' => $companyId]);
+        $this->accountService->createAccount($data);
         return redirect("/companies/{$companyId}/accounts")->with('success', 'Account created');
     }
 
@@ -62,25 +55,11 @@ class AccountController extends Controller
         return view('accounts.edit', compact('company', 'account'));
     }
 
-    public function update(Request $request, $companyId, $accountId)
+    public function update(UpdateAccountRequest $request, $companyId, $accountId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can update accounts');
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'is_active' => 'boolean',
-        ]);
-
         $account = $company->accounts()->findOrFail($accountId);
-        $account->update([
-            'name' => $request->name,
-            'is_active' => $request->has('is_active'),
-        ]);
-
+        $this->accountService->updateAccount($account, $request->validated());
         return redirect("/companies/{$companyId}/accounts")->with('success', 'Account updated');
     }
 
@@ -94,12 +73,8 @@ class AccountController extends Controller
 
         $account = $company->accounts()->findOrFail($accountId);
         
-        if ($account->transactions()->exists()) {
-            $account->update(['is_active' => false]);
-            return redirect("/companies/{$companyId}/accounts")->with('success', 'Account archived');
-        }
+        $result = $this->accountService->deleteOrArchiveAccount($account);
         
-        $account->delete();
-        return redirect("/companies/{$companyId}/accounts")->with('success', 'Account deleted');
+        return redirect("/companies/{$companyId}/accounts")->with('success', $result['message']);
     }
 }

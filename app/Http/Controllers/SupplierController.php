@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SupplierService;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SupplierController extends Controller
 {
+    protected $supplierService;
+
+    public function __construct(SupplierService $supplierService)
+    {
+        $this->supplierService = $supplierService;
+    }
+
     public function create($companyId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
@@ -34,13 +42,11 @@ class SupplierController extends Controller
             'phone' => 'required|string',
         ]);
 
-        Supplier::create([
+        $data = array_merge($request->only('name', 'email', 'address', 'phone'), [
             'company_id' => $companyId,
-            'name' => $request->name,
-            'email' => $request->email,
-            'address' => $request->address,
-            'phone' => $request->phone,
         ]);
+
+        $this->supplierService->createSupplier($data);
 
         return redirect("/companies/{$companyId}");
     }
@@ -73,12 +79,7 @@ class SupplierController extends Controller
         ]);
 
         $supplier = $company->suppliers()->findOrFail($supplierId);
-        $supplier->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'address' => $request->address,
-            'phone' => $request->phone,
-        ]);
+        $this->supplierService->updateSupplier($supplier, $request->only('name', 'email', 'address', 'phone'));
 
         return redirect("/companies/{$companyId}")->with('success', 'Supplier updated');
     }
@@ -93,11 +94,10 @@ class SupplierController extends Controller
 
         $supplier = $company->suppliers()->findOrFail($supplierId);
         
-        if ($supplier->bills()->exists()) {
+        if (!$this->supplierService->deleteSupplier($supplier)) {
             return back()->with('error', 'Cannot delete supplier with bills');
         }
         
-        $supplier->delete();
         return redirect("/companies/{$companyId}")->with('success', 'Supplier deleted');
     }
 
@@ -105,12 +105,8 @@ class SupplierController extends Controller
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
         
-        $suppliers = $company->suppliers()->with('bills')->get()->map(function($supplier) {
-            $totalBilled = $supplier->bills->sum('total_amount');
-            $totalPaid = $supplier->bills->where('status', 'paid')->sum('total_amount');
-            $supplier->balance = $totalPaid - $totalBilled;
-            return $supplier;
-        });
+        $suppliers = $company->suppliers()->with('bills')->get();
+        $suppliers = $this->supplierService->calculateSupplierBalances($suppliers);
         
         return view('suppliers.balances', compact('company', 'suppliers'));
     }

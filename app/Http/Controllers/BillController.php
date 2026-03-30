@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\BillService;
 use App\Models\Bill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BillController extends Controller
 {
+    protected $billService;
+
+    public function __construct(BillService $billService)
+    {
+        $this->billService = $billService;
+    }
+
     public function index($companyId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
@@ -42,12 +50,12 @@ class BillController extends Controller
             'status' => 'required|in:draft,sent,paid,cancelled',
         ]);
 
-        Bill::create([
+        $data = array_merge($request->only('total_amount', 'status'), [
             'company_id' => $companyId,
             'supplier_id' => $supplierId,
-            'total_amount' => $request->total_amount,
-            'status' => $request->status,
         ]);
+
+        $this->billService->createBill($data);
 
         return redirect("/companies/{$companyId}");
     }
@@ -83,21 +91,7 @@ class BillController extends Controller
             'date' => 'required|date',
         ]);
 
-        $account = \App\Models\Account::findOrFail($request->account_id);
-
-        \App\Models\Transaction::create([
-            'company_id' => $companyId,
-            'account_id' => $request->account_id,
-            'category_id' => $request->category_id,
-            'type' => 'expense',
-            'amount' => $bill->total_amount,
-            'description' => 'Payment for bill #' . $bill->id . ' - ' . $bill->supplier->name,
-            'date' => $request->date,
-            'bill_id' => $bill->id,
-        ]);
-
-        $account->decrement('balance', $bill->total_amount);
-        $bill->update(['status' => 'paid']);
+        $this->billService->payBill($bill, $request->only('account_id', 'category_id', 'date'));
 
         return redirect("/companies/{$companyId}/bills")->with('success', 'Bill paid successfully');
     }
@@ -138,10 +132,7 @@ class BillController extends Controller
             'status' => 'required|in:draft,sent,paid,cancelled',
         ]);
 
-        $bill->update([
-            'total_amount' => $request->total_amount,
-            'status' => $request->status,
-        ]);
+        $this->billService->updateBill($bill, $request->only('total_amount', 'status'));
 
         return redirect("/companies/{$companyId}/bills/{$billId}")->with('success', 'Bill updated successfully');
     }
@@ -155,7 +146,7 @@ class BillController extends Controller
         }
 
         $bill = $company->bills()->findOrFail($billId);
-        $bill->delete();
+        $this->billService->deleteBill($bill);
 
         return redirect("/companies/{$companyId}/bills")->with('success', 'Bill deleted successfully');
     }

@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ClientService;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ClientController extends Controller
 {
+    protected $clientService;
+
+    public function __construct(ClientService $clientService)
+    {
+        $this->clientService = $clientService;
+    }
+
     public function create($companyId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
@@ -34,13 +42,11 @@ class ClientController extends Controller
             'phone' => 'required|string',
         ]);
 
-        Client::create([
+        $data = array_merge($request->only('name', 'email', 'address', 'phone'), [
             'company_id' => $companyId,
-            'name' => $request->name,
-            'email' => $request->email,
-            'address' => $request->address,
-            'phone' => $request->phone,
         ]);
+
+        $this->clientService->createClient($data);
 
         return redirect("/companies/{$companyId}");
     }
@@ -73,12 +79,7 @@ class ClientController extends Controller
         ]);
 
         $client = $company->clients()->findOrFail($clientId);
-        $client->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'address' => $request->address,
-            'phone' => $request->phone,
-        ]);
+        $this->clientService->updateClient($client, $request->only('name', 'email', 'address', 'phone'));
 
         return redirect("/companies/{$companyId}")->with('success', 'Client updated');
     }
@@ -93,11 +94,10 @@ class ClientController extends Controller
 
         $client = $company->clients()->findOrFail($clientId);
         
-        if ($client->invoices()->exists()) {
+        if (!$this->clientService->deleteClient($client)) {
             return back()->with('error', 'Cannot delete client with invoices');
         }
         
-        $client->delete();
         return redirect("/companies/{$companyId}")->with('success', 'Client deleted');
     }
 
@@ -105,12 +105,8 @@ class ClientController extends Controller
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
         
-        $clients = $company->clients()->with('invoices')->get()->map(function($client) {
-            $totalInvoiced = $client->invoices->sum('total_amount');
-            $totalPaid = $client->invoices->where('status', 'paid')->sum('total_amount');
-            $client->balance = $totalPaid - $totalInvoiced;
-            return $client;
-        });
+        $clients = $company->clients()->with('invoices')->get();
+        $clients = $this->clientService->calculateClientBalances($clients);
         
         return view('clients.balances', compact('company', 'clients'));
     }

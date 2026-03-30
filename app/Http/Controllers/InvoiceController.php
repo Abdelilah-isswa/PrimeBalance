@@ -2,12 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\InvoiceService;
 use App\Models\Invoice;
+use App\Http\Requests\StoreInvoiceRequest;
+use App\Http\Requests\UpdateInvoiceRequest;
+use App\Http\Requests\ReceivePaymentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
 {
+    protected $invoiceService;
+
+    public function __construct(InvoiceService $invoiceService)
+    {
+        $this->invoiceService = $invoiceService;
+    }
+
     public function index($companyId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
@@ -29,32 +40,17 @@ class InvoiceController extends Controller
         return view('invoices.create', compact('company', 'client'));
     }
 
-    public function store(Request $request, $companyId, $clientId)
+    public function store(StoreInvoiceRequest $request, $companyId, $clientId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can create invoices');
-        }
-
-        $request->validate([
-            'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:draft,sent,paid,cancelled',
-            'send_email' => 'boolean',
-        ]);
-
-        $invoice = Invoice::create([
+        $data = array_merge($request->validated(), [
             'company_id' => $companyId,
             'client_id' => $clientId,
-            'total_amount' => $request->total_amount,
-            'status' => $request->status,
         ]);
 
-        if ($request->has('send_email') && $request->send_email) {
-            \Mail::to($invoice->client->email)->send(new \App\Mail\InvoiceMail($invoice));
-        }
+        $invoice = $this->invoiceService->createInvoice($data);
 
-        return redirect("/companies/{$companyId}")->with('success', 'Invoice created' . ($request->has('send_email') && $request->send_email ? ' and sent to client' : ''));
+        $message = 'Invoice created' . ($request->has('send_email') && $request->send_email ? ' and sent to client' : '');
+        return redirect("/companies/{$companyId}")->with('success', $message);
     }
 
     public function showReceivePayment($companyId, $invoiceId)
@@ -72,38 +68,11 @@ class InvoiceController extends Controller
         return view('invoices.receive', compact('company', 'invoice', 'accounts', 'categories'));
     }
 
-    public function receivePayment(Request $request, $companyId, $invoiceId)
+    public function receivePayment(ReceivePaymentRequest $request, $companyId, $invoiceId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can receive payments');
-        }
-
         $invoice = $company->invoices()->findOrFail($invoiceId);
-
-        $request->validate([
-            'account_id' => 'required|exists:accounts,id',
-            'category_id' => 'nullable|exists:categories,id',
-            'date' => 'required|date',
-        ]);
-
-        $account = \App\Models\Account::findOrFail($request->account_id);
-        
-        \App\Models\Transaction::create([
-            'company_id' => $companyId,
-            'account_id' => $request->account_id,
-            'category_id' => $request->category_id,
-            'type' => 'income',
-            'amount' => $invoice->total_amount,
-            'description' => 'Payment received for invoice #' . $invoice->id . ' - ' . $invoice->client->name,
-            'date' => $request->date,
-            'invoice_id' => $invoice->id,
-        ]);
-
-        $account->increment('balance', $invoice->total_amount);
-        $invoice->update(['status' => 'paid']);
-
+        $this->invoiceService->receivePayment($invoice, $request->validated());
         return redirect("/companies/{$companyId}/invoices")->with('success', 'Payment received successfully');
     }
 
@@ -128,26 +97,11 @@ class InvoiceController extends Controller
         return view('invoices.edit', compact('company', 'invoice'));
     }
 
-    public function update(Request $request, $companyId, $invoiceId)
+    public function update(UpdateInvoiceRequest $request, $companyId, $invoiceId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can update invoices');
-        }
-
         $invoice = $company->invoices()->findOrFail($invoiceId);
-
-        $request->validate([
-            'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:draft,sent,paid,cancelled',
-        ]);
-
-        $invoice->update([
-            'total_amount' => $request->total_amount,
-            'status' => $request->status,
-        ]);
-
+        $this->invoiceService->updateInvoice($invoice, $request->validated());
         return redirect("/companies/{$companyId}/invoices/{$invoiceId}")->with('success', 'Invoice updated successfully');
     }
 
@@ -160,7 +114,10 @@ class InvoiceController extends Controller
         }
 
         $invoice = $company->invoices()->findOrFail($invoiceId);
-        $invoice->delete();
+        
+        if (!$this->invoiceService->deleteInvoice($invoice)) {
+            return back()->with('error', 'Cannot delete invoice with payments');
+        }
 
         return redirect("/companies/{$companyId}/invoices")->with('success', 'Invoice deleted successfully');
     }

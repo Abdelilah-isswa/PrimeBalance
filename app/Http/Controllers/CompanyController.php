@@ -2,12 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CompanyService;
 use App\Models\Company;
+use App\Models\Invitation;
+use App\Http\Requests\StoreCompanyRequest;
+use App\Http\Requests\UpdateCompanyRequest;
+use App\Http\Requests\InviteUserRequest;
+use App\Http\Requests\UpdateUserRoleRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
+    protected $companyService;
+
+    public function __construct(CompanyService $companyService)
+    {
+        $this->companyService = $companyService;
+    }
+
     public function index()
     {
         $companies = Auth::user()->companies;
@@ -18,35 +31,15 @@ class CompanyController extends Controller
     {
         $company = Auth::user()->companies()->findOrFail($id);
         
-        // Get date range from request
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
         
-        // Build query based on date range
-        $transactionsQuery = $company->transactions();
+        $metrics = $this->companyService->getDashboardMetrics($company, $startDate, $endDate);
+        $netProfit = $metrics['totalIncome'] - $metrics['totalExpense'];
         
-        if ($startDate && $endDate) {
-            $transactionsQuery->whereBetween('date', [$startDate, $endDate]);
-        }
-        
-        // Dashboard metrics
-        $totalIncome = (clone $transactionsQuery)->where('type', 'income')->sum('amount');
-        $totalExpense = (clone $transactionsQuery)->where('type', 'expense')->sum('amount');
-        $netProfit = $totalIncome - $totalExpense;
-        $bankBalance = $company->accounts()->sum('balance');
-        $unpaidInvoices = $company->invoices()->whereIn('status', ['draft', 'sent'])->count();
-        $unpaidBills = $company->bills()->whereIn('status', ['draft', 'sent'])->count();
-        
-        return view('companies.show', compact(
-            'company', 
-            'totalIncome', 
-            'totalExpense', 
-            'netProfit', 
-            'bankBalance', 
-            'unpaidInvoices', 
-            'unpaidBills',
-            'startDate',
-            'endDate'
+        return view('companies.show', array_merge(
+            compact('company', 'startDate', 'endDate', 'netProfit'),
+            $metrics
         ));
     }
 
@@ -66,26 +59,10 @@ class CompanyController extends Controller
         return view('companies.edit', compact('company', 'userRole'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateCompanyRequest $request, $id)
     {
         $company = Auth::user()->companies()->findOrFail($id);
-        
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can update company');
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'address' => 'required|string',
-            'currency' => 'required|string|max:10',
-        ]);
-
-        $company->update([
-            'name' => $request->name,
-            'address' => $request->address,
-            'currency' => $request->currency,
-        ]);
-
+        $this->companyService->updateCompany($company, $request->validated());
         return redirect("/companies/{$id}")->with('success', 'Company updated successfully');
     }
 
@@ -97,61 +74,21 @@ class CompanyController extends Controller
             abort(403, 'Only owners can deactivate company');
         }
 
-        $company->update(['end_date' => now()->toDateString()]);
+        $this->companyService->deactivateCompany($company);
 
         return redirect('/companies')->with('success', 'Company deactivated successfully');
     }
 
-    public function inviteUser(Request $request, $id)
+    public function inviteUser(InviteUserRequest $request, $id)
     {
         $company = Auth::user()->companies()->findOrFail($id);
+        $result = $this->companyService->inviteUser($company, $request->email, $request->role);
         
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can invite users');
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
         }
-
-        $request->validate([
-            'email' => 'required|email',
-            'role' => 'required|in:owner,accountant,standard_user,viewer',
-        ]);
-
-        // Check if user already exists and is in company
-        $user = \App\Models\User::where('email', $request->email)->first();
-        if ($user && $company->users()->where('user_id', $user->id)->exists()) {
-            return back()->with('error', 'User is already a member of this company');
-        }
-
-        // Check if there's already a pending invitation
-        $existingInvitation = \App\Models\Invitation::where('company_id', $id)
-            ->where('email', $request->email)
-            ->where('status', 'pending')
-            ->where('expires_at', '>', now())
-            ->first();
-
-        if ($existingInvitation) {
-            return back()->with('error', 'An invitation has already been sent to this email');
-        }
-
-        // Create invitation
-        $token = \Str::random(64);
-        $invitation = \App\Models\Invitation::create([
-            'company_id' => $id,
-            'email' => $request->email,
-            'role' => $request->role,
-            'token' => $token,
-            'invited_by' => Auth::id(),
-            'expires_at' => now()->addDays(7),
-        ]);
-
-        // Send invitation email
-        \Mail::to($request->email)->send(new \App\Mail\CompanyInvitationMail(
-            $company,
-            $request->role,
-            Auth::user()->name,
-            $token
-        ));
-
-        return back()->with('success', 'Invitation sent to ' . $request->email);
+        
+        return back()->with('error', $result['message']);
     }
 
     public function showInvitation($token)
@@ -170,7 +107,7 @@ class CompanyController extends Controller
 
     public function acceptInvitation($token)
     {
-        $invitation = \App\Models\Invitation::where('token', $token)
+        $invitation = Invitation::where('token', $token)
             ->where('status', 'pending')
             ->firstOrFail();
 
@@ -181,29 +118,22 @@ class CompanyController extends Controller
 
         // Check if user is logged in
         if (!Auth::check()) {
-            // Store invitation token in session and redirect to login
             session(['invitation_token' => $token]);
             return redirect('/login')->with('message', 'Please login or register to accept the invitation');
         }
 
-        // Check if logged-in user email matches invitation
-        if (Auth::user()->email !== $invitation->email) {
-            return redirect('/')->with('error', 'This invitation was sent to ' . $invitation->email);
-        }
-
-        // Check if user is already in the company
-        if (!$invitation->company->users()->where('user_id', Auth::id())->exists()) {
-            $invitation->company->users()->attach(Auth::id(), ['role' => $invitation->role]);
+        $result = $this->companyService->acceptInvitation($invitation);
+        
+        if ($result['success']) {
+            return redirect($result['redirect'])->with('success', $result['message']);
         }
         
-        $invitation->update(['status' => 'accepted']);
-
-        return redirect('/companies/' . $invitation->company_id)->with('success', 'You have joined ' . $invitation->company->name);
+        return redirect('/')->with('error', $result['message']);
     }
 
     public function declineInvitation($token)
     {
-        $invitation = \App\Models\Invitation::where('token', $token)
+        $invitation = Invitation::where('token', $token)
             ->where('status', 'pending')
             ->firstOrFail();
 
@@ -217,23 +147,9 @@ class CompanyController extends Controller
         return view('companies.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreCompanyRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'address' => 'required|string',
-            'currency' => 'required|string|max:10',
-        ]);
-
-        $company = Company::create([
-            'name' => $request->name,
-            'address' => $request->address,
-            'currency' => $request->currency,
-            'start_date' => now()->toDateString(),
-        ]);
-        
-        $company->users()->attach(Auth::id(), ['role' => 'owner']);
-
+        $this->companyService->createCompany($request->validated());
         return redirect('/')->with('success', 'Company created successfully');
     }
 
@@ -245,33 +161,24 @@ class CompanyController extends Controller
             abort(403, 'Only owners can remove users');
         }
 
-        if ($userId == Auth::id()) {
-            return back()->with('error', 'You cannot remove yourself');
+        $result = $this->companyService->removeUser($company, $userId);
+        
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
         }
-
-        $company->users()->updateExistingPivot($userId, ['left_at' => now()]);
-
-        return back()->with('success', 'User removed from company');
+        
+        return back()->with('error', $result['message']);
     }
 
-    public function updateUserRole(Request $request, $companyId, $userId)
+    public function updateUserRole(UpdateUserRoleRequest $request, $companyId, $userId)
     {
         $company = Auth::user()->companies()->findOrFail($companyId);
+        $result = $this->companyService->updateUserRole($company, $userId, $request->role);
         
-        if ($company->pivot->role !== 'owner') {
-            abort(403, 'Only owners can change user roles');
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
         }
-
-        if ($userId == Auth::id()) {
-            return back()->with('error', 'You cannot change your own role');
-        }
-
-        $request->validate([
-            'role' => 'required|in:owner,accountant,standard_user,viewer',
-        ]);
-
-        $company->users()->updateExistingPivot($userId, ['role' => $request->role]);
-
-        return back()->with('success', 'User role updated');
+        
+        return back()->with('error', $result['message']);
     }
 }
