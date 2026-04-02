@@ -6,8 +6,10 @@ use App\Services\AuthService;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Api\BaseController;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
     protected $authService;
     
@@ -18,46 +20,48 @@ class AuthController extends Controller
     
     public function showLogin()
     {
-        return view('auth.login');
+        return $this->sendResponse([]);
     }
     
     public function login(LoginRequest $request)
     {
         if ($this->authService->attemptLogin($request->validated())) {
-            $request->session()->regenerate();
+            $token = $request->user()->createToken('api-token')->plainTextToken;
             
             $redirectUrl = $this->authService->handlePostLoginInvitation();
             if ($redirectUrl) {
-                return redirect($redirectUrl)->with('success', 'You have joined the company');
+                return $this->sendResponse(['token' => $token, 'redirect' => $redirectUrl], 'Logged in and joined company');
             }
             
-            return redirect()->intended(route('home'));
+            return $this->sendResponse(['token' => $token], 'Logged in successfully');
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials']);
+        return $this->sendError('Invalid credentials', 401);
     }
     
     public function showRegister()
     {
-        return view('auth.register');
+        return $this->sendResponse([]);
     }
     
     public function register(RegisterRequest $request)
     {
         $user = $this->authService->createUser($request->validated());
-        $this->authService->loginUser($user);
+        $token = $user->createToken('api-token')->plainTextToken;
         
         $redirectUrl = $this->authService->handlePostLoginInvitation();
         if ($redirectUrl) {
-            return redirect($redirectUrl)->with('success', 'You have joined the company');
+            return $this->sendResponse(['token' => $token, 'redirect' => $redirectUrl], 'Registered and joined company');
         }
         
-        return redirect()->route('home');
+        return $this->sendResponse(['token' => $token], 'Registered successfully');
     }
 
     public function logout(Request $request)
     {
         $this->authService->logout();
-        return redirect()->route('login');
+        $request->user()->currentAccessToken()->delete();
+        return $this->sendResponse([], 'Logged out successfully');
     }
 }
+

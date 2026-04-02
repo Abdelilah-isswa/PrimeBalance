@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Services\CompanyService;
 use App\Models\Invitation;
 use App\Http\Requests\InviteUserRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
-use Illuminate\Support\Facades\Auth;
 
-class InvitationController extends Controller
+class InvitationController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -25,10 +25,10 @@ class InvitationController extends Controller
         $result = $this->companyService->inviteUser($company, $request->email, $request->role);
         
         if ($result['success']) {
-            return back()->with('success', $result['message']);
+            return $this->sendResponse($result);
         }
         
-        return back()->with('error', $result['message']);
+        return $this->sendError($result['message']);
     }
 
     public function show($token)
@@ -39,10 +39,10 @@ class InvitationController extends Controller
 
         if ($invitation->isExpired()) {
             $invitation->update(['status' => 'expired']);
-            return view('invitations.expired');
+            return $this->sendError('Invitation expired');
         }
 
-        return view('invitations.accept', compact('invitation'));
+        return $this->sendResponse($invitation);
     }
 
     public function accept($token)
@@ -53,21 +53,20 @@ class InvitationController extends Controller
 
         if ($invitation->isExpired()) {
             $invitation->update(['status' => 'expired']);
-            return redirect()->route('login')->with('error', 'This invitation has expired');
+            return $this->sendError('This invitation has expired');
         }
 
-        if (!Auth::check()) {
-            session(['invitation_token' => $token]);
-            return redirect()->route('login')->with('message', 'Please login or register to accept the invitation');
+        if (!auth('sanctum')->check()) {
+            return $this->sendError('Please login or register to accept the invitation', 401);
         }
 
         $result = $this->companyService->acceptInvitation($invitation);
         
         if ($result['success']) {
-            return redirect()->route('companies.show', $invitation->company_id)->with('success', $result['message']);
+            return $this->sendResponse($result);
         }
         
-        return redirect()->route('home')->with('error', $result['message']);
+        return $this->sendError($result['message']);
     }
 
     public function decline($token)
@@ -78,6 +77,6 @@ class InvitationController extends Controller
 
         $invitation->update(['status' => 'expired']);
 
-        return redirect()->route('login')->with('message', 'Invitation declined');
+        return $this->sendResponse([], 'Invitation declined');
     }
 }

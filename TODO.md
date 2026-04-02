@@ -1,7 +1,20 @@
-sting# TODO: Enable Mail Sender Testing
-- [x] Fixed $userRole bug in CompanyController::edit()
-- [ ] Setup Laravel (cd filrouge &amp;&amp; composer install &amp;&amp; cp .env.example .env &amp;&amp; php artisan key:generate &amp;&amp; php artisan migrate)
-- [ ] Run server (cd filrouge &amp;&amp; php artisan serve)
-- [ ] Test: Register → Create company → Edit (/companies/ID/edit) → Invite user → Check storage/logs/laravel.log for mail
-- [ ] Test invoice mail similarly
- te
+# API Transformation Progress (Phase 1: Backend API)
+
+## Current Progress
+- [x] Create detailed implementation plan
+- [x] Create TODO.md with steps
+- [x] Create Api/BaseController.php with JSON helpers
+- [x] Create API routes in api.php (/api/v1 mirroring web.php, auth:sanctum)
+
+## Remaining Steps
+- [x] 2. Refactor AuthController for API (login/register return tokens)
+- [x] 3. Refactor CompanyController + core controllers (index/show to JSON)
+- [x] 4. Refactor all resource controllers (CRUD to JSON responses) - All controllers completed
+- [x] 5. Update base Controller.php with JSON helpers (legacy)
+
+- [ ] 6. Test auth endpoints
+- [ ] 7. Test company + CRUD endpoints
+- [ ] 8. Update TODO.md complete, run route:cache
+- [ ] 9. Phase 2: Vue.js SPA (future)
+
+**Notes:** Keep web.php intact. Use consistent JSON format: {'success': true, 'data': ..., 'message': ...}

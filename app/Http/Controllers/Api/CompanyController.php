@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\BaseController;
 use App\Services\CompanyService;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
-use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends BaseController
 {
@@ -24,7 +23,7 @@ class CompanyController extends BaseController
     public function index()
     {
         $companies = auth('sanctum')->user()->companies;
-        return $this->sendResponse($companies);
+        return $this->sendResponse($companies->toArray());
     }
 
     public function show(Request $request, $id)
@@ -43,11 +42,6 @@ class CompanyController extends BaseController
         );
 
         return $this->sendResponse($data);
-    }
-
-    public function create()
-    {
-        return $this->sendResponse([]);
     }
 
     public function store(StoreCompanyRequest $request)
@@ -80,3 +74,5 @@ class CompanyController extends BaseController
         return $this->sendResponse([], 'Company deactivated successfully');
     }
 }
+?>
+

@@ -7,11 +7,11 @@ use App\Models\Bill;
 use App\Http\Requests\StoreBillRequest;
 use App\Http\Requests\UpdateBillRequest;
 use App\Http\Requests\PayBillRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class BillController extends Controller
+class BillController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -27,7 +27,7 @@ class BillController extends Controller
         $company = $this->getCompanyForMember($companyId);
         $bills = $company->bills()->with('supplier')->get();
         
-        return view('bills.index', compact('company', 'bills'));
+        return $this->sendResponse(compact('company', 'bills'));
     }
 
     public function create($companyId, $supplierId)
@@ -35,7 +35,7 @@ class BillController extends Controller
         $company = $this->getCompanyForOwner($companyId, 'create bills');
         $supplier = $company->suppliers()->findOrFail($supplierId);
 
-        return view('bills.create', compact('company', 'supplier'));
+        return $this->sendResponse(compact('company', 'supplier'));
     }
 
     public function store(StoreBillRequest $request, $companyId, $supplierId)
@@ -45,9 +45,9 @@ class BillController extends Controller
             'supplier_id' => $supplierId,
         ]);
 
-        $this->billService->createBill($data);
+        $bill = $this->billService->createBill($data);
 
-        return redirect()->route('companies.show', $companyId);
+        return $this->sendCreated($bill);
     }
 
     public function showPayment($companyId, $billId)
@@ -57,7 +57,7 @@ class BillController extends Controller
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
 
-        return view('bills.pay', compact('company', 'bill', 'accounts', 'categories'));
+        return $this->sendResponse(compact('company', 'bill', 'accounts', 'categories'));
     }
 
     public function pay(PayBillRequest $request, $companyId, $billId)
@@ -65,7 +65,7 @@ class BillController extends Controller
         $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->payBill($bill, $request->validated());
-        return redirect()->route('bills.index', $companyId)->with('success', 'Bill paid successfully');
+        return $this->sendResponse($bill->fresh(), 'Bill paid successfully');
     }
 
     public function show($companyId, $billId)
@@ -73,7 +73,7 @@ class BillController extends Controller
         $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->with('supplier')->findOrFail($billId);
         
-        return view('bills.show', compact('company', 'bill'));
+        return $this->sendResponse(compact('company', 'bill'));
     }
 
     public function edit($companyId, $billId)
@@ -81,7 +81,7 @@ class BillController extends Controller
         $company = $this->getCompanyForOwner($companyId, 'edit bills');
         $bill = $company->bills()->with('supplier')->findOrFail($billId);
         
-        return view('bills.edit', compact('company', 'bill'));
+        return $this->sendResponse(compact('company', 'bill'));
     }
 
     public function update(UpdateBillRequest $request, $companyId, $billId)
@@ -89,7 +89,7 @@ class BillController extends Controller
         $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->updateBill($bill, $request->validated());
-        return redirect()->route('bills.show', [$companyId, $billId])->with('success', 'Bill updated successfully');
+        return $this->sendResponse($bill->fresh(), 'Bill updated successfully');
     }
 
     public function destroy($companyId, $billId)
@@ -98,6 +98,7 @@ class BillController extends Controller
         $bill = $company->bills()->findOrFail($billId);
         $this->billService->deleteBill($bill);
 
-        return redirect()->route('bills.index', $companyId)->with('success', 'Bill deleted successfully');
+        return $this->sendResponse([], 'Bill deleted successfully');
     }
 }
+

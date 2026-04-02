@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Services\CompanyService;
 use App\Http\Requests\UpdateUserRoleRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 
-class CompanyUserController extends Controller
+class CompanyUserController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -24,7 +25,7 @@ class CompanyUserController extends Controller
             $query->whereNull('company_user.left_at');
         }]);
         
-        return view('companies.users.index', compact('company'));
+        return $this->sendResponse($company);
     }
 
     public function destroy($companyId, $userId)
@@ -33,10 +34,10 @@ class CompanyUserController extends Controller
         $result = $this->companyService->removeUser($company, $userId);
         
         if ($result['success']) {
-            return back()->with('success', $result['message']);
+            return $this->sendResponse($result);
         }
         
-        return back()->with('error', $result['message']);
+        return $this->sendError($result['message'], 400);
     }
 
     public function updateRole(UpdateUserRoleRequest $request, $companyId, $userId)
@@ -45,9 +46,10 @@ class CompanyUserController extends Controller
         $result = $this->companyService->updateUserRole($company, $userId, $request->role);
         
         if ($result['success']) {
-            return back()->with('success', $result['message']);
+            return $this->sendResponse($result);
         }
         
-        return back()->with('error', $result['message']);
+        return $this->sendError($result['message'], 400);
     }
 }
+
