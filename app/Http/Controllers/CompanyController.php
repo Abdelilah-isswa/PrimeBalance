@@ -56,7 +56,11 @@ class CompanyController extends Controller
     public function edit($id)
     {
         $company = $this->getCompanyForOwner($id, 'edit company');
-        return view('companies.edit', compact('company'));
+        $userRole = $company->users()
+            ->where('user_id', auth()->id())
+            ->first()
+            ->pivot->role ?? 'viewer';
+        return view('companies.edit', compact('company', 'userRole'));
     }
 
     public function update(UpdateCompanyRequest $request, $id)

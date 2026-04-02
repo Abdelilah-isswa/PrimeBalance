@@ -11,7 +11,7 @@ class StoreCategoryRequest extends FormRequest
     
     public function authorize(): bool
     {
-        return $this->isCompanyOwner($this->route('companyId'));
+        return $this->isCompanyOwner($this->route('id'));
     }
 
     public function rules(): array

@@ -29,6 +29,7 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 1rem;
         }
         
         .logo h1 { 
@@ -45,7 +46,8 @@
             flex-wrap: wrap;
         }
         
-        .navbar a { 
+        .navbar a, 
+        .navbar .nav-link { 
             color: white; 
             text-decoration: none;
             font-size: 14px;
@@ -53,7 +55,8 @@
             transition: color 0.2s;
         }
         
-        .navbar a:hover { 
+        .navbar a:hover, 
+        .navbar .nav-link:hover { 
             color: #13B5EC;
         }
         
@@ -74,16 +77,23 @@
             border-color: #13B5EC;
         }
         
-        /* Logout Button */
+        /* Logout Button - Fixed */
+        .logout-form {
+            display: inline;
+            margin: 0;
+            padding: 0;
+        }
+        
         .logout-btn {
             background: transparent;
             color: white;
-            padding: 0.5rem 0;
+            padding: 0;
             font-size: 14px;
             font-weight: 500;
             border: none;
             cursor: pointer;
             transition: color 0.2s;
+            font-family: inherit;
         }
         
         .logout-btn:hover {
@@ -129,7 +139,7 @@
         }
         
         /* Form Styles */
-        form div { 
+        .form-group { 
             margin-bottom: 1.25rem; 
         }
         
@@ -140,7 +150,8 @@
             color: #1a2c3e;
         }
         
-        input { 
+        input, 
+        .form-input { 
             width: 100%; 
             padding: 0.75rem; 
             border: 1px solid #ddd; 
@@ -149,7 +160,8 @@
             transition: border-color 0.2s;
         }
         
-        input:focus {
+        input:focus,
+        .form-input:focus {
             outline: none;
             border-color: #13B5EC;
         }
@@ -168,7 +180,8 @@
             border-color: #13B5EC;
         }
         
-        button { 
+        button, 
+        .btn { 
             background: #13B5EC; 
             color: white; 
             padding: 0.75rem 1.5rem; 
@@ -180,12 +193,14 @@
             transition: background 0.2s;
         }
         
-        button:hover { 
+        button:hover, 
+        .btn:hover { 
             background: #0e9fd1;
         }
         
         /* Error Messages */
-        .error-message { 
+        .error-message, 
+        .text-red { 
             color: #e74c3c; 
             font-size: 0.85rem; 
             margin-top: 0.25rem;
@@ -202,11 +217,11 @@
         }
         
         /* Table Hover */
-        tr { 
+        table tr { 
             cursor: pointer; 
         }
         
-        tr:hover { 
+        table tr:hover { 
             background: #f8f9fa; 
         }
         
@@ -227,6 +242,23 @@
             padding: 12px;
             margin-bottom: 20px;
             color: #2e7d32;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .navbar {
+                justify-content: center;
+            }
+            
+            main {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -257,7 +289,7 @@
                     
                     <a href="/companies/create">Create Company</a>
                     
-                    <form method="POST" action="/logout" style="display: inline;">
+                    <form method="POST" action="/logout" class="logout-form">
                         @csrf
                         <button type="submit" class="logout-btn">Logout</button>
                     </form>

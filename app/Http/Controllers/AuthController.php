@@ -10,17 +10,17 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     protected $authService;
-
+    
     public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
     }
-
+    
     public function showLogin()
     {
         return view('auth.login');
     }
-
+    
     public function login(LoginRequest $request)
     {
         if ($this->authService->attemptLogin($request->validated())) {
@@ -36,12 +36,12 @@ class AuthController extends Controller
 
         return back()->withErrors(['email' => 'Invalid credentials']);
     }
-
+    
     public function showRegister()
     {
         return view('auth.register');
     }
-
+    
     public function register(RegisterRequest $request)
     {
         $user = $this->authService->createUser($request->validated());
