@@ -23,7 +23,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../../stores/auth.js';
 import axios from 'axios';
 
@@ -31,6 +31,7 @@ const form = ref({ email: '', password: '' });
 const loading = ref(false);
 const error = ref('');
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const login = async () => {
@@ -38,7 +39,8 @@ const login = async () => {
   error.value = '';
   try {
     await authStore.login(form.value);
-    router.push('/dashboard');
+    const invitation = route.query.invitation;
+    router.push(invitation ? `/invitations/${invitation}` : '/dashboard');
   } catch (err) {
     error.value = err.response?.data?.message || 'Login failed';
   } finally {

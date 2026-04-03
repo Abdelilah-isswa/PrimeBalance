@@ -35,6 +35,7 @@ class InvitationController extends BaseController
     {
         $invitation = Invitation::where('token', $token)
             ->where('status', 'pending')
+            ->with('company')
             ->firstOrFail();
 
         if ($invitation->isExpired()) {

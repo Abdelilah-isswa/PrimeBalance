@@ -31,7 +31,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '../../stores/auth.js';
 
@@ -39,6 +39,7 @@ const form = ref({ name: '', email: '', password: '', password_confirmation: '' 
 const loading = ref(false);
 const error = ref('');
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const register = async () => {
@@ -46,7 +47,8 @@ const register = async () => {
   error.value = '';
   try {
     await axios.post('/register', form.value);
-    router.push('/login');
+    const invitation = route.query.invitation;
+    router.push(invitation ? `/invitations/${invitation}` : '/login');
   } catch (err) {
     error.value = err.response?.data?.message || 'Registration failed';
   } finally {
