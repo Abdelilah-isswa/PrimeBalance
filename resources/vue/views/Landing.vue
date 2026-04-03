@@ -4,8 +4,13 @@
     <nav style="background:#1a1a2e; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
       <span style="color:white; font-weight:700; font-size:1.2rem; letter-spacing:0.5px;">FilRouge</span>
       <div style="display:flex; gap:1rem;">
-        <router-link to="/login"><button class="btn-secondary btn-sm">Login</button></router-link>
-        <router-link to="/register"><button class="btn-sm">Get Started</button></router-link>
+        <template v-if="authStore.token">
+          <router-link to="/dashboard"><button class="btn-sm">Go to Dashboard</button></router-link>
+        </template>
+        <template v-else>
+          <router-link to="/login"><button class="btn-secondary btn-sm">Login</button></router-link>
+          <router-link to="/register"><button class="btn-sm">Get Started</button></router-link>
+        </template>
       </div>
     </nav>
 
@@ -16,8 +21,13 @@
         FilRouge helps you track invoices, bills, transactions, and clients — all in one place, for multiple companies.
       </p>
       <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
-        <router-link to="/register"><button style="padding:0.85rem 2rem; font-size:1rem;">Start for Free</button></router-link>
-        <router-link to="/login"><button class="btn-secondary" style="padding:0.85rem 2rem; font-size:1rem;">Login</button></router-link>
+        <template v-if="authStore.token">
+          <router-link to="/dashboard"><button style="padding:0.85rem 2rem; font-size:1rem;">Go to Dashboard</button></router-link>
+        </template>
+        <template v-else>
+          <router-link to="/register"><button style="padding:0.85rem 2rem; font-size:1rem;">Start for Free</button></router-link>
+          <router-link to="/login"><button class="btn-secondary" style="padding:0.85rem 2rem; font-size:1rem;">Login</button></router-link>
+        </template>
       </div>
     </section>
 
@@ -62,7 +72,8 @@
     <section style="background:#1a1a2e; color:white; padding:5rem 2rem; text-align:center;">
       <h2 style="font-size:2rem; font-weight:700; color:white; margin-bottom:1rem;">Ready to get started?</h2>
       <p style="color:#a5b4fc; margin-bottom:2rem; font-size:1rem;">Create your free account and start managing your finances today.</p>
-      <router-link to="/register"><button style="padding:0.85rem 2.5rem; font-size:1rem;">Create Free Account</button></router-link>
+      <router-link v-if="authStore.token" to="/dashboard"><button style="padding:0.85rem 2.5rem; font-size:1rem;">Go to Dashboard</button></router-link>
+      <router-link v-else to="/register"><button style="padding:0.85rem 2.5rem; font-size:1rem;">Create Free Account</button></router-link>
     </section>
 
     <!-- Footer -->
@@ -73,4 +84,6 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '../stores/auth.js';
+const authStore = useAuthStore();
 </script>

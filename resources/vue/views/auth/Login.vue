@@ -38,7 +38,7 @@ const login = async () => {
   error.value = '';
   try {
     await authStore.login(form.value);
-    router.push('/home');
+    router.push('/dashboard');
   } catch (err) {
     error.value = err.response?.data?.message || 'Login failed';
   } finally {

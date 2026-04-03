@@ -5,7 +5,7 @@ const routes = [
   { path: '/login', name: 'Login', component: () => import('../views/auth/Login.vue') },
   { path: '/register', name: 'Register', component: () => import('../views/auth/Register.vue') },
   { path: '/', name: 'Landing', component: () => import('../views/Landing.vue') },
-  { path: '/home', name: 'Home', component: () => import('../views/Home.vue'), meta: { auth: true } },
+  { path: '/dashboard', name: 'Home', component: () => import('../views/Home.vue'), meta: { auth: true } },
   { path: '/companies', name: 'Companies', component: () => import('../views/companies/Index.vue'), meta: { auth: true } },
   { path: '/companies/create', name: 'CompanyCreate', component: () => import('../views/companies/Create.vue'), meta: { auth: true } },
   { path: '/companies/:companyId', name: 'CompanyShow', component: () => import('../views/companies/Show.vue'), meta: { auth: true } },
@@ -54,7 +54,7 @@ router.beforeEach((to) => {
     return '/login';
   }
   if ((to.path === '/login' || to.path === '/register') && authStore.token) {
-    return '/home';
+    return '/dashboard';
   }
 });
 
