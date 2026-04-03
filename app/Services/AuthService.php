@@ -11,7 +11,7 @@ class AuthService
 {
     public function attemptLogin(array $credentials): bool
     {
-        return Auth::attempt($credentials);
+        return Auth::attempt($credentials, true);
     }
 
     public function handlePostLoginInvitation(): ?string

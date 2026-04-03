@@ -15,20 +15,22 @@ use App\Http\Controllers\BillController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\DocumentController;
 
+Route::prefix('v1')->name('api.')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+
+    // Invitations (public)
+    Route::get('/invitations/{token}', [InvitationController::class, 'show']);
+    Route::post('/invitations/{token}/accept', [InvitationController::class, 'accept']);
+    Route::post('/invitations/{token}/decline', [InvitationController::class, 'decline']);
+});
+
 Route::middleware('auth:sanctum')->prefix('v1')->name('api.')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 
-    // Auth (public for login/register)
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
     Route::post('/logout', [AuthController::class, 'logout']);
-
-    // Invitations
-    Route::get('/invitations/{token}', [InvitationController::class, 'show']);
-    Route::post('/invitations/{token}/accept', [InvitationController::class, 'accept']);
-    Route::post('/invitations/{token}/decline', [InvitationController::class, 'decline']);
 
     // Companies
     Route::apiResource('companies', CompanyController::class);
