@@ -34,9 +34,24 @@ class InvitationController extends BaseController
     public function show($token)
     {
         $invitation = Invitation::where('token', $token)
-            ->where('status', 'pending')
             ->with('company')
-            ->firstOrFail();
+            ->first();
+
+        if (!$invitation) {
+            return $this->sendError('Invitation not found');
+        }
+
+        if ($invitation->status === 'accepted') {
+            return $this->sendError('This invitation has already been accepted');
+        }
+
+        if ($invitation->status === 'expired') {
+            return $this->sendError('Invitation expired');
+        }
+
+        if ($invitation->status !== 'pending') {
+            return $this->sendError('Invitation invalid or already processed');
+        }
 
         if ($invitation->isExpired()) {
             $invitation->update(['status' => 'expired']);
@@ -48,17 +63,23 @@ class InvitationController extends BaseController
 
     public function accept($token)
     {
-        $invitation = Invitation::where('token', $token)
-            ->where('status', 'pending')
-            ->firstOrFail();
+        $invitation = Invitation::where('token', $token)->first();
 
-        if ($invitation->isExpired()) {
+        if (!$invitation) {
+            return $this->sendError('Invitation not found');
+        }
+
+        if ($invitation->status === 'accepted') {
+            return $this->sendError('This invitation has already been accepted');
+        }
+
+        if ($invitation->status === 'expired' || $invitation->isExpired()) {
             $invitation->update(['status' => 'expired']);
             return $this->sendError('This invitation has expired');
         }
 
-        if (!auth('sanctum')->check()) {
-            return $this->sendError('Please login or register to accept the invitation', 401);
+        if ($invitation->status !== 'pending') {
+            return $this->sendError('Invitation invalid or already processed');
         }
 
         $result = $this->companyService->acceptInvitation($invitation);
@@ -72,11 +93,26 @@ class InvitationController extends BaseController
 
     public function decline($token)
     {
-        $invitation = Invitation::where('token', $token)
-            ->where('status', 'pending')
-            ->firstOrFail();
+        $invitation = Invitation::where('token', $token)->first();
 
-        $invitation->update(['status' => 'expired']);
+        if (!$invitation) {
+            return $this->sendError('Invitation not found');
+        }
+
+        if ($invitation->status === 'accepted') {
+            return $this->sendError('This invitation has already been accepted');
+        }
+
+        if ($invitation->status === 'expired' || $invitation->isExpired()) {
+            $invitation->update(['status' => 'expired']);
+            return $this->sendError('This invitation has expired');
+        }
+
+        if ($invitation->status !== 'pending') {
+            return $this->sendError('Invitation invalid or already processed');
+        }
+
+        $invitation->update(['status' => 'declined']);
 
         return $this->sendResponse([], 'Invitation declined');
     }

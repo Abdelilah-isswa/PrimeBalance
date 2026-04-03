@@ -2,7 +2,7 @@
   <div>
     <!-- Navbar -->
     <nav style="background:#1a1a2e; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-      <span style="color:white; font-weight:700; font-size:1.2rem; letter-spacing:0.5px;">FilRouge</span>
+      <span style="color:white; font-weight:700; font-size:1.2rem; letter-spacing:0.5px;">PrimeBalance</span>
       <div style="display:flex; gap:1rem;">
         <template v-if="authStore.token">
           <router-link to="/dashboard"><button class="btn-sm">Go to Dashboard</button></router-link>
@@ -18,7 +18,7 @@
     <section style="background:linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%); color:white; padding:6rem 2rem; text-align:center;">
       <h1 style="font-size:3rem; font-weight:800; margin-bottom:1rem; color:white;">Manage Your Business Finances</h1>
       <p style="font-size:1.2rem; color:#a5b4fc; max-width:600px; margin:0 auto 2.5rem;">
-        FilRouge helps you track invoices, bills, transactions, and clients — all in one place, for multiple companies.
+        PrimeBalance helps you track invoices, bills, transactions, and clients — all in one place, for multiple companies.
       </p>
       <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
         <template v-if="authStore.token">
@@ -78,7 +78,7 @@
 
     <!-- Footer -->
     <footer style="background:#0f0f1a; color:#64748b; text-align:center; padding:1.5rem; font-size:0.85rem;">
-      © {{ new Date().getFullYear() }} FilRouge. All rights reserved.
+      © {{ new Date().getFullYear() }} PrimeBalance. All rights reserved.
     </footer>
   </div>
 </template>

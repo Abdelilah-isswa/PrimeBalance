@@ -21,7 +21,6 @@ Route::prefix('v1')->name('api.')->group(function () {
 
     // Invitations (public)
     Route::get('/invitations/{token}', [InvitationController::class, 'show']);
-    Route::post('/invitations/{token}/accept', [InvitationController::class, 'accept']);
     Route::post('/invitations/{token}/decline', [InvitationController::class, 'decline']);
 });
 
@@ -31,6 +30,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.')->group(function ()
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Invitations (requires auth)
+    Route::post('/invitations/{token}/accept', [InvitationController::class, 'accept']);
 
     // Companies
     Route::apiResource('companies', CompanyController::class);
