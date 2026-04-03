@@ -27,8 +27,9 @@ class CompanyController extends BaseController
         return $this->sendResponse($companies);
     }
 
-    public function show(Request $request, $id)
+    public function show(Request $request, $company)
     {
+        $id = $company;
         $company = $this->getCompanyForMember($id);
         
         $startDate = $request->get('start_date');
@@ -66,11 +67,20 @@ class CompanyController extends BaseController
         return $this->sendResponse(compact('company', 'userRole'));
     }
 
-    public function update(UpdateCompanyRequest $request, $id)
+    public function update(UpdateCompanyRequest $request, $company)
     {
-        $company = $this->getCompanyForMember($id);
+        $id = $company;
+        $company = $this->getCompanyForOwner($id, 'update company');
         $this->companyService->updateCompany($company, $request->validated());
         return $this->sendResponse($company->fresh(), 'Company updated successfully');
+    }
+
+    public function destroy($company)
+    {
+        $id = $company;
+        $company = $this->getCompanyForOwner($id, 'delete company');
+        $company->delete();
+        return $this->sendResponse([], 'Company deleted');
     }
 
     public function deactivate($id)

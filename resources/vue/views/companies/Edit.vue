@@ -108,15 +108,22 @@ const inviteSuccess = ref('');
 const inviteError = ref('');
 
 onMounted(async () => {
-  const res = await axios.get(`/companies/${id}/edit`);
-  company.value = res.data.data.company;
-  form.value = { name: company.value.name, address: company.value.address, currency: company.value.currency };
-  const usersRes = await axios.get(`/companies/${id}/users`);
-  users.value = usersRes.data.data;
+  try {
+    const [showRes, usersRes] = await Promise.all([
+      axios.get(`/companies/${id}`),
+      axios.get(`/companies/${id}/users`),
+    ]);
+    company.value = showRes.data.data.company;
+    form.value = { name: company.value.name, address: company.value.address, currency: company.value.currency };
+    users.value = usersRes.data.data.users || [];
+  } catch (err) {
+    console.error('Error loading company:', err.response?.data);
+  }
 });
 
 const update = async () => {
   await axios.put(`/companies/${id}`, form.value);
+  company.value = { ...company.value, ...form.value };
   editMode.value = false;
 };
 

@@ -11,7 +11,8 @@ class UpdateCompanyRequest extends FormRequest
     
     public function authorize(): bool
     {
-        return $this->isCompanyOwner($this->route('id'));
+        $id = $this->route('company') ?? $this->route('id');
+        return $this->isCompanyOwner($id);
     }
 
     public function rules(): array
