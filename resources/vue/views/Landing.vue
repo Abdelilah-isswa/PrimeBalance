@@ -6,8 +6,9 @@
       <div class="pb-nav-left">
         <div class="pb-logo">
           <div class="pb-logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              <circle cx="12" cy="12" r="3"/>
             </svg>
           </div>
           <span>PrimeBalance</span>
@@ -21,6 +22,53 @@
       </div>
 
       <div class="pb-nav-right">
+        <template v-if="authStore.token && companies.length">
+          <select @change="switchCompany" class="pb-company-select">
+            <option v-for="c in companies" :key="c.id" :value="c.id" :selected="c.id == currentCompanyId">
+              {{ c.name }}
+            </option>
+          </select>
+
+          <div class="pb-dropdown-wrap">
+            <button class="btn-ghost" @click="dropdownOpen = !dropdownOpen">
+              Menu
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 4px;">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div v-if="dropdownOpen" class="pb-dropdown">
+              <router-link :to="`/companies/${currentCompanyId}`" @click="dropdownOpen=false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+              </router-link>
+              <router-link :to="`/companies/${currentCompanyId}/clients`" @click="dropdownOpen=false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Clients
+              </router-link>
+              <router-link :to="`/companies/${currentCompanyId}/suppliers`" @click="dropdownOpen=false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6-9 6-9-6z"/><path d="M3 9v6l9 6 9-6V9"/></svg>
+                Suppliers
+              </router-link>
+              <router-link :to="`/companies/${currentCompanyId}/accounts`" @click="dropdownOpen=false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Accounts
+              </router-link>
+              <router-link :to="`/companies/${currentCompanyId}/categories`" @click="dropdownOpen=false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                Categories
+              </router-link>
+              <router-link :to="`/companies/${currentCompanyId}/documents`" @click="dropdownOpen=false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Documents
+              </router-link>
+              <router-link :to="`/companies/${currentCompanyId}/transactions`" @click="dropdownOpen=false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Transactions
+              </router-link>
+            </div>
+          </div>
+        </template>
+
         <template v-if="authStore.token">
           <router-link to="/dashboard"><button class="btn-primary">Dashboard</button></router-link>
         </template>
@@ -35,7 +83,6 @@
     <section class="pb-hero-section">
       <div class="pb-hero-inner">
 
-        <!-- Left copy -->
         <div class="pb-hero-copy">
           <div class="pb-badge">
             <span class="pb-badge-dot"></span>
@@ -72,7 +119,6 @@
           </div>
         </div>
 
-        <!-- Right visual mockup -->
         <div class="pb-hero-visual">
           <div class="pb-visual-card pb-chart-card">
             <div class="pb-visual-card-top">
@@ -95,10 +141,8 @@
           </div>
 
           <div class="pb-mini-card">
-            <div class="pb-mini-icon pb-mini-icon-green">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 12V8H4v8h16v-4M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4"/>
-              </svg>
+            <div class="pb-mini-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M20 12V8h-4"/><path d="M4 12V8h4"/><path d="M12 4v16"/><path d="M4 12h16"/></svg>
             </div>
             <div class="pb-mini-info">
               <div class="pb-mini-title">Invoice paid</div>
@@ -108,14 +152,8 @@
           </div>
 
           <div class="pb-mini-card">
-            <div class="pb-mini-icon pb-mini-icon-yellow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-              </svg>
+            <div class="pb-mini-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
             <div class="pb-mini-info">
               <div class="pb-mini-title">Invoice sent</div>
@@ -137,66 +175,43 @@
         </div>
         <div class="pb-features-grid">
           <div class="pb-feature-card">
-            <div class="pb-feature-icon pb-feature-icon-purple">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-              </svg>
+            <div class="pb-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             </div>
             <h3>Multi-company</h3>
             <p>Manage multiple companies from a single account. Switch between them instantly.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon pb-feature-icon-blue">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-              </svg>
+            <div class="pb-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
             <h3>Invoices & bills</h3>
             <p>Create and send invoices to clients. Track bills from suppliers. Download PDFs instantly.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon pb-feature-icon-green">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 6v6l4 2"/>
-              </svg>
+            <div class="pb-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <h3>Transactions</h3>
             <p>Track income and expenses. Account balances update automatically with every payment.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon pb-feature-icon-yellow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M21 12v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-3"/>
-                <path d="M12 2v8M9 7l3-3 3 3"/>
-                <path d="M3 12h18"/>
-              </svg>
+            <div class="pb-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             </div>
             <h3>Dashboard</h3>
             <p>Clear overview of your finances — income, expenses, net profit, and unpaid invoices.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon pb-feature-icon-pink">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
+            <div class="pb-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <h3>Team management</h3>
             <p>Invite team members with different roles — owner, accountant, viewer, and more.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon pb-feature-icon-purple">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-              </svg>
+            <div class="pb-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             </div>
             <h3>Email notifications</h3>
             <p>Send invoices and team invitations directly by email with one click.</p>
@@ -226,9 +241,34 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth.js';
+import axios from 'axios';
 
 const authStore = useAuthStore();
+const router = useRouter();
+const companies = ref([]);
+const currentCompanyId = ref(null);
+const dropdownOpen = ref(false);
+
+onMounted(async () => {
+  if (authStore.token) {
+    try {
+      const res = await axios.get('/companies');
+      companies.value = res.data.data;
+      if (companies.value.length > 0) {
+        currentCompanyId.value = companies.value[0].id;
+      }
+    } catch {}
+  }
+});
+
+const switchCompany = (e) => {
+  currentCompanyId.value = e.target.value;
+  dropdownOpen.value = false;
+  router.push(`/companies/${e.target.value}`);
+};
 </script>
 
 <style scoped>
@@ -302,6 +342,47 @@ const authStore = useAuthStore();
   gap: 10px;
 }
 
+.pb-company-select {
+  padding: 6px 10px;
+  background: #f8fafc;
+  color: #1a1a2e;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pb-dropdown-wrap {
+  position: relative;
+}
+
+.pb-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #ffffff;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 12px;
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  overflow: hidden;
+  z-index: 200;
+}
+
+.pb-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 13px;
+  color: #374151;
+  text-decoration: none;
+  border-bottom: 0.5px solid #f1f5f9;
+  transition: background 0.15s;
+}
+
+.pb-dropdown a:last-child { border-bottom: none; }
+.pb-dropdown a:hover { background: #f8fafc; }
 
 /* Buttons */
 .btn-ghost {
@@ -313,6 +394,8 @@ const authStore = useAuthStore();
   color: #1a1a2e;
   cursor: pointer;
   transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
 }
 .btn-ghost:hover { background: #f8fafc; }
 
@@ -518,19 +601,11 @@ const authStore = useAuthStore();
   width: 32px;
   height: 32px;
   border-radius: 8px;
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: white;
-}
-
-.pb-mini-icon-green {
-  background: #10b981;
-}
-
-.pb-mini-icon-yellow {
-  background: #f59e0b;
 }
 
 .pb-mini-info { flex: 1; }
@@ -606,31 +681,11 @@ const authStore = useAuthStore();
   width: 42px;
   height: 42px;
   border-radius: 10px;
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
-  color: white;
-}
-
-.pb-feature-icon-purple {
-  background: #8b5cf6;
-}
-
-.pb-feature-icon-blue {
-  background: #3b82f6;
-}
-
-.pb-feature-icon-green {
-  background: #10b981;
-}
-
-.pb-feature-icon-yellow {
-  background: #f59e0b;
-}
-
-.pb-feature-icon-pink {
-  background: #ec4899;
 }
 
 .pb-feature-card h3 {

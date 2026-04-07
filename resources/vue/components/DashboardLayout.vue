@@ -41,14 +41,23 @@
           <span class="pb-nav-label">{{ link.label }}</span>
         </router-link>
 
+
         <div v-if="navLinks.length === 0" class="pb-nav-empty">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="12" cy="12" r="10"/>
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
-          <p>Select a company to see navigation</p>
+          <p>No companies found. Create your first company to get started!</p>
+          <router-link to="/companies/create" class="pb-create-company-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Create your first company
+          </router-link>
         </div>
+
       </nav>
 
       <div class="pb-sidebar-footer">
@@ -345,6 +354,7 @@ const navLinks = computed(() => {
   flex: 1;
 }
 
+
 /* Empty State */
 .pb-nav-empty {
   text-align: center;
@@ -359,7 +369,30 @@ const navLinks = computed(() => {
 
 .pb-nav-empty p {
   font-size: 13px;
+  margin-bottom: 1.5rem;
 }
+
+.pb-create-company-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: #4f46e5;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.pb-create-company-btn:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
 
 /* Sidebar Footer */
 .pb-sidebar-footer {
