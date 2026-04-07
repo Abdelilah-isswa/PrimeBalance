@@ -12,7 +12,7 @@ export const useBillStore = defineStore('bill', {
       this.loading = true;
       try {
         const response = await axios.get(`/api/v1/companies/${companyId}/bills`);
-        this.bills = response.data.data;
+        this.bills = response.data.data ?? [];
       } catch (error) {
         console.error('Fetch bills error:', error);
       } finally {

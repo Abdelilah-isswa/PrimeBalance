@@ -15,7 +15,7 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       try {
         const response = await axios.get(`/api/v1/companies/${companyId}/accounts`);
-        this.accounts = response.data.data;
+        this.accounts = response.data.data ?? [];
       } catch (error) {
         console.error('Fetch accounts error:', error);
       } finally {

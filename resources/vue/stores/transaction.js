@@ -11,7 +11,7 @@ export const useTransactionStore = defineStore('transaction', {
       this.loading = true;
       try {
         const response = await axios.get(`/api/v1/companies/${companyId}/transactions`);
-        this.transactions = response.data.data;
+        this.transactions = response.data.data ?? [];
       } catch (error) {
         console.error('Fetch transactions error:', error);
       } finally {

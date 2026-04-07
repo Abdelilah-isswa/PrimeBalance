@@ -7,7 +7,14 @@ const routes = [
   { path: '/register', name: 'Register', component: () => import('../views/auth/Register.vue') },
   { path: '/invitations/:token', name: 'Invitation', component: () => import('../views/Invitation.vue') },
   { path: '/', name: 'Landing', component: () => import('../views/Landing.vue') },
-  { path: '/dashboard', name: 'Home', component: () => import('../views/Home.vue'), meta: { auth: true } },
+  {
+    path: '/dashboard',
+    component: DashboardLayout,
+    meta: { auth: true },
+    children: [
+      { path: '', name: 'Home', component: () => import('../views/Home.vue') },
+    ]
+  },
   { path: '/companies', name: 'Companies', component: () => import('../views/companies/Index.vue'), meta: { auth: true } },
   { path: '/companies/create', name: 'CompanyCreate', component: () => import('../views/companies/Create.vue'), meta: { auth: true } },
   {
@@ -16,7 +23,7 @@ const routes = [
     props: true,
     meta: { auth: true },
     children: [
-      { path: '', name: 'CompanyDashboard', component: () => import('../views/companies/Show.vue') },
+      { path: '', name: 'CompanyDashboard', component: () => import('../views/Home.vue') },
       { path: 'edit', name: 'CompanyEdit', component: () => import('../views/companies/Edit.vue') },
       { path: 'invoices', name: 'Invoices', component: () => import('../views/invoices/Index.vue') },
       { path: 'invoices/create', name: 'InvoiceCreate', component: () => import('../views/invoices/Form.vue') },

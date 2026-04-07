@@ -12,7 +12,7 @@ export const useInvoiceStore = defineStore('invoice', {
       this.loading = true;
       try {
         const response = await axios.get(`/api/v1/companies/${companyId}/invoices`);
-        this.invoices = response.data.data;
+        this.invoices = response.data.data ?? [];
       } catch (error) {
         console.error('Fetch invoices error:', error);
       } finally {
