@@ -14,16 +14,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { useCompanyStore } from '../../stores/company.js';
 
-const companies = ref([]);
+const companyStore = useCompanyStore();
 
-onMounted(async () => {
-  try {
-    const response = await axios.get('/companies');
-    companies.value = response.data.data;
-  } catch (error) {
-    console.error('Error fetching companies', error);
-  }
+onMounted(() => {
+  companyStore.fetchCompanies();
 });
 </script>

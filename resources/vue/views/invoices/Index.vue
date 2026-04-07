@@ -35,17 +35,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
 import NavBar from '../../components/NavBar.vue';
+import { useCompanyStore } from '../../stores/company.js';
+import { useInvoiceStore } from '../../stores/invoice.js';
 
 const route = useRoute();
 const id = route.params.companyId;
-const company = ref(null);
-const invoices = ref([]);
+const companyStore = useCompanyStore();
+const invoiceStore = useInvoiceStore();
 
 onMounted(async () => {
-  const res = await axios.get(`/companies/${id}/invoices`);
-  company.value = res.data.data.company;
-  invoices.value = res.data.data.invoices;
+  await companyStore.fetchCompany(id);
+  await invoiceStore.fetchInvoices(id);
 });
 </script>

@@ -1,52 +1,123 @@
 <template>
-  <div>
-    <NavBar />
-    <div class="page" style="max-width:700px;">
-      <h1>My Companies</h1>
-      <router-link to="/companies/create"><button style="margin-bottom:1.5rem;">+ New Company</button></router-link>
-      <div v-if="companies.length" style="display:flex; flex-direction:column; gap:1rem;">
-        <router-link
-          v-for="company in companies"
-          :key="company.id"
-          :to="`/companies/${company.id}`"
-          style="text-decoration:none;"
-        >
-          <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem 1.5rem; cursor:pointer; transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow=''">
-            <div>
-              <h3 style="color:#1a1a2e; margin-bottom:0.25rem;">{{ company.name }}</h3>
-              <p style="color:#64748b; font-size:0.85rem;">{{ company.address }} · {{ company.currency }}</p>
-            </div>
-            <span v-if="company.end_date" style="color:#dc2626; font-size:0.8rem; font-weight:600;">Deactivated</span>
-            <span v-else style="color:#16a34a; font-size:0.8rem; font-weight:600;">Active</span>
-          </div>
-        </router-link>
+  <DashboardLayout :company-id="currentCompany?.id">
+    <div class="container mx-auto px-6 py-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Income Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Total Income</h3>
+          <p class="text-3xl font-bold text-green-600">{{ summary.income || '0.00' }} <span class="text-sm text-gray-500">USD</span></p>
+        </div>
+        <!-- Total Expenses Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Total Expenses</h3>
+          <p class="text-3xl font-bold text-red-600">{{ summary.expenses || '0.00' }} <span class="text-sm text-gray-500">USD</span></p>
+        </div>
+        <!-- Overdue Invoices -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Overdue</h3>
+          <p class="text-3xl font-bold text-orange-600">{{ summary.overdue || 0 }}</p>
+        </div>
+        <!-- Unpaid Bills -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Unpaid Bills</h3>
+          <p class="text-3xl font-bold text-blue-600">{{ summary.unpaidBills || 0 }}</p>
+        </div>
       </div>
-      <div v-else class="card" style="text-align:center; padding:3rem; color:#64748b;">
-        <p style="margin-bottom:1rem;">No companies yet.</p>
-        <router-link to="/companies/create"><button>Create your first company</button></router-link>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Recent Transactions -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow-md">
+          <div class="p-6 border-b border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900">Recent Transactions</h3>
+          </div>
+          <div class="p-6">
+            <div v-if="recentTransactions.length" class="space-y-4">
+              <div v-for="trans in recentTransactions" :key="trans.id" class="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0">
+                <div>
+                  <p class="font-medium text-gray-900">{{ trans.description }}</p>
+                  <p class="text-sm text-gray-500">{{ trans.category?.name || 'Uncategorized' }} · {{ trans.date }}</p>
+                </div>
+                <div class="text-right">
+                  <p :class="['font-bold', trans.amount > 0 ? 'text-green-600' : 'text-red-600']">{{ trans.amount > 0 ? '+' : '' }}{{ trans.amount.toFixed(2) }}</p>
+                  <p class="text-sm text-gray-500">{{ trans.account?.name }}</p>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-center py-12 text-gray-500">
+              No recent transactions.
+            </div>
+          </div>
+        </div>
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow-md">
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Quick Actions</h3>
+            <router-link to="/companies" class="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg text-center font-medium hover:bg-blue-700 mb-4">
+              Manage Companies
+            </router-link>
+            <router-link v-if="currentCompany" :to="`/companies/${currentCompany.id}/invoices`" class="block w-full bg-green-600 text-white py-3 px-4 rounded-lg text-center font-medium hover:bg-green-700 mb-4">
+              + New Invoice
+            </router-link>
+            <router-link v-if="currentCompany" :to="`/companies/${currentCompany.id}/bills`" class="block w-full bg-purple-600 text-white py-3 px-4 rounded-lg text-center font-medium hover:bg-purple-700">
+              + New Bill
+            </router-link>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import NavBar from '../components/NavBar.vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import DashboardLayout from '../components/DashboardLayout.vue';
+import { useCompanyStore } from '../stores/company.js';
+import { useInvoiceStore } from '../stores/invoice.js';
+import { useBillStore } from '../stores/bill.js';
+import { useAccountStore } from '../stores/account.js';
+import { useTransactionStore } from '../stores/transaction.js';
+import { useAuthStore } from '../stores/auth.js';
 
-const companies = ref([]);
+const route = useRoute();
 const router = useRouter();
+const companyStore = useCompanyStore();
+const invoiceStore = useInvoiceStore();
+const billStore = useBillStore();
+const accountStore = useAccountStore();
+const transactionStore = useTransactionStore();
+const authStore = useAuthStore();
+
+const companies = computed(() => companyStore.companies);
+const currentCompany = computed(() => companyStore.currentCompany);
+const recentTransactions = ref([]);
+const summary = ref({
+  income: 0,
+  expenses: 0,
+  overdue: 0,
+  unpaidBills: 0,
+});
 
 onMounted(async () => {
-  try {
-    const res = await axios.get('/companies');
-    companies.value = res.data.data;
-    if (companies.value.length === 1) {
-      router.push(`/companies/${companies.value[0].id}`);
-    }
-  } catch (err) {
-    if (err.response?.status === 401) router.push('/login');
+  await companyStore.fetchCompanies();
+  if (companies.value.length === 1) {
+    await companyStore.fetchCompany(companies.value[0].id);
+    router.push(`/companies/${companies.value[0].id}`);
+  }
+  // Load summary from first company or skip if none
+  if (currentCompany.value) {
+    const companyId = currentCompany.value.id;
+    await Promise.all([
+      invoiceStore.fetchInvoices(companyId),
+      billStore.fetchBills(companyId),
+      accountStore.fetchAccounts(companyId),
+      transactionStore.fetchTransactions(companyId),
+    ]);
+    // Mock summary calcs (enhance backend later)
+    summary.value.income = invoiceStore.invoices.reduce((sum, i) => sum + parseFloat(i.total_amount || 0), 0);
+    summary.value.expenses = billStore.bills.reduce((sum, b) => sum + parseFloat(b.total_amount || 0), 0);
+    summary.value.overdue = invoiceStore.invoices.filter(i => i.status === 'overdue').length;
+    summary.value.unpaidBills = billStore.bills.filter(b => b.status !== 'paid').length;
+    recentTransactions.value = transactionStore.transactions.slice(0, 5);
   }
 });
 </script>

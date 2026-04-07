@@ -63,9 +63,9 @@
 
     <!-- Hero -->
     <section style="background:linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%); color:white; padding:6rem 2rem; text-align:center;">
-      <h1 style="font-size:3rem; font-weight:800; margin-bottom:1rem; color:white;">Manage Your Business Finances</h1>
+      <h1 style="font-size:3rem; font-weight:800; margin-bottom:1rem; color:white;">Get back to what you love with PrimeBalance</h1>
       <p style="font-size:1.2rem; color:#a5b4fc; max-width:600px; margin:0 auto 2.5rem;">
-        PrimeBalance helps you track invoices, bills, transactions, and clients — all in one place, for multiple companies.
+        Accounting software made for small businesses and sole traders.
       </p>
       <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
         <template v-if="authStore.token">
