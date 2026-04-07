@@ -5,7 +5,7 @@
         <router-link :to="homeLink" class="sidebar-logo">PrimeBalance</router-link>
         <div class="sidebar-company">
           <span class="sidebar-company-label">Company</span>
-          <select v-model="currentCompanyId" @change="switchCompany" class="sidebar-select">
+          <select :value="currentCompanyId" @input="currentCompanyId = $event.target.value" class="sidebar-select">
             <option disabled value="">Select company</option>
             <option v-for="company in companies" :key="company.id" :value="String(company.id)">
               {{ company.name }}
@@ -61,15 +61,17 @@ const route = useRoute()
 const authStore = useAuthStore()
 const companyStore = useCompanyStore()
 
-const currentCompanyId = ref(props.companyId || route.params.companyId || '')
+const currentCompanyId = ref(String(props.companyId || route.params.companyId || ''))
 
 onMounted(async () => {
   if (companyStore.companies.length === 0) {
     await companyStore.fetchCompanies()
   }
 
-  if (!currentCompanyId.value && route.params.companyId) {
-    currentCompanyId.value = route.params.companyId
+  // Ensure currentCompanyId is set from route if available
+  const companyId = route.params.companyId || props.companyId
+  if (companyId && !currentCompanyId.value) {
+    currentCompanyId.value = String(companyId)
   }
 })
 
@@ -88,15 +90,19 @@ watch(
   }
 )
 
-const companies = computed(() => companyStore.companies)
-
-const switchCompany = () => {
-  if (currentCompanyId.value) {
-    router.push(`/companies/${currentCompanyId.value}`)
-  } else {
+watch(currentCompanyId, (newVal, oldVal) => {
+  if (newVal && newVal !== oldVal) {
+    router.push(`/companies/${newVal}`)
+  } else if (!newVal && oldVal) {
     router.push('/dashboard')
   }
-}
+})
+
+const companies = computed(() => companyStore.companies)
+
+const selectedCompany = computed(() => {
+  return companies.value.find(company => String(company.id) === currentCompanyId.value)
+})
 
 const logout = async () => {
   await authStore.logout()

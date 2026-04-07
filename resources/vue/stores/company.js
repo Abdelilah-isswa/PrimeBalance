@@ -14,7 +14,7 @@ export const useCompanyStore = defineStore('company', {
     async fetchCompanies() {
       this.loading = true;
       try {
-        const response = await axios.get('/api/v1/companies');
+        const response = await axios.get('/companies');
         this.companies = response.data.data;
       } catch (error) {
         console.error('Fetch companies error:', error);
