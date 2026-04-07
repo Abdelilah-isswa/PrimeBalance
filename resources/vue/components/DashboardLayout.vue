@@ -117,7 +117,7 @@ const navLinks = computed(() => {
   if (!currentCompanyId.value) return []
   const id = currentCompanyId.value
   return [
-    { path: `/companies/${id}`, label: 'Dashboard', icon: '📊' },
+    { path: `/dashboard`, label: 'Dashboard', icon: '📊' },
     { path: `/companies/${id}/invoices`, label: 'Invoices', icon: '🧾' },
     { path: `/companies/${id}/bills`, label: 'Bills', icon: '📉' },
     { path: `/companies/${id}/clients`, label: 'Clients', icon: '👥' },
