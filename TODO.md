@@ -5,9 +5,10 @@ Current status: Logged in users see "Select company" dropdown empty at /dashboar
 Goal: Add button to create company.
 
 Steps:
-- [x] 1. Plan approved by user
-- [ ] 2. Read DashboardLayout.vue full content
-- [ ] 3. Edit to add button in pb-nav-empty div
+- [x] 1. Plan approved
+- [x] 2. Read files
+- [x] 3. Edit DashboardLayout.vue button + style (Vite reloaded)
+
 - [ ] 4. Hot reload test (Vite running)
 - [ ] 5. Update TODO.md complete
 - [ ] 6. attempt_completion

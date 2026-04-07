@@ -34,16 +34,22 @@ const form = ref({ name: '', address: '', currency: 'USD' });
 const loading = ref(false);
 const error = ref('');
 
+
+import { useCompanyStore } from '../../stores/company.js';
+
+const companyStore = useCompanyStore();
+
 const createCompany = async () => {
   loading.value = true;
   error.value = '';
   try {
-    await axios.post('/companies', form.value);
-    router.push('/companies');
+    const newCompany = await companyStore.createCompany(form.value);
+    router.push(`/companies/${newCompany.id}`);
   } catch (err) {
     error.value = err.response?.data?.message || 'Error creating company';
   } finally {
     loading.value = false;
   }
 };
+
 </script>
