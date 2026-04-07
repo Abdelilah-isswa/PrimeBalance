@@ -5,7 +5,7 @@
         <router-link :to="homeLink" class="sidebar-logo">PrimeBalance</router-link>
         <div class="sidebar-company">
           <span class="sidebar-company-label">Company</span>
-          <select :value="currentCompanyId" @input="currentCompanyId = $event.target.value" class="sidebar-select">
+          <select v-model="currentCompanyId" class="sidebar-select">
             <option disabled value="">Select company</option>
             <option v-for="company in companies" :key="company.id" :value="String(company.id)">
               {{ company.name }}
