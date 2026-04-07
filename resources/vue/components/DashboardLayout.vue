@@ -2,7 +2,7 @@
   <div class="dashboard-layout">
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <div class="sidebar-logo">PrimeBalance</div>
+        <router-link :to="homeLink" class="sidebar-logo">PrimeBalance</router-link>
         <div class="sidebar-company">
           <span class="sidebar-company-label">Company</span>
           <select v-model="currentCompanyId" @change="switchCompany" class="sidebar-select">
@@ -102,6 +102,10 @@ const logout = async () => {
   await authStore.logout()
   router.push('/login')
 }
+
+const homeLink = computed(() => {
+  return '/'
+})
 
 const navLinks = computed(() => {
   if (!currentCompanyId.value) return []

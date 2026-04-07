@@ -28,7 +28,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import NavBar from '../../components/NavBar.vue';
 import { useCompanyStore } from '../../stores/company.js';
 import { useAuthStore } from '../../stores/auth.js';
 

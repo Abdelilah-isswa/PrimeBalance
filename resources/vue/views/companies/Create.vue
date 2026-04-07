@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <div style="padding:2rem; max-width:600px;">
       <h1>Create Company</h1>
       <form @submit.prevent="createCompany">
@@ -29,7 +28,6 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import NavBar from '../../components/NavBar.vue';
 
 const router = useRouter();
 const form = ref({ name: '', address: '', currency: 'USD' });

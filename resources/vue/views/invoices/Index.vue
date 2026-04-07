@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <div style="padding:2rem;">
       <h1>Invoices - {{ company?.name }}</h1>
       <table style="width:100%; border-collapse:collapse; margin:1rem 0;">
@@ -35,7 +34,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import NavBar from '../../components/NavBar.vue';
 import { useCompanyStore } from '../../stores/company.js';
 import { useInvoiceStore } from '../../stores/invoice.js';
 

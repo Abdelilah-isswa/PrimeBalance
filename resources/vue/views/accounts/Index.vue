@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <div style="padding:2rem;">
       <h1>Accounts - {{ company?.name }}</h1>
       <router-link :to="`/companies/${id}/accounts/create`"><button style="margin-bottom:1rem;">Create Account</button></router-link>
@@ -36,7 +35,6 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
-import NavBar from '../../components/NavBar.vue';
 
 const route = useRoute();
 const id = route.params.companyId;

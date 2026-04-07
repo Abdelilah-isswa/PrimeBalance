@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <div style="padding:2rem; max-width:700px;">
       <h1>Invoice #{{ invoice?.id }}</h1>
       <div style="padding:1rem; background:#f5f5f5; border-radius:4px; margin:1rem 0;">
@@ -25,7 +24,6 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-import NavBar from '../../components/NavBar.vue';
 
 const route = useRoute();
 const router = useRouter();

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <div style="padding:2rem;">
       <h1>Supplier Balances - {{ company?.name }}</h1>
       <table style="width:100%; border-collapse:collapse; margin:2rem 0;">
@@ -36,7 +35,6 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
-import NavBar from '../../components/NavBar.vue';
 
 const route = useRoute();
 const id = route.params.companyId;

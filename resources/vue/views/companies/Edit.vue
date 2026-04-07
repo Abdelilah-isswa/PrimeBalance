@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <div style="padding:2rem;">
       <h1>Manage Company</h1>
 
@@ -92,7 +91,6 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-import NavBar from '../../components/NavBar.vue';
 import { useAuthStore } from '../../stores/auth.js';
 
 const route = useRoute();

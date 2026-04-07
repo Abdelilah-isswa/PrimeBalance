@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <div style="padding:2rem;">
       <h1>Categories - {{ company?.name }}</h1>
       <form @submit.prevent="store" style="margin:1rem 0; display:flex; gap:0.5rem;">
@@ -42,7 +41,6 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
-import NavBar from '../../components/NavBar.vue';
 
 const route = useRoute();
 const id = route.params.companyId;

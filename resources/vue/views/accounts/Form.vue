@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <div style="padding:2rem; max-width:600px;">
       <h1>{{ isEdit ? 'Edit Account' : 'Create Account' }}</h1>
       <form @submit.prevent="submit">
@@ -21,7 +20,6 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-import NavBar from '../../components/NavBar.vue';
 
 const route = useRoute();
 const router = useRouter();
