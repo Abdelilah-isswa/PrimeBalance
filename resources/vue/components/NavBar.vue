@@ -29,7 +29,7 @@
               👥 Clients
             </router-link>
             <router-link :to="`/companies/${currentCompanyId}/suppliers`" @click="dropdownOpen=false" style="display:block; padding:0.75rem 1rem; color:#a5b4fc; text-decoration:none; border-bottom:1px solid #4f46e5; transition:background 0.2s;" @mouseenter="$event.target.style.background='#3d3d54'" @mouseleave="$event.target.style.background='transparent'">
-              🏢 Suppliers
+              🏢 Supplier
             </router-link>
             <router-link :to="`/companies/${currentCompanyId}/accounts`" @click="dropdownOpen=false" style="display:block; padding:0.75rem 1rem; color:#a5b4fc; text-decoration:none; border-bottom:1px solid #4f46e5; transition:background 0.2s;" @mouseenter="$event.target.style.background='#3d3d54'" @mouseleave="$event.target.style.background='transparent'">
               💰 Accounts
