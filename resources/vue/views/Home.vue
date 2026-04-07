@@ -99,10 +99,11 @@ const summary = ref({
 
 onMounted(async () => {
   await companyStore.fetchCompanies();
-  if (companies.value.length === 1) {
+
+  if (companies.value.length === 1 && !currentCompany.value) {
     await companyStore.fetchCompany(companies.value[0].id);
-    router.push(`/companies/${companies.value[0].id}`);
   }
+
   // Load summary from first company or skip if none
   if (currentCompany.value) {
     const companyId = currentCompany.value.id;

@@ -95,7 +95,11 @@
           </div>
 
           <div class="pb-mini-card">
-            <div class="pb-mini-icon" style="background:#d1fae5;">💰</div>
+            <div class="pb-mini-icon pb-mini-icon-green">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 12V8H4v8h16v-4M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4"/>
+              </svg>
+            </div>
             <div class="pb-mini-info">
               <div class="pb-mini-title">Invoice paid</div>
               <div class="pb-mini-sub">Acme Corp · just now</div>
@@ -104,7 +108,15 @@
           </div>
 
           <div class="pb-mini-card">
-            <div class="pb-mini-icon" style="background:#fef3c7;">📄</div>
+            <div class="pb-mini-icon pb-mini-icon-yellow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
             <div class="pb-mini-info">
               <div class="pb-mini-title">Invoice sent</div>
               <div class="pb-mini-sub">TechStart Ltd · 2h ago</div>
@@ -125,32 +137,67 @@
         </div>
         <div class="pb-features-grid">
           <div class="pb-feature-card">
-            <div class="pb-feature-icon" style="background:#ede9fe;">🏢</div>
+            <div class="pb-feature-icon pb-feature-icon-purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              </svg>
+            </div>
             <h3>Multi-company</h3>
             <p>Manage multiple companies from a single account. Switch between them instantly.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon" style="background:#dbeafe;">📄</div>
+            <div class="pb-feature-icon pb-feature-icon-blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
             <h3>Invoices & bills</h3>
             <p>Create and send invoices to clients. Track bills from suppliers. Download PDFs instantly.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon" style="background:#d1fae5;">💰</div>
+            <div class="pb-feature-icon pb-feature-icon-green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
             <h3>Transactions</h3>
             <p>Track income and expenses. Account balances update automatically with every payment.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon" style="background:#fef3c7;">📊</div>
+            <div class="pb-feature-icon pb-feature-icon-yellow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 12v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-3"/>
+                <path d="M12 2v8M9 7l3-3 3 3"/>
+                <path d="M3 12h18"/>
+              </svg>
+            </div>
             <h3>Dashboard</h3>
             <p>Clear overview of your finances — income, expenses, net profit, and unpaid invoices.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon" style="background:#fce7f3;">👥</div>
+            <div class="pb-feature-icon pb-feature-icon-pink">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
             <h3>Team management</h3>
             <p>Invite team members with different roles — owner, accountant, viewer, and more.</p>
           </div>
           <div class="pb-feature-card">
-            <div class="pb-feature-icon" style="background:#ede9fe;">📧</div>
+            <div class="pb-feature-icon pb-feature-icon-purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+              </svg>
+            </div>
             <h3>Email notifications</h3>
             <p>Send invoices and team invitations directly by email with one click.</p>
           </div>
@@ -474,8 +521,16 @@ const authStore = useAuthStore();
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
   flex-shrink: 0;
+  color: white;
+}
+
+.pb-mini-icon-green {
+  background: #10b981;
+}
+
+.pb-mini-icon-yellow {
+  background: #f59e0b;
 }
 
 .pb-mini-info { flex: 1; }
@@ -555,7 +610,27 @@ const authStore = useAuthStore();
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
-  font-size: 18px;
+  color: white;
+}
+
+.pb-feature-icon-purple {
+  background: #8b5cf6;
+}
+
+.pb-feature-icon-blue {
+  background: #3b82f6;
+}
+
+.pb-feature-icon-green {
+  background: #10b981;
+}
+
+.pb-feature-icon-yellow {
+  background: #f59e0b;
+}
+
+.pb-feature-icon-pink {
+  background: #ec4899;
 }
 
 .pb-feature-card h3 {
