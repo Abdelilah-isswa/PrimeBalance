@@ -3,7 +3,8 @@
 
     <!-- Navbar -->
     <nav class="pb-nav">
-      <div class="pb-nav-left">
+      <div class="pb-nav-inner">
+        <!-- Logo -->
         <router-link to="/" class="pb-logo">
           <div class="pb-logo-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="14" height="14">
@@ -12,21 +13,24 @@
           </div>
           <span>PrimeBalance</span>
         </router-link>
+
+        <!-- Center Links -->
         <div class="pb-nav-links">
           <router-link to="/">Home</router-link>
           <a href="#features">Features</a>
           <router-link to="/about">About Us</router-link>
         </div>
-      </div>
 
-      <div class="pb-nav-right">
-        <template v-if="authStore.token">
-          <router-link to="/dashboard"><button class="btn-primary">Dashboard</button></router-link>
-        </template>
-        <template v-else>
-          <router-link to="/login"><button class="btn-ghost">Login</button></router-link>
-          <router-link to="/register"><button class="btn-primary">Get Started</button></router-link>
-        </template>
+        <!-- Right Actions -->
+        <div class="pb-nav-right">
+          <template v-if="authStore.token">
+            <router-link to="/dashboard"><button class="btn-primary">Dashboard</button></router-link>
+          </template>
+          <template v-else>
+            <router-link to="/login"><button class="btn-ghost">Login</button></router-link>
+            <router-link to="/register"><button class="btn-primary">Get Started</button></router-link>
+          </template>
+        </div>
       </div>
     </nav>
 
@@ -222,9 +226,6 @@ const authStore = useAuthStore();
 
 /* ── Navbar ───────────────────────────────────────────────── */
 .pb-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 0.9rem 2.5rem;
   background: #ffffff;
   border-bottom: 0.5px solid #e2e8f0;
@@ -233,10 +234,14 @@ const authStore = useAuthStore();
   z-index: 100;
 }
 
-.pb-nav-left {
-  display: flex;
+.pb-nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 2.5rem;
+  width: 100%;
+  gap: 1rem;
 }
 
 .pb-logo {
@@ -247,6 +252,7 @@ const authStore = useAuthStore();
   font-size: 15px;
   color: #1a1a2e;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .pb-logo-icon {
@@ -257,11 +263,14 @@ const authStore = useAuthStore();
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .pb-nav-links {
   display: flex;
   gap: 2rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .pb-nav-links a {
@@ -269,9 +278,10 @@ const authStore = useAuthStore();
   color: #64748b;
   text-decoration: none;
   transition: color 0.15s;
+  white-space: nowrap;
 }
 
-.pb-nav-links a:hover {
+.pb-nav-links a:hover, .pb-nav-links a.router-link-active {
   color: #1a1a2e;
 }
 
@@ -279,6 +289,7 @@ const authStore = useAuthStore();
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-content: flex-end;
 }
 
 /* Buttons */
