@@ -13,6 +13,7 @@ const routes = [
     meta: { auth: true },
     children: [
       { path: '', name: 'Home', component: () => import('../views/Home.vue') },
+      { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') }
     ]
   },
   { path: '/companies', name: 'Companies', component: () => import('../views/companies/Index.vue'), meta: { auth: true } },

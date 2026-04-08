@@ -26,6 +26,13 @@
               {{ company.name }}
             </option>
           </select>
+          <router-link to="/companies/create" class="pb-create-company-btn pb-create-company-btn--sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add New Company
+          </router-link>
         </div>
       </div>
 
@@ -61,6 +68,16 @@
       </nav>
 
       <div class="pb-sidebar-footer">
+        <div class="pb-footer-links">
+          <router-link to="/dashboard/settings" class="pb-footer-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
+          </router-link>
+          <button class="pb-footer-link" @click="copySupportEmail" title="Copy Support Email">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Support
+          </button>
+        </div>
         <button class="pb-logout-btn" @click="logout">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -87,7 +104,7 @@
             <p class="pb-greeting-subtitle">Welcome back. Here's what's happening with your business.</p>
           </div>
         </div>
-        <div class="pb-header-actions">
+        <div class="pb-header-actions" v-if="showDateFilter">
            <DateRangePicker />
         </div>
       </header>
@@ -120,6 +137,11 @@ const companyStore = useCompanyStore()
 const dashboardStore = useDashboardStore()
 
 const currentCompanyId = ref(String(props.companyId || route.params.companyId || ''))
+
+const showDateFilter = computed(() => {
+  const allowedNames = ['Home', 'CompanyDashboard', 'Invoices', 'Bills', 'Transactions'];
+  return allowedNames.includes(route.name);
+})
 
 onMounted(async () => {
   if (companyStore.companies.length === 0) {
@@ -177,6 +199,15 @@ const selectedCompany = computed(() => {
 const logout = async () => {
   await authStore.logout()
   router.push('/login')
+}
+
+const copySupportEmail = async () => {
+  try {
+    await navigator.clipboard.writeText('support@primebalance.com');
+    alert('Support email (support@primebalance.com) copied to clipbaord! We look forward to hearing from you.');
+  } catch (err) {
+    alert('The support email is: support@primebalance.com');
+  }
 }
 
 const homeLink = computed(() => {
@@ -413,7 +444,23 @@ const navLinks = computed(() => {
   cursor: pointer;
 }
 
-.pb-create-company-btn:hover {
+.pb-create-company-btn--sm {
+  margin-top: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: transparent;
+  color: #c7d2fe;
+  border: 1px dashed rgba(79, 70, 229, 0.5);
+  justify-content: center;
+}
+
+.pb-create-company-btn--sm:hover {
+  background: rgba(79, 70, 229, 0.1);
+  color: white;
+  border-color: #4f46e5;
+}
+
+.pb-create-company-btn:not(.pb-create-company-btn--sm):hover {
   background: #4338ca;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
@@ -424,6 +471,36 @@ const navLinks = computed(() => {
 .pb-sidebar-footer {
   padding: 1.25rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pb-footer-links {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pb-footer-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.pb-footer-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .pb-logout-btn {

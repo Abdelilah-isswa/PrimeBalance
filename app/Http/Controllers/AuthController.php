@@ -41,4 +41,16 @@ class AuthController extends BaseController
         $request->user()->currentAccessToken()->delete();
         return $this->sendResponse([], 'Logged out successfully');
     }
+
+    public function updateProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $request->user()->id,
+        ]);
+
+        $request->user()->update($validated);
+
+        return $this->sendResponse($request->user(), 'Profile updated successfully');
+    }
 }

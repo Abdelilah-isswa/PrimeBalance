@@ -21,10 +21,29 @@ export const useTransactionStore = defineStore('transaction', {
     async createTransaction(companyId, data) {
       try {
         const response = await axios.post(`companies/${companyId}/transactions`, data);
-        this.transactions.unshift(response.data.data);
+        await this.fetchTransactions(companyId);
         return response.data.data;
       } catch (error) {
         console.error('Create transaction error:', error);
+        throw error;
+      }
+    },
+    async updateTransaction(companyId, transactionId, data) {
+      try {
+        await axios.put(`companies/${companyId}/transactions/${transactionId}`, data);
+        await this.fetchTransactions(companyId);
+      } catch (error) {
+        console.error('Update transaction error:', error);
+        throw error;
+      }
+    },
+    async deleteTransaction(companyId, transactionId) {
+      try {
+        await axios.delete(`companies/${companyId}/transactions/${transactionId}`);
+        await this.fetchTransactions(companyId);
+      } catch (error) {
+        console.error('Delete transaction error:', error);
+        throw error;
       }
     },
   },

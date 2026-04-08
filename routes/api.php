@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.')->group(function ()
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::put('/user', [AuthController::class, 'updateProfile']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -86,6 +87,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.')->group(function ()
 
     // Transactions
     Route::prefix('companies/{companyId}')->group(function () {
-        Route::apiResource('transactions', TransactionController::class)->only(['index', 'store']);
+        Route::apiResource('transactions', TransactionController::class);
     });
 });

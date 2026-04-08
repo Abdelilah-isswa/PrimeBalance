@@ -37,4 +37,24 @@ class TransactionController extends BaseController
         $transaction = $this->transactionService->createTransaction($data);
         return $this->sendCreated($transaction);
     }
+    
+    public function update(StoreTransactionRequest $request, $companyId, $transactionId)
+    {
+        $company = $this->getCompanyForMember($companyId);
+        $transaction = $company->transactions()->findOrFail($transactionId);
+        
+        $this->transactionService->updateTransaction($transaction, $request->validated());
+        
+        return $this->sendResponse($transaction->fresh(['account', 'category', 'invoice.client', 'bill.supplier']));
+    }
+
+    public function destroy($companyId, $transactionId)
+    {
+        $company = $this->getCompanyForMember($companyId);
+        $transaction = $company->transactions()->findOrFail($transactionId);
+
+        $this->transactionService->deleteTransaction($transaction);
+
+        return $this->sendResponse([], 'Transaction deleted');
+    }
 }
