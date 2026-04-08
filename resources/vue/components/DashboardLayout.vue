@@ -195,10 +195,16 @@ watch(currentCompanyId, (newVal, oldVal) => {
 })
 
 const isActiveLink = (path) => {
-  if (path === '/dashboard') {
-    return route.path === '/dashboard'
+  const currentPath = route.path;
+  // Dashboard: active when on /dashboard OR /companies/:id (exact, not sub-pages like /companies/:id/invoices)
+  if (path.match(/^\/(dashboard|companies\/\d+)$/) || path === '/dashboard') {
+    // check if this IS the dashboard link by seeing if it's the path we built
+    const dashPath = currentCompanyId.value ? `/companies/${currentCompanyId.value}` : '/dashboard';
+    if (path === dashPath || path === '/dashboard') {
+      return currentPath === dashPath || currentPath === '/dashboard' || /^\/companies\/\d+$/.test(currentPath);
+    }
   }
-  return route.path.startsWith(path)
+  return currentPath.startsWith(path + '/') || currentPath === path;
 }
 
 const companies = computed(() => companyStore.companies)
@@ -230,7 +236,7 @@ const navLinks = computed(() => {
   const id = currentCompanyId.value
   return [
     { 
-      path: `/dashboard`, 
+      path: currentCompanyId.value ? `/companies/${currentCompanyId.value}` : `/dashboard`, 
       label: 'Dashboard', 
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`
     },
