@@ -33,11 +33,12 @@ export const useInvoiceStore = defineStore('invoice', {
     },
     async createInvoice(companyId, data) {
       try {
-        const response = await axios.post(`companies/${companyId}/clients/${data.client_id}/invoices`, data);
-        this.invoices.unshift(response.data.data);
+        const response = await axios.post(`companies/${companyId}/invoices`, data);
+        await this.fetchInvoices(companyId);
         return response.data.data;
       } catch (error) {
         console.error('Create invoice error:', error);
+        throw error;
       }
     },
     async updateInvoice(companyId, id, data) {

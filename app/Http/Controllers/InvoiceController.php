@@ -38,14 +38,16 @@ class InvoiceController extends BaseController
         return $this->sendResponse(compact('company', 'client'));
     }
 
-    public function store(StoreInvoiceRequest $request, $companyId, $clientId)
+    public function store(StoreInvoiceRequest $request, $companyId)
     {
+        $clientId = $request->input('client_id');
         $data = array_merge($request->validated(), [
             'company_id' => $companyId,
             'client_id' => $clientId,
         ]);
 
         $invoice = $this->invoiceService->createInvoice($data);
+        $invoice->load('client');
 
         $message = 'Invoice created' . ($request->has('send_email') && $request->send_email ? ' and sent to client' : '');
         return $this->sendCreated($invoice, $message);

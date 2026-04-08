@@ -11,8 +11,8 @@ export const useClientStore = defineStore('client', {
     async fetchClients(companyId) {
       this.loading = true;
       try {
-        const response = await axios.get(`companies/${companyId}/clients`);
-        this.clients = response.data.data;
+        const response = await axios.get(`companies/${companyId}/clients/balances`);
+        this.clients = response.data.data.clients ?? [];
       } catch (error) {
         console.error('Fetch clients error:', error);
       } finally {
@@ -34,10 +34,11 @@ export const useClientStore = defineStore('client', {
     async createClient(companyId, data) {
       try {
         const response = await axios.post(`companies/${companyId}/clients`, data);
-        this.clients.push(response.data.data);
+        await this.fetchClients(companyId);
         return response.data.data;
       } catch (error) {
         console.error('Create client error:', error);
+        throw error;
       }
     },
     async updateClient(companyId, id, data) {

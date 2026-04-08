@@ -11,8 +11,8 @@ export const useSupplierStore = defineStore('supplier', {
     async fetchSuppliers(companyId) {
       this.loading = true;
       try {
-        const response = await axios.get(`companies/${companyId}/suppliers`);
-        this.suppliers = response.data.data;
+        const response = await axios.get(`companies/${companyId}/suppliers/balances`);
+        this.suppliers = response.data.data.suppliers ?? [];
       } catch (error) {
         console.error('Fetch suppliers error:', error);
       } finally {
@@ -34,10 +34,11 @@ export const useSupplierStore = defineStore('supplier', {
     async createSupplier(companyId, data) {
       try {
         const response = await axios.post(`companies/${companyId}/suppliers`, data);
-        this.suppliers.push(response.data.data);
+        await this.fetchSuppliers(companyId);
         return response.data.data;
       } catch (error) {
         console.error('Create supplier error:', error);
+        throw error;
       }
     },
     async updateSupplier(companyId, id, data) {

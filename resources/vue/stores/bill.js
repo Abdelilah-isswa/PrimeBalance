@@ -33,11 +33,12 @@ export const useBillStore = defineStore('bill', {
     },
     async createBill(companyId, data) {
       try {
-        const response = await axios.post(`companies/${companyId}/suppliers/${data.supplier_id}/bills`, data);
-        this.bills.unshift(response.data.data);
+        const response = await axios.post(`companies/${companyId}/bills`, data);
+        await this.fetchBills(companyId);
         return response.data.data;
       } catch (error) {
         console.error('Create bill error:', error);
+        throw error;
       }
     },
     async updateBill(companyId, id, data) {

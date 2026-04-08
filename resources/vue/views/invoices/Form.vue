@@ -26,32 +26,34 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import { useInvoiceStore } from '../../stores/invoice.js';
 
 const route = useRoute();
 const router = useRouter();
 const companyId = route.params.companyId;
 const clientId = route.params.clientId;
 const invoiceId = route.params.invoiceId;
+
+const invoiceStore = useInvoiceStore();
+
 const isEdit = computed(() => !!invoiceId);
 const client = ref(null);
-const form = ref({ total_amount: '', status: 'draft', send_email: false });
+const form = ref({ total_amount: '', status: 'draft', send_email: false, client_id: clientId });
 
 onMounted(async () => {
   if (isEdit.value) {
-    const res = await axios.get(`/companies/${companyId}/invoices/${invoiceId}/edit`);
-    const inv = res.data.data.invoice;
-    form.value = { total_amount: inv.total_amount, status: inv.status };
-    client.value = inv.client;
+    const res = await invoiceStore.fetchInvoice(companyId, invoiceId);
+    form.value = { total_amount: res.total_amount, status: res.status };
+    client.value = res.client;
   }
 });
 
 const submit = async () => {
   if (isEdit.value) {
-    await axios.put(`/companies/${companyId}/invoices/${invoiceId}`, form.value);
+    await invoiceStore.updateInvoice(companyId, invoiceId, form.value);
     router.push(`/companies/${companyId}/invoices/${invoiceId}`);
   } else {
-    await axios.post(`/companies/${companyId}/clients/${clientId}/invoices`, form.value);
+    await invoiceStore.createInvoice(companyId, form.value);
     router.push(`/companies/${companyId}`);
   }
 };

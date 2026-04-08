@@ -38,14 +38,16 @@ class BillController extends BaseController
         return $this->sendResponse(compact('company', 'supplier'));
     }
 
-    public function store(StoreBillRequest $request, $companyId, $supplierId)
+    public function store(StoreBillRequest $request, $companyId)
     {
+        $supplierId = $request->input('supplier_id');
         $data = array_merge($request->validated(), [
             'company_id' => $companyId,
             'supplier_id' => $supplierId,
         ]);
 
         $bill = $this->billService->createBill($data);
+        $bill->load('supplier');
 
         return $this->sendCreated($bill);
     }

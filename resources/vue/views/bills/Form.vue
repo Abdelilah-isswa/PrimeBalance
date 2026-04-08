@@ -24,32 +24,34 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import { useBillStore } from '../../stores/bill.js';
 
 const route = useRoute();
 const router = useRouter();
 const companyId = route.params.companyId;
 const supplierId = route.params.supplierId;
 const billId = route.params.billId;
+
+const billStore = useBillStore();
+
 const isEdit = computed(() => !!billId);
 const supplier = ref(null);
-const form = ref({ total_amount: '', status: 'draft' });
+const form = ref({ total_amount: '', status: 'unpaid', supplier_id: supplierId });
 
 onMounted(async () => {
   if (isEdit.value) {
-    const res = await axios.get(`/companies/${companyId}/bills/${billId}/edit`);
-    const bill = res.data.data.bill;
-    form.value = { total_amount: bill.total_amount, status: bill.status };
-    supplier.value = bill.supplier;
+    const res = await billStore.fetchBill(companyId, billId);
+    form.value = { total_amount: res.total_amount, status: res.status };
+    supplier.value = res.supplier;
   }
 });
 
 const submit = async () => {
   if (isEdit.value) {
-    await axios.put(`/companies/${companyId}/bills/${billId}`, form.value);
+    await billStore.updateBill(companyId, billId, form.value);
     router.push(`/companies/${companyId}/bills/${billId}`);
   } else {
-    await axios.post(`/companies/${companyId}/suppliers/${supplierId}/bills`, form.value);
+    await billStore.createBill(companyId, form.value);
     router.push(`/companies/${companyId}`);
   }
 };
