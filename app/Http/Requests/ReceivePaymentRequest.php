@@ -17,9 +17,10 @@ class ReceivePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_id' => 'required|exists:accounts,id',
+            'account_id'  => 'required|exists:accounts,id',
             'category_id' => 'nullable|exists:categories,id',
-            'date' => 'required|date',
+            'date'        => 'required|date',
+            'amount_paid' => 'required|numeric|min:0.01',
         ];
     }
 }

@@ -67,8 +67,8 @@ class InvoiceController extends BaseController
     {
         $company = $this->getCompanyForMember($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
-        $this->invoiceService->receivePayment($invoice, $request->validated());
-        return $this->sendResponse([], 'Payment received successfully');
+        $result = $this->invoiceService->receivePayment($invoice, $request->validated());
+        return $this->sendResponse($result, 'Payment received successfully');
     }
 
     public function show($companyId, $invoiceId)

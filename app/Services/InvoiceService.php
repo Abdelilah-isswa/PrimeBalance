@@ -14,9 +14,9 @@ class InvoiceService
     {
         $invoice = Invoice::create([
             'company_id' => $data['company_id'],
-            'client_id' => $data['client_id'],
+            'client_id'  => $data['client_id'],
             'total_amount' => $data['total_amount'],
-            'status' => $data['status'],
+            'status'     => $data['status'],
         ]);
 
         if (isset($data['send_email']) && $data['send_email']) {
@@ -30,29 +30,52 @@ class InvoiceService
     {
         return $invoice->update([
             'total_amount' => $data['total_amount'],
-            'status' => $data['status'],
+            'status'       => $data['status'],
         ]);
     }
 
-    public function receivePayment(Invoice $invoice, array $data): bool
+    /**
+     * Mark invoice as paid (full or partial).
+     * Creates an income transaction for the amount paid.
+     * If amount_paid < total_amount the status becomes 'partial'.
+     */
+    public function receivePayment(Invoice $invoice, array $data): array
     {
-        $account = Account::findOrFail($data['account_id']);
-        
+        $amountPaid   = (float) $data['amount_paid'];
+        $totalAmount  = (float) $invoice->total_amount;
+        $account      = Account::findOrFail($data['account_id']);
+
+        // Determine new status
+        $newStatus = $amountPaid >= $totalAmount ? 'paid' : 'partial';
+
+        // Create income transaction
         Transaction::create([
-            'company_id' => $invoice->company_id,
-            'account_id' => $data['account_id'],
+            'company_id'  => $invoice->company_id,
+            'account_id'  => $data['account_id'],
             'category_id' => $data['category_id'] ?? null,
-            'type' => 'income',
-            'amount' => $invoice->total_amount,
-            'description' => 'Payment received for invoice #' . $invoice->id . ' - ' . $invoice->client->name,
-            'date' => $data['date'],
-            'invoice_id' => $invoice->id,
+            'type'        => 'income',
+            'amount'      => $amountPaid,
+            'description' => 'Payment received for Invoice #' . $invoice->id . ' (' . $invoice->client->name . ')',
+            'date'        => $data['date'],
+            'invoice_id'  => $invoice->id,
         ]);
 
-        $account->increment('balance', $invoice->total_amount);
-        $invoice->update(['status' => 'paid']);
+        // Update account balance
+        $account->increment('balance', $amountPaid);
 
-        return true;
+        // Update invoice status & track amount paid
+        $invoice->update([
+            'status'       => $newStatus,
+            'amount_paid'  => ($invoice->amount_paid ?? 0) + $amountPaid,
+        ]);
+
+        $remaining = max(0, $totalAmount - (($invoice->amount_paid ?? 0) + $amountPaid));
+
+        return [
+            'status'    => $newStatus,
+            'paid'      => $amountPaid,
+            'remaining' => $remaining,
+        ];
     }
 
     public function canDelete(Invoice $invoice): bool
