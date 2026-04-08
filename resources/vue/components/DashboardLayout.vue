@@ -87,6 +87,9 @@
             <p class="pb-greeting-subtitle">Welcome back. Here's what's happening with your business.</p>
           </div>
         </div>
+        <div class="pb-header-actions">
+           <DateRangePicker />
+        </div>
       </header>
       <div class="pb-content-wrapper">
         <router-view />
@@ -100,6 +103,8 @@ import { computed, watch, ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import { useCompanyStore } from '../stores/company.js'
+import { useDashboardStore } from '../stores/dashboard.js'
+import DateRangePicker from './DateRangePicker.vue'
 
 const props = defineProps({
   companyId: {
@@ -112,6 +117,7 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const companyStore = useCompanyStore()
+const dashboardStore = useDashboardStore()
 
 const currentCompanyId = ref(String(props.companyId || route.params.companyId || ''))
 
@@ -461,6 +467,9 @@ const navLinks = computed(() => {
   background: white;
   border-bottom: 1px solid #e2e8f0;
   margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .pb-welcome-section {
@@ -493,6 +502,16 @@ const navLinks = computed(() => {
   font-size: 14px;
   color: #64748b;
   margin: 4px 0 0 0;
+}
+
+.pb-header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.pb-header-actions {
+  display: flex;
+  align-items: center;
 }
 
 /* Scrollbar Styling */

@@ -329,6 +329,7 @@ import { useBillStore } from '../stores/bill.js';
 import { useAccountStore } from '../stores/account.js';
 import { useTransactionStore } from '../stores/transaction.js';
 import { useAuthStore } from '../stores/auth.js';
+import { useDashboardStore } from '../stores/dashboard.js';
 
 const route = useRoute();
 const companyStore = useCompanyStore();
@@ -337,6 +338,7 @@ const billStore = useBillStore();
 const accountStore = useAccountStore();
 const transactionStore = useTransactionStore();
 const authStore = useAuthStore();
+const dashboardStore = useDashboardStore();
 
 const companies = computed(() => companyStore.companies);
 const currentCompany = computed(() => companyStore.currentCompany);
@@ -361,6 +363,39 @@ const formatCurrency = (amount) => {
   }).format(amount || 0);
 };
 
+const isInDateRange = (dateString, start, end) => {
+  if (!dateString) return false;
+  const date = new Date(dateString);
+  date.setHours(0, 0, 0, 0);
+  const startDate = new Date(start);
+  startDate.setHours(0, 0, 0, 0);
+  const endDate = new Date(end);
+  endDate.setHours(23, 59, 59, 999);
+  
+  return date >= startDate && date <= endDate;
+};
+
+const calculateSummary = () => {
+  const invoices = invoiceStore.invoices || [];
+  const bills = billStore.bills || [];
+  const accounts = accountStore.accounts || [];
+  const transactions = transactionStore.transactions || [];
+  const start = dashboardStore.startDate;
+  const end = dashboardStore.endDate;
+
+  const filteredInvoices = invoices.filter(i => isInDateRange(i.created_at || i.date, start, end));
+  const filteredBills = bills.filter(b => isInDateRange(b.created_at || b.date, start, end));
+  const filteredTransactions = transactions.filter(t => isInDateRange(t.date || t.created_at, start, end));
+
+  summary.value.income = filteredInvoices.reduce((sum, i) => sum + parseFloat(i.total_amount || 0), 0);
+  summary.value.expenses = filteredBills.reduce((sum, b) => sum + parseFloat(b.total_amount || 0), 0);
+  summary.value.overdue = filteredInvoices.filter(i => i.status === 'overdue').length;
+  summary.value.unpaidBills = filteredBills.filter(b => b.status !== 'paid').length;
+  summary.value.cashBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
+  recentTransactions.value = filteredTransactions.slice(0, 5);
+  recentInvoices.value = filteredInvoices.filter(i => i.status !== 'paid').slice(0, 3);
+};
+
 const loadCompanyData = async (companyId) => {
   if (!companyId) return;
 
@@ -374,18 +409,7 @@ const loadCompanyData = async (companyId) => {
       transactionStore.fetchTransactions(companyId),
     ]);
 
-    const invoices = invoiceStore.invoices || [];
-    const bills = billStore.bills || [];
-    const accounts = accountStore.accounts || [];
-    const transactions = transactionStore.transactions || [];
-
-    summary.value.income = invoices.reduce((sum, i) => sum + parseFloat(i.total_amount || 0), 0);
-    summary.value.expenses = bills.reduce((sum, b) => sum + parseFloat(b.total_amount || 0), 0);
-    summary.value.overdue = invoices.filter(i => i.status === 'overdue').length;
-    summary.value.unpaidBills = bills.filter(b => b.status !== 'paid').length;
-    summary.value.cashBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
-    recentTransactions.value = transactions.slice(0, 5);
-    recentInvoices.value = invoices.filter(i => i.status !== 'paid').slice(0, 3);
+    calculateSummary();
   } catch (err) {
     console.error('Unable to load company dashboard data:', err);
     error.value = 'Unable to load company data. Please refresh or select a different company.';
@@ -452,6 +476,13 @@ watch(
     if (newCompanyId && newCompanyId !== oldCompanyId) {
       await loadCompanyData(newCompanyId);
     }
+  }
+);
+
+watch(
+  [() => dashboardStore.startDate, () => dashboardStore.endDate],
+  () => {
+    calculateSummary();
   }
 );
 </script>
