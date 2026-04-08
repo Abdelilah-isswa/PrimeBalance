@@ -61,10 +61,12 @@
                   </div>
                   <div v-else class="pb-action-group">
                     <button @click="startEdit(cat)" class="pb-btn-icon pb-icon-primary" title="Edit">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      <span>Edit</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
                     <button @click="destroy(cat.id)" class="pb-btn-icon pb-icon-danger" title="Delete">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                      <span>Delete</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     </button>
                   </div>
                 </td>
@@ -279,7 +281,6 @@ const destroy = async (catId) => {
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   overflow: hidden;
-  max-width: 800px;
 }
 
 .pb-table-wrapper {
@@ -354,8 +355,10 @@ const destroy = async (catId) => {
 }
 
 .pb-btn-icon {
-  width: 32px;
+  width: auto;
+  min-width: 32px;
   height: 32px;
+  padding: 0 8px;
   border-radius: 8px;
   border: none;
   background: transparent;
@@ -365,6 +368,8 @@ const destroy = async (catId) => {
   cursor: pointer;
   transition: all 0.2s;
   color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .pb-btn-icon:hover {
@@ -384,7 +389,8 @@ const destroy = async (catId) => {
 
 /* Form Styles */
 .pb-form-card {
-  max-width: 600px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .pb-card-header {
