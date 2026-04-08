@@ -1,51 +1,54 @@
 <template>
-  <div class="pb-company-create-layout">
-    <div class="pb-onboarding-container anim-fade-in">
-      <div class="pb-onboarding-header">
-      
-        <h1 class="pb-title">Create a Company</h1>
-        <p class="pb-subtitle">Set up a new workspace for your business to track finances naturally.</p>
+  <div class="pb-company-create-page">
+    <div class="pb-page-header">
+      <div class="pb-header-content">
+        <h1 class="pb-page-title">Create a Company</h1>
+        <p class="pb-page-subtitle">Set up a new workspace for your business to track finances naturally.</p>
+      </div>
+    </div>
+
+    <div class="pb-card pb-form-card anim-slide-up">
+      <div class="pb-card-header">
+        <h2 class="pb-card-title">Company Details</h2>
+        <p class="pb-card-subtitle">Please provide the initial details for your new company.</p>
       </div>
 
-      <div class="pb-card pb-form-card">
-        <form @submit.prevent="createCompany" class="pb-form">
-          <div v-if="error" class="pb-alert pb-alert-error">
-            {{ error }}
+      <form @submit.prevent="createCompany" class="pb-form">
+        <div v-if="error" class="pb-alert pb-alert-error">
+          {{ error }}
+        </div>
+
+        <div class="pb-form-grid">
+          <div class="pb-form-group pb-col-full">
+            <label class="pb-label">Company Name</label>
+            <input v-model="form.name" type="text" class="pb-input" placeholder="e.g., Acme Corp" required autofocus>
           </div>
 
-          <div class="pb-form-grid">
-            <div class="pb-form-group pb-col-full">
-              <label class="pb-label">Company Name</label>
-              <input v-model="form.name" type="text" class="pb-input" placeholder="e.g., Acme Corp" required autofocus>
-            </div>
-
-            <div class="pb-form-group pb-col-full">
-              <label class="pb-label">Address</label>
-              <input v-model="form.address" type="text" class="pb-input" placeholder="123 Business Rd, City" required>
-            </div>
-
-            <div class="pb-form-group pb-col-full">
-              <label class="pb-label">Base Currency</label>
-              <select v-model="form.currency" class="pb-input pb-select" required>
-                <option value="USD">USD - US Dollar ($)</option>
-                <option value="EUR">EUR - Euro (€)</option>
-                <option value="GBP">GBP - British Pound (£)</option>
-                <option value="MAD">MAD - Moroccan Dirham</option>
-                <option value="JPY">JPY - Japanese Yen (¥)</option>
-                <option value="CAD">CAD - Canadian Dollar ($)</option>
-              </select>
-            </div>
+          <div class="pb-form-group pb-col-full">
+            <label class="pb-label">Address</label>
+            <input v-model="form.address" type="text" class="pb-input" placeholder="123 Business Rd, City" required>
           </div>
 
-          <div class="pb-form-actions">
-            <router-link to="/dashboard" class="pb-btn pb-btn-secondary" v-if="hasCompanies">Cancel</router-link>
-            <button type="button" v-else class="pb-btn pb-btn-secondary pb-invisible">Cancel</button>
-            <button type="submit" class="pb-btn pb-btn-primary" :disabled="loading">
-              {{ loading ? 'Creating Workspace...' : 'Create Company Workspace' }}
-            </button>
+          <div class="pb-form-group pb-col-full">
+            <label class="pb-label">Base Currency</label>
+            <select v-model="form.currency" class="pb-input pb-select" required>
+              <option value="USD">USD - US Dollar ($)</option>
+              <option value="EUR">EUR - Euro (€)</option>
+              <option value="GBP">GBP - British Pound (£)</option>
+              <option value="MAD">MAD - Moroccan Dirham</option>
+              <option value="JPY">JPY - Japanese Yen (¥)</option>
+              <option value="CAD">CAD - Canadian Dollar ($)</option>
+            </select>
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div class="pb-form-actions">
+          <router-link to="/dashboard" class="pb-btn pb-btn-secondary" v-if="hasCompanies">Cancel</router-link>
+          <button type="submit" class="pb-btn pb-btn-primary" :disabled="loading">
+            {{ loading ? 'Creating Workspace...' : 'Create Company Workspace' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -86,64 +89,40 @@ const createCompany = async () => {
 </script>
 
 <style scoped>
-.pb-company-create-layout {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8fafc;
-  padding: 2rem;
+.pb-company-create-page {
+  animation: fadeIn 0.4s ease-out;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.pb-onboarding-container {
-  width: 100%;
-  max-width: 500px;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.pb-onboarding-header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.pb-logo-badge {
-  width: 56px;
-  height: 56px;
-  background: #4f46e5;
-  color: white;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem auto;
-  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
-}
-
-.pb-title {
-  font-size: 32px;
-  font-weight: 800;
-  color: #1e293b;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.pb-subtitle {
-  color: #64748b;
-  font-size: 15px;
-  margin: 0;
-}
+.pb-page-header { margin-bottom: 2rem; padding-bottom: 0; }
+.pb-header-content { display: flex; flex-direction: column; gap: 0.5rem; }
+.pb-page-title { font-size: 28px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; margin: 0; }
+.pb-page-subtitle { color: #64748b; font-size: 14px; margin-bottom: 1.5rem; }
 
 /* Card */
 .pb-card {
   background: white;
   border-radius: 20px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   overflow: hidden;
 }
 
-.pb-form {
-  padding: 2.5rem;
+.pb-form-card {
+  max-width: 800px;
+  margin: 0 auto;
 }
+
+.pb-card-header { padding: 2rem; border-bottom: 1px solid #f1f5f9; }
+.pb-card-title { font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #1a1a2e; }
+.pb-card-subtitle { font-size: 14px; color: #64748b; margin: 0; }
+.pb-form { padding: 2.5rem; }
 
 /* Forms */
 .pb-form-grid {
@@ -159,15 +138,8 @@ const createCompany = async () => {
   gap: 8px;
 }
 
-.pb-col-full {
-  grid-column: 1 / -1;
-}
-
-.pb-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-}
+.pb-col-full { grid-column: 1 / -1; }
+.pb-label { font-size: 13px; font-weight: 600; color: #475569; }
 
 .pb-input {
   padding: 12px 16px;
@@ -196,15 +168,7 @@ const createCompany = async () => {
 }
 
 /* Actions */
-.pb-form-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pb-invisible {
-  visibility: hidden;
-}
+.pb-form-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
 
 .pb-btn {
   padding: 12px 24px;
@@ -220,33 +184,12 @@ const createCompany = async () => {
   justify-content: center;
 }
 
-.pb-btn-primary {
-  background: #4f46e5;
-  color: white;
-  flex: 1;
-  margin-left: 12px;
-}
+.pb-btn-primary { background: #4f46e5; color: white; }
+.pb-btn-primary:hover:not(:disabled) { background: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+.pb-btn-primary:disabled { background: #818cf8; cursor: not-allowed; }
 
-.pb-btn-primary:hover:not(:disabled) {
-  background: #4338ca;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-.pb-btn-primary:disabled {
-  background: #818cf8;
-  cursor: not-allowed;
-}
-
-.pb-btn-secondary {
-  background: transparent;
-  color: #64748b;
-}
-
-.pb-btn-secondary:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-}
+.pb-btn-secondary { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
+.pb-btn-secondary:hover { background: #f8fafc; color: #1e293b; }
 
 /* Alerts */
 .pb-alert-error {
@@ -258,16 +201,8 @@ const createCompany = async () => {
   background: #fee2e2;
   color: #991b1b;
   border: 1px solid #fecaca;
-  text-align: center;
 }
 
-/* Animations */
-.anim-fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.anim-slide-up { animation: slideUp 0.3s ease-out; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
