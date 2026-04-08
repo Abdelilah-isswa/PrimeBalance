@@ -1,9 +1,8 @@
 <template>
   <div class="pb-wrap pb-about-page">
-    <!-- Navbar -->
+    <!-- Navbar (identical to Landing) -->
     <nav class="pb-nav">
       <div class="pb-nav-inner">
-        <!-- Logo -->
         <router-link to="/" class="pb-logo">
           <div class="pb-logo-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="14" height="14">
@@ -13,13 +12,12 @@
           <span>PrimeBalance</span>
         </router-link>
 
-        <!-- Center Links -->
         <div class="pb-nav-links">
           <router-link to="/">Home</router-link>
+          <a href="/#features">Features</a>
           <router-link to="/about" class="pb-active-link">About Us</router-link>
         </div>
 
-        <!-- Right Actions -->
         <div class="pb-nav-right">
           <template v-if="authStore.token">
             <router-link to="/dashboard"><button class="btn-primary">Dashboard</button></router-link>
@@ -87,9 +85,37 @@
       </section>
     </main>
 
-    <!-- Footer -->
+    <!-- Full Footer (identical to Landing) -->
     <footer class="pb-footer">
-      © {{ new Date().getFullYear() }} PrimeBalance. Built for the modern business.
+      <div class="pb-footer-content">
+        <div class="pb-brand">
+          <div class="pb-logo-icon pb-footer-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="14" height="14">
+              <path d="M3 12h2l2-5 3 8 2-5 2 5 2-5 2 5h2" stroke="white" fill="none"/>
+            </svg>
+          </div>
+          <span style="font-size: 15px; font-weight: 700; color: #1a1a2e;">PrimeBalance</span>
+          <p style="margin-top: 10px; color: #64748b; font-size: 13px;">Making accounting accessible for modern companies.</p>
+        </div>
+
+        <div class="pb-footer-links-group">
+          <strong>Product</strong>
+          <a href="/#features">Features</a>
+          <router-link to="/about">About Us</router-link>
+        </div>
+
+        <div class="pb-footer-links-group">
+          <strong>Connect</strong>
+          <div class="pb-socials">
+            <a href="#" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg></a>
+            <a href="#" aria-label="GitHub"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a>
+            <a href="#" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="pb-footer-bottom">
+        © {{ new Date().getFullYear() }} PrimeBalance. All rights reserved.
+      </div>
     </footer>
   </div>
 </template>
@@ -103,7 +129,7 @@ const authStore = useAuthStore();
 * { box-sizing: border-box; margin: 0; padding: 0; }
 .pb-wrap { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif; color: #1a1a2e; background: #ffffff; }
 
-/* ── Navbar ───────────────────────────────────────────────── */
+/* ── Navbar (3-col grid, identical to Landing) ─────────────── */
 .pb-nav {
   padding: 0.9rem 2.5rem;
   background: #ffffff;
@@ -253,9 +279,7 @@ const authStore = useAuthStore();
 }
 
 /* ── Values ───────────────────────────────────────────────── */
-.pb-about-values {
-  text-align: center;
-}
+.pb-about-values { text-align: center; }
 
 .pb-about-values h2 {
   font-size: 2rem;
@@ -311,14 +335,57 @@ const authStore = useAuthStore();
   line-height: 1.7;
 }
 
-/* ── Footer ───────────────────────────────────────────────── */
+/* ── Footer (identical to Landing) ────────────────────────── */
 .pb-footer {
-  padding: 3rem;
-  text-align: center;
-  font-size: 14px;
-  color: #94a3b8;
-  border-top: 1px solid #e2e8f0;
+  padding: 4rem 2.5rem 1.5rem;
   background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
   margin-top: 4rem;
+}
+
+.pb-footer-content {
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2rem;
+}
+
+.pb-brand { display: flex; flex-direction: column; }
+.pb-footer-icon { margin-bottom: 1rem; }
+
+.pb-footer-links-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pb-footer-links-group strong {
+  font-size: 14px;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.pb-footer-links-group a {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.15s;
+}
+
+.pb-footer-links-group a:hover { color: #4f46e5; }
+
+.pb-socials { display: flex; gap: 1rem; }
+.pb-socials a { color: #94a3b8; }
+.pb-socials a:hover { color: #4f46e5; }
+
+.pb-footer-bottom {
+  text-align: center;
+  font-size: 12px;
+  color: #94a3b8;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 </style>
