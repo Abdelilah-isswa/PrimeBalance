@@ -18,7 +18,7 @@ class StoreBillRequest extends FormRequest
     {
         return [
             'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:draft,sent,paid,cancelled',
+            'status' => 'required|in:draft,unpaid,paid,cancelled',
         ];
     }
 }
