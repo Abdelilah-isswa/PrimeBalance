@@ -2,11 +2,7 @@
   <div class="pb-company-create-layout">
     <div class="pb-onboarding-container anim-fade-in">
       <div class="pb-onboarding-header">
-        <div class="pb-logo-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
-        </div>
+      
         <h1 class="pb-title">Create a Company</h1>
         <p class="pb-subtitle">Set up a new workspace for your business to track finances naturally.</p>
       </div>

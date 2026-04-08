@@ -37,20 +37,29 @@ export const useAccountStore = defineStore('account', {
     async createAccount(companyId, data) {
       try {
         const response = await axios.post(`companies/${companyId}/accounts`, data);
-        this.accounts.push(response.data.data);
+        await this.fetchAccounts(companyId);
         return response.data.data;
       } catch (error) {
         console.error('Create account error:', error);
+        throw error;
       }
     },
     async updateAccount(companyId, id, data) {
       try {
-        const response = await axios.put(`companies/${companyId}/accounts/${id}`, data);
-        const index = this.accounts.findIndex(a => a.id === id);
-        if (index !== -1) this.accounts[index] = response.data.data;
-        if (this.currentAccount?.id === id) this.currentAccount = response.data.data;
+        await axios.put(`companies/${companyId}/accounts/${id}`, data);
+        await this.fetchAccounts(companyId);
       } catch (error) {
         console.error('Update account error:', error);
+        throw error;
+      }
+    },
+    async deleteAccount(companyId, accountId) {
+      try {
+        await axios.delete(`companies/${companyId}/accounts/${accountId}`);
+        await this.fetchAccounts(companyId);
+      } catch (error) {
+        console.error('Delete account error:', error);
+        throw error;
       }
     },
   },

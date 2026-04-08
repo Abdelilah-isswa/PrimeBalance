@@ -13,11 +13,11 @@ const routes = [
     meta: { auth: true },
     children: [
       { path: '', name: 'Home', component: () => import('../views/Home.vue') },
-      { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') }
+      { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') },
+      { path: '/companies/create', name: 'CompanyCreate', component: () => import('../views/companies/Create.vue') }
     ]
   },
   { path: '/companies', name: 'Companies', component: () => import('../views/companies/Index.vue'), meta: { auth: true } },
-  { path: '/companies/create', name: 'CompanyCreate', component: () => import('../views/companies/Create.vue'), meta: { auth: true } },
   {
     path: '/companies/:companyId',
     component: DashboardLayout,
@@ -40,6 +40,7 @@ const routes = [
       { path: 'categories', name: 'Categories', component: () => import('../views/categories/Index.vue') },
       { path: 'transactions', name: 'Transactions', component: () => import('../views/transactions/Index.vue') },
       { path: 'documents', name: 'Documents', component: () => import('../views/documents/Index.vue') },
+      { path: 'team', name: 'Team', component: () => import('../views/team/Index.vue') },
     ]
   },
 ];

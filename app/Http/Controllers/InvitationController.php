@@ -31,6 +31,25 @@ class InvitationController extends BaseController
         return $this->sendError($result['message']);
     }
 
+    public function index($companyId)
+    {
+        $company = $this->getCompanyForMember($companyId);
+        $invitations = $company->invitations()->where('status', 'pending')
+                               ->orWhere('status', 'expired') // Perhaps show all non-accepted
+                               ->orderBy('created_at', 'desc')->get();
+        // Just show all invitations for the company that are not accepted
+        $invitations = $company->invitations()->where('status', '!=', 'accepted')->orderBy('created_at', 'desc')->get();
+        return $this->sendResponse(compact('company', 'invitations'));
+    }
+
+    public function destroy($companyId, $invitationId)
+    {
+        $company = $this->getCompanyForOwner($companyId, 'manage invitations');
+        $invitation = $company->invitations()->findOrFail($invitationId);
+        $invitation->delete();
+        return $this->sendResponse([], 'Invitation deleted');
+    }
+
     public function show($token)
     {
         $invitation = Invitation::where('token', $token)

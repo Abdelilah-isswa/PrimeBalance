@@ -150,8 +150,11 @@ onMounted(async () => {
 
   // Auto-select first company if none
   if (companyStore.companies.length > 0 && !currentCompanyId.value && !route.params.companyId) {
-    currentCompanyId.value = String(companyStore.companies[0].id)
-    router.push(`/companies/${currentCompanyId.value}`)
+    const isSpecialRoute = ['CompanyCreate', 'Settings'].includes(route.name);
+    if (!isSpecialRoute) {
+      currentCompanyId.value = String(companyStore.companies[0].id);
+      router.push(`/companies/${currentCompanyId.value}`);
+    }
   }
 
   const companyId = route.params.companyId || props.companyId
@@ -262,6 +265,11 @@ const navLinks = computed(() => {
       path: `/companies/${id}/documents`, 
       label: 'Documents', 
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`
+    },
+    { 
+      path: `/companies/${id}/team`, 
+      label: 'Team', 
+      iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>`
     }
   ]
 })

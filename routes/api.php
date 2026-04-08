@@ -41,6 +41,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.')->group(function ()
     Route::get('companies/{id}/users', [CompanyUserController::class, 'index']);
     Route::delete('companies/{companyId}/users/{userId}', [CompanyUserController::class, 'destroy']);
     Route::put('companies/{companyId}/users/{userId}/role', [CompanyUserController::class, 'updateRole']);
+    Route::get('companies/{id}/invitations', [InvitationController::class, 'index']);
+    Route::delete('companies/{companyId}/invitations/{invitationId}', [InvitationController::class, 'destroy']);
     Route::post('companies/{id}/deactivate', [CompanyController::class, 'deactivate']);
 
     // Categories
