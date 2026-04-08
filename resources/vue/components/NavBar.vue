@@ -41,7 +41,7 @@
               📄 Documents
             </router-link>
             <router-link :to="`/companies/${currentCompanyId}/transactions`" @click="dropdownOpen=false" style="display:block; padding:0.75rem 1rem; color:#a5b4fc; text-decoration:none; transition:background 0.2s;" @mouseenter="$event.target.style.background='#3d3d54'" @mouseleave="$event.target.style.background='transparent'">
-              💳 Transactions
+              💳 Transaction
             </router-link>
           </div>
         </div>

@@ -51,13 +51,13 @@ const editId = ref(null);
 const editName = ref('');
 
 onMounted(async () => {
-  const res = await axios.get(`/companies/${id}/categories`);
+  const res = await axios.get(`companies/${id}/categories`);
   company.value = res.data.data.company;
   categories.value = res.data.data.categories;
 });
 
 const store = async () => {
-  const res = await axios.post(`/companies/${id}/categories`, { name: newName.value });
+  const res = await axios.post(`companies/${id}/categories`, { name: newName.value });
   categories.value.push(res.data.data);
   newName.value = '';
 };
@@ -65,14 +65,14 @@ const store = async () => {
 const startEdit = (cat) => { editId.value = cat.id; editName.value = cat.name; };
 
 const update = async (catId) => {
-  await axios.put(`/companies/${id}/categories/${catId}`, { name: editName.value });
+  await axios.put(`companies/${id}/categories/${catId}`, { name: editName.value });
   categories.value = categories.value.map(c => c.id === catId ? { ...c, name: editName.value } : c);
   editId.value = null;
 };
 
 const destroy = async (catId) => {
   if (!confirm('Delete this category?')) return;
-  await axios.delete(`/companies/${id}/categories/${catId}`);
+  await axios.delete(`companies/${id}/categories/${catId}`);
   categories.value = categories.value.filter(c => c.id !== catId);
 };
 </script>

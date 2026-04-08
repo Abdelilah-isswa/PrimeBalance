@@ -1,14 +1,15 @@
-# Task: Add "No Companies → Create Company" UX
+# Sidebar Content Fix
 
-Current status: Logged in users see "Select company" dropdown empty at /dashboard, nav hidden.
+## Status
+Done: Create company button added.
 
-Goal: Add button to create company.
+## Steps Complete
+1. [x] Add "Create first company" button in DashboardLayout nav empty
 
-Steps:
-- [x] 1. Plan approved
-- [x] 2. Read files
-- [x] 3. Edit DashboardLayout.vue button + style (Vite reloaded)
+## Next
+1. [ ] Auto-select first company
+2. [ ] Fix white space content
+3. [ ] Demo data
 
-- [ ] 4. Hot reload test (Vite running)
-- [ ] 5. Update TODO.md complete
-- [ ] 6. attempt_completion
+Test: Login → select company → click button → white space shows table
+

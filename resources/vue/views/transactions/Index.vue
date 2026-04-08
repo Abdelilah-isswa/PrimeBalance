@@ -41,8 +41,8 @@ const company = ref(null);
 const transactions = ref([]);
 
 onMounted(async () => {
-  const res = await axios.get(`/companies/${id}/transactions`);
+  const res = await axios.get(`companies/${id}/transactions`);
   company.value = res.data.data?.company || null;
-  transactions.value = res.data.data?.transactions || res.data.data || [];
+  transactions.value = res.data.data?.transactions || [];
 });
 </script>

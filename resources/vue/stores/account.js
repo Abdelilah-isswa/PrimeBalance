@@ -14,8 +14,8 @@ export const useAccountStore = defineStore('account', {
     async fetchAccounts(companyId) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/accounts`);
-        this.accounts = response.data.data ?? [];
+        const response = await axios.get(`companies/${companyId}/accounts`);
+        this.accounts = response.data.data.accounts ?? [];
       } catch (error) {
         console.error('Fetch accounts error:', error);
       } finally {
@@ -25,7 +25,7 @@ export const useAccountStore = defineStore('account', {
     async fetchAccount(companyId, id) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/accounts/${id}`);
+        const response = await axios.get(`companies/${companyId}/accounts/${id}`);
         this.currentAccount = response.data.data;
         return this.currentAccount;
       } catch (error) {
@@ -36,7 +36,7 @@ export const useAccountStore = defineStore('account', {
     },
     async createAccount(companyId, data) {
       try {
-        const response = await axios.post(`/api/v1/companies/${companyId}/accounts`, data);
+        const response = await axios.post(`companies/${companyId}/accounts`, data);
         this.accounts.push(response.data.data);
         return response.data.data;
       } catch (error) {
@@ -45,7 +45,7 @@ export const useAccountStore = defineStore('account', {
     },
     async updateAccount(companyId, id, data) {
       try {
-        const response = await axios.put(`/api/v1/companies/${companyId}/accounts/${id}`, data);
+        const response = await axios.put(`companies/${companyId}/accounts/${id}`, data);
         const index = this.accounts.findIndex(a => a.id === id);
         if (index !== -1) this.accounts[index] = response.data.data;
         if (this.currentAccount?.id === id) this.currentAccount = response.data.data;

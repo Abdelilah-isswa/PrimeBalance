@@ -11,8 +11,8 @@ export const useBillStore = defineStore('bill', {
     async fetchBills(companyId) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/bills`);
-        this.bills = response.data.data ?? [];
+        const response = await axios.get(`companies/${companyId}/bills`);
+        this.bills = response.data.data.bills ?? [];
       } catch (error) {
         console.error('Fetch bills error:', error);
       } finally {
@@ -22,7 +22,7 @@ export const useBillStore = defineStore('bill', {
     async fetchBill(companyId, id) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/bills/${id}`);
+        const response = await axios.get(`companies/${companyId}/bills/${id}`);
         this.currentBill = response.data.data;
         return this.currentBill;
       } catch (error) {
@@ -33,7 +33,7 @@ export const useBillStore = defineStore('bill', {
     },
     async createBill(companyId, data) {
       try {
-        const response = await axios.post(`/api/v1/companies/${companyId}/suppliers/${data.supplier_id}/bills`, data);
+        const response = await axios.post(`companies/${companyId}/suppliers/${data.supplier_id}/bills`, data);
         this.bills.unshift(response.data.data);
         return response.data.data;
       } catch (error) {
@@ -42,7 +42,7 @@ export const useBillStore = defineStore('bill', {
     },
     async updateBill(companyId, id, data) {
       try {
-        const response = await axios.put(`/api/v1/companies/${companyId}/bills/${id}`, data);
+        const response = await axios.put(`companies/${companyId}/bills/${id}`, data);
         const index = this.bills.findIndex(b => b.id === id);
         if (index !== -1) this.bills[index] = response.data.data;
         if (this.currentBill?.id === id) this.currentBill = response.data.data;
@@ -52,7 +52,7 @@ export const useBillStore = defineStore('bill', {
     },
     async payBill(companyId, id, amount) {
       try {
-        const response = await axios.post(`/api/v1/companies/${companyId}/bills/${id}/pay`, { amount });
+        const response = await axios.post(`companies/${companyId}/bills/${id}/pay`, { amount });
         await this.fetchBill(companyId, id);
       } catch (error) {
         console.error('Pay bill error:', error);

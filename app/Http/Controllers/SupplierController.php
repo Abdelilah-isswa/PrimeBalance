@@ -6,11 +6,12 @@ use App\Services\SupplierService;
 use App\Models\Supplier;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class SupplierController extends Controller
+class SupplierController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -21,24 +22,11 @@ class SupplierController extends Controller
         $this->supplierService = $supplierService;
     }
 
-    public function create($companyId)
-    {
-        $company = $this->getCompanyForOwner($companyId, 'create suppliers');
-        return view('suppliers.create', compact('company'));
-    }
-
     public function store(StoreSupplierRequest $request, $companyId)
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
-        $this->supplierService->createSupplier($data);
-        return redirect()->route('companies.show', $companyId);
-    }
-
-    public function edit($companyId, $supplierId)
-    {
-        $company = $this->getCompanyForOwner($companyId, 'edit suppliers');
-        $supplier = $company->suppliers()->findOrFail($supplierId);
-        return view('suppliers.edit', compact('company', 'supplier'));
+        $supplier = $this->supplierService->createSupplier($data);
+        return $this->sendCreated($supplier);
     }
 
     public function update(UpdateSupplierRequest $request, $companyId, $supplierId)
@@ -46,7 +34,7 @@ class SupplierController extends Controller
         $company = $this->getCompanyForOwner($companyId, 'update suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         $this->supplierService->updateSupplier($supplier, $request->validated());
-        return redirect()->route('companies.show', $companyId)->with('success', 'Supplier updated');
+        return $this->sendResponse($supplier->fresh(), 'Supplier updated');
     }
 
     public function destroy($companyId, $supplierId)
@@ -55,10 +43,10 @@ class SupplierController extends Controller
         $supplier = $company->suppliers()->findOrFail($supplierId);
         
         if (!$this->supplierService->deleteSupplier($supplier)) {
-            return back()->with('error', 'Cannot delete supplier with bills');
+            return $this->sendError('Cannot delete supplier with bills');
         }
         
-        return redirect()->route('companies.show', $companyId)->with('success', 'Supplier deleted');
+        return $this->sendResponse([], 'Supplier deleted');
     }
 
     public function balances($companyId)
@@ -67,6 +55,6 @@ class SupplierController extends Controller
         $suppliers = $company->suppliers()->with('bills')->get();
         $suppliers = $this->supplierService->calculateSupplierBalances($suppliers);
         
-        return view('suppliers.balances', compact('company', 'suppliers'));
+        return $this->sendResponse(compact('company', 'suppliers'));
     }
 }

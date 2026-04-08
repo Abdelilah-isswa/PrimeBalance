@@ -11,7 +11,7 @@ export const useClientStore = defineStore('client', {
     async fetchClients(companyId) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/clients`);
+        const response = await axios.get(`companies/${companyId}/clients`);
         this.clients = response.data.data;
       } catch (error) {
         console.error('Fetch clients error:', error);
@@ -22,7 +22,7 @@ export const useClientStore = defineStore('client', {
     async fetchClient(companyId, id) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/clients/${id}`);
+        const response = await axios.get(`companies/${companyId}/clients/${id}`);
         this.currentClient = response.data.data;
         return this.currentClient;
       } catch (error) {
@@ -33,7 +33,7 @@ export const useClientStore = defineStore('client', {
     },
     async createClient(companyId, data) {
       try {
-        const response = await axios.post(`/api/v1/companies/${companyId}/clients`, data);
+        const response = await axios.post(`companies/${companyId}/clients`, data);
         this.clients.push(response.data.data);
         return response.data.data;
       } catch (error) {
@@ -42,7 +42,7 @@ export const useClientStore = defineStore('client', {
     },
     async updateClient(companyId, id, data) {
       try {
-        const response = await axios.put(`/api/v1/companies/${companyId}/clients/${id}`, data);
+        const response = await axios.put(`companies/${companyId}/clients/${id}`, data);
         const index = this.clients.findIndex(c => c.id === id);
         if (index !== -1) this.clients[index] = response.data.data;
         if (this.currentClient?.id === id) this.currentClient = response.data.data;

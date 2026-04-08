@@ -42,7 +42,7 @@ const company = ref(null);
 const bills = ref([]);
 
 onMounted(async () => {
-  const res = await axios.get(`/companies/${id}/bills`);
+  const res = await axios.get(`companies/${id}/bills`);
   company.value = res.data.data.company;
   bills.value = res.data.data.bills;
 });

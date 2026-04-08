@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000/api/v1';
+axios.defaults.baseURL = 'http://127.0.0.1:8000/api/v1/';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 if (localStorage.getItem('token')) {
@@ -15,12 +15,12 @@ export const useAuthStore = defineStore('auth', {
   }),
   actions: {
     async login(credentials) {
-      const response = await axios.post('/login', credentials);
+      const response = await axios.post('login', credentials);
       this.token = response.data.data.token;
       localStorage.setItem('token', this.token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
       // Fetch user after login
-      const userResponse = await axios.get('/user');
+      const userResponse = await axios.get('user');
       this.user = userResponse.data.data;
     },
     logout() {

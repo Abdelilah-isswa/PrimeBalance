@@ -75,7 +75,7 @@
     <!-- Main Content -->
     <main class="pb-main-content">
       <div class="pb-content-wrapper">
-        <slot />
+        <router-view />
       </div>
     </main>
   </div>
@@ -104,6 +104,12 @@ const currentCompanyId = ref(String(props.companyId || route.params.companyId ||
 onMounted(async () => {
   if (companyStore.companies.length === 0) {
     await companyStore.fetchCompanies()
+  }
+
+  // Auto-select first company if none
+  if (companyStore.companies.length > 0 && !currentCompanyId.value && !route.params.companyId) {
+    currentCompanyId.value = String(companyStore.companies[0].id)
+    router.push(`/companies/${currentCompanyId.value}`)
   }
 
   const companyId = route.params.companyId || props.companyId

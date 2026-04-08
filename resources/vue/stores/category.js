@@ -10,7 +10,7 @@ export const useCategoryStore = defineStore('category', {
     async fetchCategories(companyId) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/categories`);
+        const response = await axios.get(`companies/${companyId}/categories`);
         this.categories = response.data.data;
       } catch (error) {
         console.error('Fetch categories error:', error);
@@ -20,7 +20,7 @@ export const useCategoryStore = defineStore('category', {
     },
     async createCategory(companyId, data) {
       try {
-        const response = await axios.post(`/api/v1/companies/${companyId}/categories`, data);
+        const response = await axios.post(`companies/${companyId}/categories`, data);
         this.categories.push(response.data.data);
         return response.data.data;
       } catch (error) {
@@ -29,7 +29,7 @@ export const useCategoryStore = defineStore('category', {
     },
     async updateCategory(companyId, id, data) {
       try {
-        const response = await axios.put(`/api/v1/companies/${companyId}/categories/${id}`, data);
+        const response = await axios.put(`companies/${companyId}/categories/${id}`, data);
         const index = this.categories.findIndex(c => c.id === id);
         if (index !== -1) this.categories[index] = response.data.data;
       } catch (error) {

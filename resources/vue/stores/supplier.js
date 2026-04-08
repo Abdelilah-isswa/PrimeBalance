@@ -11,7 +11,7 @@ export const useSupplierStore = defineStore('supplier', {
     async fetchSuppliers(companyId) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/suppliers`);
+        const response = await axios.get(`companies/${companyId}/suppliers`);
         this.suppliers = response.data.data;
       } catch (error) {
         console.error('Fetch suppliers error:', error);
@@ -22,7 +22,7 @@ export const useSupplierStore = defineStore('supplier', {
     async fetchSupplier(companyId, id) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/suppliers/${id}`);
+        const response = await axios.get(`companies/${companyId}/suppliers/${id}`);
         this.currentSupplier = response.data.data;
         return this.currentSupplier;
       } catch (error) {
@@ -33,7 +33,7 @@ export const useSupplierStore = defineStore('supplier', {
     },
     async createSupplier(companyId, data) {
       try {
-        const response = await axios.post(`/api/v1/companies/${companyId}/suppliers`, data);
+        const response = await axios.post(`companies/${companyId}/suppliers`, data);
         this.suppliers.push(response.data.data);
         return response.data.data;
       } catch (error) {
@@ -42,7 +42,7 @@ export const useSupplierStore = defineStore('supplier', {
     },
     async updateSupplier(companyId, id, data) {
       try {
-        const response = await axios.put(`/api/v1/companies/${companyId}/suppliers/${id}`, data);
+        const response = await axios.put(`companies/${companyId}/suppliers/${id}`, data);
         const index = this.suppliers.findIndex(s => s.id === id);
         if (index !== -1) this.suppliers[index] = response.data.data;
         if (this.currentSupplier?.id === id) this.currentSupplier = response.data.data;

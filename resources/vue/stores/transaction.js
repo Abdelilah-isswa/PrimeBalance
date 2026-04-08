@@ -10,8 +10,8 @@ export const useTransactionStore = defineStore('transaction', {
     async fetchTransactions(companyId) {
       this.loading = true;
       try {
-        const response = await axios.get(`/api/v1/companies/${companyId}/transactions`);
-        this.transactions = response.data.data ?? [];
+        const response = await axios.get(`companies/${companyId}/transactions`);
+        this.transactions = response.data.data.transactions ?? [];
       } catch (error) {
         console.error('Fetch transactions error:', error);
       } finally {
@@ -20,7 +20,7 @@ export const useTransactionStore = defineStore('transaction', {
     },
     async createTransaction(companyId, data) {
       try {
-        const response = await axios.post(`/api/v1/companies/${companyId}/transactions`, data);
+        const response = await axios.post(`companies/${companyId}/transactions`, data);
         this.transactions.unshift(response.data.data);
         return response.data.data;
       } catch (error) {

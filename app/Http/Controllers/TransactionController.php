@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Services\TransactionService;
 use App\Http\Requests\StoreTransactionRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class TransactionController extends Controller
+class TransactionController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -27,22 +28,13 @@ class TransactionController extends Controller
             ->orderBy('date', 'desc')
             ->get();
         
-        return view('transactions.index', compact('company', 'transactions'));
-    }
-
-    public function create($companyId)
-    {
-        $company = $this->getCompanyForOwner($companyId, 'create transactions');
-        $accounts = $company->accounts()->where('is_active', true)->get();
-        $categories = $company->categories;
-
-        return view('transactions.create', compact('company', 'accounts', 'categories'));
+        return $this->sendResponse(compact('company', 'transactions'));
     }
 
     public function store(StoreTransactionRequest $request, $companyId)
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
-        $this->transactionService->createTransaction($data);
-        return redirect()->route('transactions.index', $companyId)->with('success', 'Transaction created successfully');
+        $transaction = $this->transactionService->createTransaction($data);
+        return $this->sendCreated($transaction);
     }
 }

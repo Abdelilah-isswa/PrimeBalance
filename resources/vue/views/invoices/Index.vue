@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCompanyStore } from '../../stores/company.js';
 import { useInvoiceStore } from '../../stores/invoice.js';
@@ -41,6 +41,9 @@ const route = useRoute();
 const id = route.params.companyId;
 const companyStore = useCompanyStore();
 const invoiceStore = useInvoiceStore();
+
+const invoices = computed(() => invoiceStore.invoices);
+const company = computed(() => companyStore.currentCompany);
 
 onMounted(async () => {
   await companyStore.fetchCompany(id);
