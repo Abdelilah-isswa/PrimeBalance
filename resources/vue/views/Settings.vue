@@ -132,12 +132,9 @@ const companySuccess = ref('');
 const companyError = ref('');
 
 const currentCompany = computed(() => {
-  // Try to find the company ID from the route path to get context.
-  const routeParts = window.location.pathname.split('/');
-  const maybeId = routeParts[routeParts.indexOf('companies') + 1];
-  
-  if (maybeId && !isNaN(maybeId)) {
-    return companyStore.companies.find(c => c.id == maybeId) || companyStore.companies[0];
+  const activeId = localStorage.getItem('pb_active_company_id');
+  if (activeId) {
+    return companyStore.companies.find(c => String(c.id) === activeId) || companyStore.companies[0];
   }
   return companyStore.companies[0] || null;
 });

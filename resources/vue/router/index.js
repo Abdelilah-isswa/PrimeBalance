@@ -7,6 +7,7 @@ const routes = [
   { path: '/register', name: 'Register', component: () => import('../views/auth/Register.vue') },
   { path: '/invitations/:token', name: 'Invitation', component: () => import('../views/Invitation.vue') },
   { path: '/', name: 'Landing', component: () => import('../views/Landing.vue') },
+  { path: '/about', name: 'AboutUs', component: () => import('../views/AboutUs.vue') },
   {
     path: '/dashboard',
     component: DashboardLayout,

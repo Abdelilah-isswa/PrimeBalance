@@ -157,9 +157,13 @@ onMounted(async () => {
     }
   }
 
-  const companyId = route.params.companyId || props.companyId
+  const companyId = route.params.companyId || props.companyId || localStorage.getItem('pb_active_company_id');
   if (companyId && !currentCompanyId.value) {
     currentCompanyId.value = String(companyId)
+  }
+
+  if (currentCompanyId.value) {
+    localStorage.setItem('pb_active_company_id', currentCompanyId.value);
   }
 })
 
@@ -179,10 +183,14 @@ watch(
 )
 
 watch(currentCompanyId, (newVal, oldVal) => {
-  if (newVal && newVal !== oldVal) {
-    router.push(`/companies/${newVal}`)
+  if (newVal) {
+    localStorage.setItem('pb_active_company_id', newVal);
+    if (newVal !== oldVal) {
+      router.push(`/companies/${newVal}`);
+    }
   } else if (!newVal && oldVal) {
-    router.push('/dashboard')
+    localStorage.removeItem('pb_active_company_id');
+    router.push('/dashboard');
   }
 })
 

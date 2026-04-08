@@ -47,4 +47,9 @@ class Company extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function invitations()
+    {
+        return $this->hasMany(Invitation::class);
+    }
 }

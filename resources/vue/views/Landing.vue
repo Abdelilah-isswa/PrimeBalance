@@ -4,70 +4,22 @@
     <!-- Navbar -->
     <nav class="pb-nav">
       <div class="pb-nav-left">
-        <div class="pb-logo">
+        <router-link to="/" class="pb-logo">
           <div class="pb-logo-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="14" height="14">
               <path d="M3 12h2l2-5 3 8 2-5 2 5 2-5 2 5h2" stroke="white" fill="none"/>
             </svg>
           </div>
           <span>PrimeBalance</span>
-        </div>
+        </router-link>
         <div class="pb-nav-links">
-          <a href="#">Home</a>
-          <a href="#">Features</a>
-          <a href="#">Overview</a>
-          <a href="#">About</a>
+          <router-link to="/">Home</router-link>
+          <a href="#features">Features</a>
+          <router-link to="/about">About Us</router-link>
         </div>
       </div>
 
       <div class="pb-nav-right">
-        <template v-if="authStore.token && companies.length">
-          <select @change="switchCompany" class="pb-company-select">
-            <option v-for="c in companies" :key="c.id" :value="c.id" :selected="c.id == currentCompanyId">
-              {{ c.name }}
-            </option>
-          </select>
-
-          <div class="pb-dropdown-wrap">
-            <button class="btn-ghost" @click="dropdownOpen = !dropdownOpen">
-              Menu
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-left: 6px;">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-            </button>
-            <div v-if="dropdownOpen" class="pb-dropdown">
-              <router-link :to="`/companies/${currentCompanyId}`" @click="dropdownOpen=false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                Dashboard
-              </router-link>
-              <router-link :to="`/companies/${currentCompanyId}/clients`" @click="dropdownOpen=false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Clients
-              </router-link>
-              <router-link :to="`/companies/${currentCompanyId}/suppliers`" @click="dropdownOpen=false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                Suppliers
-              </router-link>
-              <router-link :to="`/companies/${currentCompanyId}/accounts`" @click="dropdownOpen=false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                Accounts
-              </router-link>
-              <router-link :to="`/companies/${currentCompanyId}/categories`" @click="dropdownOpen=false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                Categories
-              </router-link>
-              <router-link :to="`/companies/${currentCompanyId}/documents`" @click="dropdownOpen=false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-                Documents
-              </router-link>
-              <router-link :to="`/companies/${currentCompanyId}/transactions`" @click="dropdownOpen=false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Transactions
-              </router-link>
-            </div>
-          </div>
-        </template>
-
         <template v-if="authStore.token">
           <router-link to="/dashboard"><button class="btn-primary">Dashboard</button></router-link>
         </template>
@@ -85,11 +37,11 @@
         <div class="pb-hero-copy">
           <div class="pb-badge">
             <span class="pb-badge-dot"></span>
-            Trusted by 500+ businesses
+            Finances made beautifully simple
           </div>
           <h1>Smart books,<br><span class="pb-accent">simple life</span></h1>
           <p class="pb-hero-sub">
-            Track, plan, and grow your business finances with powerful tools designed for small businesses and sole traders.
+            Track, plan, and grow your business finances with powerful tools designed exclusively for modern businesses and ambitious founders.
           </p>
           <div class="pb-hero-ctas">
             <template v-if="authStore.token">
@@ -110,63 +62,37 @@
               <div class="pb-stat-num">98%</div>
               <div class="pb-stat-label">customer satisfaction</div>
             </div>
-            <div class="pb-stat-divider"></div>
-            <div class="pb-stat">
-              <div class="pb-stat-num">500+</div>
-              <div class="pb-stat-label">financial institutions</div>
-            </div>
           </div>
         </div>
 
         <div class="pb-hero-visual">
-          <div class="pb-visual-card pb-chart-card">
-            <div class="pb-visual-card-top">
-              <div>
-                <div class="pb-visual-label">Net profit</div>
-                <div class="pb-visual-value">$24,850</div>
-                <div class="pb-visual-sub">April 2026</div>
-              </div>
-              <span class="pb-chip-green">+12.4%</span>
-            </div>
-            <div class="pb-bars">
-              <div class="pb-bar" style="height:38px; background:#c7d2fe;"></div>
-              <div class="pb-bar" style="height:52px; background:#818cf8;"></div>
-              <div class="pb-bar" style="height:44px; background:#c7d2fe;"></div>
-              <div class="pb-bar" style="height:68px; background:#4f46e5;"></div>
-              <div class="pb-bar" style="height:48px; background:#c7d2fe;"></div>
-              <div class="pb-bar" style="height:60px; background:#818cf8;"></div>
-              <div class="pb-bar" style="height:76px; background:#4f46e5;"></div>
-            </div>
-          </div>
-
-          <div class="pb-mini-card">
-            <div class="pb-mini-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.5"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <div class="pb-mini-info">
-              <div class="pb-mini-title">Invoice paid</div>
-              <div class="pb-mini-sub">Acme Corp · just now</div>
-            </div>
-            <div class="pb-mini-amount pb-green">+$3,200</div>
-          </div>
-
-          <div class="pb-mini-card">
-            <div class="pb-mini-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </div>
-            <div class="pb-mini-info">
-              <div class="pb-mini-title">Invoice sent</div>
-              <div class="pb-mini-sub">TechStart Ltd · 2h ago</div>
-            </div>
-            <div class="pb-mini-amount">$1,850</div>
-          </div>
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dashboard Preview" class="pb-hero-img" />
         </div>
 
       </div>
     </section>
 
+    <!-- Trusted By -->
+    <section class="pb-trusted-by">
+      <p class="pb-trusted-label">TRUSTED BY INNOVATIVE COMPANIES WORLDWIDE</p>
+      <div class="pb-trusted-logos">
+        <svg fill="currentColor" width="100" height="30" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 5h5v20h-5V5zM22.5 5h15v4.5h-10v3h9v4.5h-9v3h10V25h-15V5zM42.5 25V5h5l7.5 12.5V5h5v20h-5l-7.5-12.5V25h-5zM67.5 25V5h15v4.5h-10v3h9v4.5h-9v3h10V25h-15zM87.5 25V5h5v20h-5z"/>
+        </svg>
+        <svg fill="currentColor" width="100" height="30" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="15" cy="15" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path d="M35 10v10h15v-10H35z"/>
+        </svg>
+        <svg fill="currentColor" width="100" height="30" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 25L25 5l15 20H10zM50 25h15L57.5 5 50 25z"/>
+        </svg>
+        <svg fill="currentColor" width="100" height="30" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="5" width="20" height="20" /><circle cx="45" cy="15" r="10" />
+        </svg>
+      </div>
+    </section>
+
     <!-- Features -->
-    <section class="pb-features">
+    <section id="features" class="pb-features">
       <div class="pb-features-inner">
         <div class="pb-features-header">
           <h2>Everything you need</h2>
@@ -219,6 +145,17 @@
       </div>
     </section>
 
+    <!-- Additional Real Image Banner -->
+    <section class="pb-image-banner">
+      <div class="pb-banner-inner">
+        <div class="pb-banner-text">
+          <h2>Focus on scale. We'll handle the numbers.</h2>
+          <p>Join thousands of growing startups tracking everything flawlessly in PrimeBalance.</p>
+        </div>
+        <img class="pb-banner-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Team working" />
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="pb-cta">
       <h2>Ready to get started?</h2>
@@ -231,43 +168,46 @@
       </router-link>
     </section>
 
-    <!-- Footer -->
+    <!-- Footer with Links and Socials -->
     <footer class="pb-footer">
-      © {{ new Date().getFullYear() }} PrimeBalance. All rights reserved.
+      <div class="pb-footer-content">
+        <div class="pb-brand">
+          <div class="pb-logo-icon pb-footer-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="14" height="14">
+              <path d="M3 12h2l2-5 3 8 2-5 2 5 2-5 2 5h2" stroke="white" fill="none"/>
+            </svg>
+          </div>
+          <span style="font-size: 15px; font-weight: 700; color: #1a1a2e;">PrimeBalance</span>
+          <p style="margin-top: 10px; color: #64748b; font-size: 13px;">Making accounting accessible for modern companies.</p>
+        </div>
+        
+        <div class="pb-footer-links-group">
+          <strong>Product</strong>
+          <a href="#features">Features</a>
+          <router-link to="/about">Pricing</router-link>
+          <router-link to="/about">About Us</router-link>
+        </div>
+
+        <div class="pb-footer-links-group">
+          <strong>Connect</strong>
+          <div class="pb-socials">
+            <a href="#" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg></a>
+            <a href="#" aria-label="GitHub"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a>
+            <a href="#" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="pb-footer-bottom">
+        © {{ new Date().getFullYear() }} PrimeBalance. All rights reserved.
+      </div>
     </footer>
 
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth.js';
-import axios from 'axios';
-
 const authStore = useAuthStore();
-const router = useRouter();
-const companies = ref([]);
-const currentCompanyId = ref(null);
-const dropdownOpen = ref(false);
-
-onMounted(async () => {
-  if (authStore.token) {
-    try {
-      const res = await axios.get('/companies');
-      companies.value = res.data.data;
-      if (companies.value.length > 0) {
-        currentCompanyId.value = companies.value[0].id;
-      }
-    } catch {}
-  }
-});
-
-const switchCompany = (e) => {
-  currentCompanyId.value = e.target.value;
-  dropdownOpen.value = false;
-  router.push(`/companies/${e.target.value}`);
-};
 </script>
 
 <style scoped>
@@ -341,48 +281,6 @@ const switchCompany = (e) => {
   gap: 10px;
 }
 
-.pb-company-select {
-  padding: 6px 10px;
-  background: #f8fafc;
-  color: #1a1a2e;
-  border: 0.5px solid #e2e8f0;
-  border-radius: 20px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.pb-dropdown-wrap {
-  position: relative;
-}
-
-.pb-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: #ffffff;
-  border: 0.5px solid #e2e8f0;
-  border-radius: 12px;
-  min-width: 200px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  overflow: hidden;
-  z-index: 200;
-}
-
-.pb-dropdown a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0.7rem 1rem;
-  font-size: 13px;
-  color: #374151;
-  text-decoration: none;
-  border-bottom: 0.5px solid #f1f5f9;
-  transition: background 0.15s;
-}
-
-.pb-dropdown a:last-child { border-bottom: none; }
-.pb-dropdown a:hover { background: #f8fafc; }
-
 /* Buttons */
 .btn-ghost {
   padding: 7px 16px;
@@ -395,6 +293,7 @@ const switchCompany = (e) => {
   transition: background 0.15s;
   display: inline-flex;
   align-items: center;
+  text-decoration: none;
 }
 .btn-ghost:hover { background: #f8fafc; }
 
@@ -408,6 +307,7 @@ const switchCompany = (e) => {
   cursor: pointer;
   font-weight: 500;
   transition: background 0.15s;
+  text-decoration: none;
 }
 .btn-primary:hover { background: #4338ca; }
 
@@ -522,117 +422,48 @@ const switchCompany = (e) => {
   background: #e2e8f0;
 }
 
-/* Hero Visual */
+/* Hero Visual Real Image */
 .pb-hero-visual {
-  background: linear-gradient(145deg, #f0effe 0%, #e8e4fd 100%);
-  border-radius: 24px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  transform: translateY(-20px);
+}
+.pb-hero-img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
-.pb-visual-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 1.25rem;
-  border: 0.5px solid rgba(79,70,229,0.12);
+/* ── Trusted By ─────────────────────────────────────────────  */
+.pb-trusted-by {
+  padding: 4rem 2.5rem;
+  text-align: center;
+  background: #f8fafc;
+  margin-top: 5rem;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
 }
-
-.pb-visual-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.pb-visual-label {
-  font-size: 11px;
-  color: #8b7ad1;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.pb-visual-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1a1a2e;
-}
-
-.pb-visual-sub {
+.pb-trusted-label {
   font-size: 12px;
+  font-weight: 700;
   color: #94a3b8;
-  margin-top: 2px;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
 }
-
-.pb-chip-green {
-  background: #d1fae5;
-  color: #065f46;
-  font-size: 11px;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-weight: 500;
-}
-
-.pb-bars {
+.pb-trusted-logos {
   display: flex;
-  gap: 6px;
-  align-items: flex-end;
-}
-
-.pb-bar {
-  flex: 1;
-  border-radius: 4px 4px 0 0;
-}
-
-.pb-mini-card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 0.85rem 1rem;
-  border: 0.5px solid rgba(79,70,229,0.1);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pb-mini-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: #f3f4f6;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-}
-
-.pb-mini-info { flex: 1; }
-
-.pb-mini-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: #1a1a2e;
-}
-
-.pb-mini-sub {
-  font-size: 11px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4rem;
   color: #94a3b8;
 }
-
-.pb-mini-amount {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1a1a2e;
-}
-
-.pb-green { color: #059669; }
 
 /* ── Features ─────────────────────────────────────────────── */
 .pb-features {
   padding: 5rem 2.5rem;
-  background: #f8fafc;
-  margin-top: 5rem;
+  background: #ffffff;
 }
 
 .pb-features-inner {
@@ -700,6 +531,40 @@ const switchCompany = (e) => {
   line-height: 1.6;
 }
 
+/* Image Banner */
+.pb-image-banner {
+  padding: 5rem 2.5rem;
+  background: #f8fafc;
+}
+.pb-banner-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+.pb-banner-text h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #1a1a2e;
+}
+.pb-banner-text p {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.pb-banner-img {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
 /* ── CTA ──────────────────────────────────────────────────── */
 .pb-cta {
   padding: 5rem 2.5rem;
@@ -723,19 +588,69 @@ const switchCompany = (e) => {
 
 /* ── Footer ───────────────────────────────────────────────── */
 .pb-footer {
-  padding: 1.5rem;
+  padding: 4rem 2.5rem 1.5rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+.pb-footer-content {
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2rem;
+}
+.pb-brand .pb-footer-icon {
+  margin-bottom: 1rem;
+}
+.pb-footer-links-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pb-footer-links-group strong {
+  font-size: 14px;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+.pb-footer-links-group a {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.15s;
+}
+.pb-footer-links-group a:hover {
+  color: #4f46e5;
+}
+.pb-socials {
+  display: flex;
+  gap: 1rem;
+}
+.pb-socials a {
+  color: #94a3b8;
+}
+.pb-socials a:hover {
+  color: #4f46e5;
+}
+.pb-footer-bottom {
   text-align: center;
   font-size: 12px;
   color: #94a3b8;
-  border-top: 0.5px solid #e2e8f0;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .pb-hero-inner {
+  .pb-hero-inner, .pb-banner-inner {
     grid-template-columns: 1fr;
     gap: 2.5rem;
     padding-bottom: 2rem;
+  }
+  .pb-banner-inner {
+    flex-direction: column;
+    text-align: center;
   }
 
   .pb-hero-copy h1 { font-size: 2.2rem; }
@@ -750,6 +665,10 @@ const switchCompany = (e) => {
   .pb-stat-divider { display: none; }
 
   .pb-features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pb-footer-content {
     grid-template-columns: 1fr;
   }
 }

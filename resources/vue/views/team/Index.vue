@@ -56,9 +56,9 @@
                   <template v-if="editRoleId === member.id">
                     <select v-model="editRoleValue" class="pb-input pb-input-sm" style="min-width: 130px;">
                       <option value="owner">Owner</option>
-                      <option value="admin">Admin</option>
                       <option value="accountant">Accountant</option>
-                      <option value="user">User</option>
+                      <option value="standard_user">Standard User</option>
+                      <option value="viewer">Viewer</option>
                     </select>
                   </template>
                   <template v-else>
@@ -166,9 +166,9 @@
               <label class="pb-label">Workspace Role</label>
               <select v-model="inviteForm.role" class="pb-input" required>
                 <option value="owner">Owner (Full Access & Billing)</option>
-                <option value="admin">Admin (Manage Data & Team)</option>
                 <option value="accountant">Accountant (Manage Books)</option>
-                <option value="user">User (View Only)</option>
+                <option value="standard_user">Standard User (Manage Data)</option>
+                <option value="viewer">Viewer (Read Only)</option>
               </select>
             </div>
           </div>
@@ -204,7 +204,7 @@ const invitations = ref([]);
 const editRoleId = ref(null);
 const editRoleValue = ref('');
 
-const inviteForm = ref({ email: '', role: 'user' });
+const inviteForm = ref({ email: '', role: 'standard_user' });
 const successMsg = ref('');
 const errorMsg = ref('');
 
@@ -239,7 +239,7 @@ const sendInvite = async () => {
     await axios.post(`companies/${id}/invite`, inviteForm.value);
     successMsg.value = 'Invitation sent successfully!';
     inviteForm.value.email = '';
-    inviteForm.value.role = 'user';
+    inviteForm.value.role = 'standard_user';
     fetchInvitations();
     setTimeout(() => { successMsg.value = ''; }, 3000);
   } catch (err) {
@@ -264,7 +264,7 @@ const revokeInvitation = async (invId) => {
 
 const startRoleEdit = (member) => {
   editRoleId.value = member.id;
-  editRoleValue.value = member.pivot?.role || 'user';
+  editRoleValue.value = member.pivot?.role || 'standard_user';
 };
 
 const saveRole = async (userId) => {
@@ -303,7 +303,7 @@ const formatDate = (dateString) => {
 const getRoleBadgeClass = (role) => {
   switch(role) {
     case 'owner': return 'pb-status--owner';
-    case 'admin': return 'pb-status--admin';
+    case 'accountant': return 'pb-status--admin';
     default: return 'pb-status--active';
   }
 };
