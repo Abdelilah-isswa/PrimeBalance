@@ -382,8 +382,7 @@ const createBill = async () => {
 
 /* Form Styles */
 .pb-form-card {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .pb-card-header {

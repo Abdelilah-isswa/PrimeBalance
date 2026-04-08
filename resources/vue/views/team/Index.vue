@@ -354,7 +354,7 @@ const getRoleBadgeClass = (role) => {
 .pb-icon-neutral:hover { color: #475569; background: #e2e8f0; }
 .pb-empty-row { text-align: center; padding: 4rem !important; color: #94a3b8; }
 
-.pb-form-card { max-width: 800px; margin: 0 auto; }
+.pb-form-card { width: 100%; }
 .pb-card-header { padding: 2rem; border-bottom: 1px solid #f1f5f9; }
 .pb-card-title { font-size: 20px; font-weight: 700; margin: 0 0 8px 0; color: #1a1a2e; }
 .pb-card-subtitle { font-size: 14px; color: #64748b; margin: 0; }

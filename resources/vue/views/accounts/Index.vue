@@ -46,7 +46,7 @@
                   <td style="padding: 8px;">
                     <input v-model="form.name" type="text" class="pb-input pb-input-sm" required autofocus>
                   </td>
-                  <td style="padding: 8px;" class="pb-text-right">
+                  <td style="padding: 8px; text-align: right;">
                     <input v-model="form.balance" type="number" step="0.01" class="pb-input pb-input-sm pb-text-right" required>
                   </td>
                   <td style="padding: 8px;">
@@ -449,8 +449,7 @@ const destroyAccount = async (account) => {
 
 /* Form Styles */
 .pb-form-card {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .pb-card-header {

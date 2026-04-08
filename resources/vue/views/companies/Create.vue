@@ -115,8 +115,7 @@ const createCompany = async () => {
 }
 
 .pb-form-card {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .pb-card-header { padding: 2rem; border-bottom: 1px solid #f1f5f9; }
