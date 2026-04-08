@@ -74,6 +74,20 @@
 
     <!-- Main Content -->
     <main class="pb-main-content">
+      <header class="pb-dashboard-header">
+        <div class="pb-welcome-section">
+          <div class="pb-user-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="pb-welcome-text">
+            <h1 class="pb-greeting-title">Hi, {{ authStore.user?.name || 'there' }}</h1>
+            <p class="pb-greeting-subtitle">Welcome back. Here's what's happening with your business.</p>
+          </div>
+        </div>
+      </header>
       <div class="pb-content-wrapper">
         <router-view />
       </div>
@@ -436,9 +450,49 @@ const navLinks = computed(() => {
 }
 
 .pb-content-wrapper {
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+/* New Top Header Styles */
+.pb-dashboard-header {
+  padding: 1.5rem 2rem;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+
+.pb-welcome-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pb-user-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4f46e5;
+  flex-shrink: 0;
+}
+
+.pb-greeting-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pb-greeting-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0 0 0;
 }
 
 /* Scrollbar Styling */
