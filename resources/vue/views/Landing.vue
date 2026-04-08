@@ -80,18 +80,12 @@
     <section class="pb-trusted-by">
       <p class="pb-trusted-label">TRUSTED BY INNOVATIVE COMPANIES WORLDWIDE</p>
       <div class="pb-trusted-logos">
-        <svg fill="currentColor" width="100" height="30" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12.5 5h5v20h-5V5zM22.5 5h15v4.5h-10v3h9v4.5h-9v3h10V25h-15V5zM42.5 25V5h5l7.5 12.5V5h5v20h-5l-7.5-12.5V25h-5zM67.5 25V5h15v4.5h-10v3h9v4.5h-9v3h10V25h-15zM87.5 25V5h5v20h-5z"/>
-        </svg>
-        <svg fill="currentColor" width="100" height="30" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="15" cy="15" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path d="M35 10v10h15v-10H35z"/>
-        </svg>
-        <svg fill="currentColor" width="100" height="30" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 25L25 5l15 20H10zM50 25h15L57.5 5 50 25z"/>
-        </svg>
-        <svg fill="currentColor" width="100" height="30" viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg">
-          <rect x="5" y="5" width="20" height="20" /><circle cx="45" cy="15" r="10" />
-        </svg>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" height="26" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Shopify_logo_2018.svg" alt="Shopify" height="26" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Slack_Technologies_Logo.svg" alt="Slack" height="22" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg" alt="Figma" height="26" class="pb-trusted-logo pb-trusted-logo--icon" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS" height="26" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Hubspot_logo.svg" alt="HubSpot" height="26" class="pb-trusted-logo" />
       </div>
     </section>
 
@@ -467,8 +461,15 @@ const authStore = useAuthStore();
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4rem;
-  color: #94a3b8;
+  gap: 3.5rem;
+}
+.pb-trusted-logo {
+  filter: grayscale(100%) opacity(0.45);
+  transition: filter 0.25s;
+  object-fit: contain;
+}
+.pb-trusted-logo:hover {
+  filter: grayscale(0%) opacity(1);
 }
 
 /* ── Features ─────────────────────────────────────────────── */
