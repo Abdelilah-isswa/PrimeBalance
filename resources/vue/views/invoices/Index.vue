@@ -91,6 +91,9 @@
         </div>
         
         <form @submit.prevent="handleSubmit" class="pb-form" style="padding: 2rem;">
+          <div v-if="formError" class="pb-alert pb-alert-error">{{ formError }}</div>
+          <div v-if="formSuccess" class="pb-alert pb-alert-success">{{ formSuccess }}</div>
+
           <!-- Client Selection & Due Date -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
             <div>
@@ -191,10 +194,10 @@
             <button type="button" @click="activeTab = 'manage'" style="padding: 0.55rem 1.5rem; background: #94a3b8; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">
               Cancel
             </button>
-            <button type="button" @click="submit('draft')" :disabled="submitting || form.items.length === 0 || dueDateError" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; opacity: var(--opacity);" :style="{ opacity: (submitting || form.items.length === 0 || dueDateError) ? 0.5 : 1 }">
+            <button type="button" @click="submit('draft')" :disabled="submitting" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; opacity: var(--opacity);" :style="{ opacity: submitting ? 0.5 : 1 }">
               {{ submitting ? 'Processing...' : 'Save as Draft' }}
             </button>
-            <button type="submit" :disabled="submitting || form.items.length === 0 || dueDateError" style="padding: 0.55rem 1.5rem; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: (submitting || form.items.length === 0 || dueDateError) ? 0.5 : 1 }">
+            <button type="submit" :disabled="submitting" style="padding: 0.55rem 1.5rem; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: submitting ? 0.5 : 1 }">
               {{ submitting ? 'Processing...' : 'Send Invoice' }}
             </button>
           </div>
@@ -222,6 +225,8 @@ const clientStore = useClientStore();
 const activeTab = ref('manage');
 const submitting = ref(false);
 const showItemForm = ref(false);
+const formError = ref('');
+const formSuccess = ref('');
 const form = ref({
   client_id: '',
   status: 'draft',
@@ -293,11 +298,26 @@ onMounted(async () => {
 });
 
 const submit = async (action) => {
-  if (form.value.items.length === 0) {
+  formError.value = '';
+  formSuccess.value = '';
+
+  if (!form.value.client_id) {
+    formError.value = 'Please select a client before sending the invoice.';
     return;
   }
 
-  if (!form.value.due_date || dueDateError.value) {
+  if (form.value.items.length === 0) {
+    formError.value = 'Add at least one item before sending the invoice.';
+    return;
+  }
+
+  if (!form.value.due_date) {
+    formError.value = 'Please choose a due date.';
+    return;
+  }
+
+  if (dueDateError.value) {
+    formError.value = dueDateError.value;
     return;
   }
 
@@ -314,13 +334,16 @@ const submit = async (action) => {
     }
 
     await invoiceStore.createInvoice(id, submitData);
+    formSuccess.value = action === 'send'
+      ? 'Invoice created and email was requested for sending.'
+      : 'Invoice saved as draft.';
     activeTab.value = 'manage';
     // Reset form
     form.value = { client_id: '', status: 'draft', due_date: '', items: [] };
     showItemForm.value = false;
   } catch (error) {
     console.error('Failed to create invoice:', error);
-    alert('Failed to create invoice. Please try again.');
+    formError.value = error?.response?.data?.message || 'Failed to create invoice. Please try again.';
   } finally {
     submitting.value = false;
   }
@@ -640,6 +663,26 @@ const handleSubmit = async (e) => {
 .pb-btn-secondary:hover {
   background: #f8fafc;
   color: #1e293b;
+}
+
+.pb-alert {
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pb-alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.pb-alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 /* Utilities */

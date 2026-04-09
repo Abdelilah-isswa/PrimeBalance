@@ -47,8 +47,10 @@ export const useInvoiceStore = defineStore('invoice', {
         const index = this.invoices.findIndex(i => i.id === id);
         if (index !== -1) this.invoices[index] = response.data.data;
         if (this.currentInvoice?.id === id) this.currentInvoice = response.data.data;
+        return response.data.data;
       } catch (error) {
         console.error('Update invoice error:', error);
+        throw error;
       }
     },
     async receivePayment(companyId, id, amount) {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="padding:2rem; width: 100%;">
-      <h1 style="margin-bottom: 0.5rem;">{{ isEdit ? 'Edit Invoice' : 'Create Invoice for ' + client?.name }}</h1>
+      <h1 style="margin-bottom: 0.5rem;">{{ isEdit ? 'Edit Invoice' : (client?.name ? 'Create Invoice for ' + client.name : 'Create Invoice') }}</h1>
       
       <!-- Success Result -->
       <div v-if="result" class="pb-result-card">
@@ -31,6 +31,8 @@
 
       <!-- Form -->
       <form v-else @submit.prevent="handleSubmit">
+        <div v-if="formError" class="pb-alert pb-alert-error">{{ formError }}</div>
+        <div v-if="formSuccess" class="pb-alert pb-alert-success">{{ formSuccess }}</div>
         
         <!-- Client Selection & Due Date -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
@@ -38,6 +40,7 @@
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #64748b; font-size: 0.9rem;">Client *</label>
             <select v-model="form.client_id" required style="width: 100%; padding: 0.6rem 0.75rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #fff; color: #1a1a2e;">
               <option disabled value="">Select a client</option>
+              <option v-for="entry in clients" :key="entry.id" :value="entry.id">{{ entry.name }}</option>
             </select>
           </div>
 
@@ -122,13 +125,13 @@
         <!-- Form Actions -->
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
           <router-link :to="`/companies/${companyId}`"><button type="button" style="padding: 0.55rem 1.5rem; background: #94a3b8; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">Cancel</button></router-link>
-          <button v-if="isEdit" type="button" @click="submit('draft')" :disabled="submitting || form.items.length === 0 || dueDateError" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: (submitting || form.items.length === 0 || dueDateError) ? 0.5 : 1 }">
+          <button v-if="isEdit" type="button" @click="submit('draft')" :disabled="submitting" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: submitting ? 0.5 : 1 }">
             {{ submitting ? 'Saving...' : 'Save Changes' }}
           </button>
-          <button v-if="!isEdit" type="button" @click="submit('draft')" :disabled="submitting || form.items.length === 0 || dueDateError" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: (submitting || form.items.length === 0 || dueDateError) ? 0.5 : 1 }">
+          <button v-if="!isEdit" type="button" @click="submit('draft')" :disabled="submitting" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: submitting ? 0.5 : 1 }">
             {{ submitting ? 'Processing...' : 'Save as Draft' }}
           </button>
-          <button type="submit" :disabled="submitting || form.items.length === 0 || dueDateError" style="padding: 0.55rem 1.5rem; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: (submitting || form.items.length === 0 || dueDateError) ? 0.5 : 1 }">
+          <button type="submit" :disabled="submitting" style="padding: 0.55rem 1.5rem; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: submitting ? 0.5 : 1 }">
             {{ submitting ? 'Processing...' : isEdit ? 'Save & Send' : 'Send Invoice' }}
           </button>
         </div>
@@ -164,6 +167,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useInvoiceStore } from '../../stores/invoice.js';
+import { useClientStore } from '../../stores/client.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -172,12 +176,16 @@ const clientId = route.params.clientId;
 const invoiceId = route.params.invoiceId;
 
 const invoiceStore = useInvoiceStore();
+const clientStore = useClientStore();
 
 const isEdit = computed(() => !!invoiceId);
+const clients = computed(() => clientStore.clients || []);
 const client = ref(null);
 const submitting = ref(false);
 const showItemForm = ref(false);
 const result = ref(null);
+const formError = ref('');
+const formSuccess = ref('');
 const form = ref({ 
   total_amount: '', 
   status: 'draft', 
@@ -237,6 +245,10 @@ const removeItem = (index) => {
 };
 
 onMounted(async () => {
+  if (!isEdit.value) {
+    await clientStore.fetchClients(companyId);
+  }
+
   if (isEdit.value) {
     const res = await invoiceStore.fetchInvoice(companyId, invoiceId);
     form.value = { 
@@ -251,17 +263,38 @@ onMounted(async () => {
 });
 
 const submit = async (action) => {
-  if (form.value.items.length === 0) {
+  formError.value = '';
+  formSuccess.value = '';
+
+  if (!isEdit.value && !clients.value.length) {
+    formError.value = 'No clients available. Please create a client first.';
     return;
   }
 
-  if (!form.value.due_date || dueDateError.value) {
+  if (!isEdit.value && !form.value.client_id) {
+    formError.value = 'Please select a client before sending the invoice.';
+    return;
+  }
+
+  if (form.value.items.length === 0) {
+    formError.value = 'Add at least one item before sending the invoice.';
+    return;
+  }
+
+  if (!form.value.due_date) {
+    formError.value = 'Please choose a due date.';
+    return;
+  }
+
+  if (dueDateError.value) {
+    formError.value = dueDateError.value;
     return;
   }
 
   submitting.value = true;
   try {
     const submitData = {
+      ...(isEdit.value ? {} : { client_id: form.value.client_id }),
       status: form.value.status,
       due_date: form.value.due_date,
       items: form.value.items,
@@ -276,6 +309,7 @@ const submit = async (action) => {
       if (action === 'send') {
         // For edit + send, show success and navigate after
         result.value = invoiceStore.currentInvoice;
+        formSuccess.value = 'Invoice updated and email was requested for sending.';
       } else {
         router.push(`/companies/${companyId}/invoices/${invoiceId}`);
       }
@@ -284,13 +318,14 @@ const submit = async (action) => {
       if (action === 'send') {
         // Show success card for 3 seconds then navigate
         result.value = invoice;
+        formSuccess.value = 'Invoice created and email was requested for sending.';
       } else {
         router.push(`/companies/${companyId}`);
       }
     }
   } catch (error) {
     console.error('Error:', error);
-    alert('Failed to save invoice');
+    formError.value = error?.response?.data?.message || 'Failed to save invoice';
   } finally {
     submitting.value = false;
   }
