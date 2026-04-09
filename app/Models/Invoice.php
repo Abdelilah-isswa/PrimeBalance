@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    protected $fillable = ['company_id', 'client_id', 'status', 'total_amount', 'due_date', 'created_by'];
+    protected $fillable = ['company_id', 'client_id', 'status', 'total_amount', 'due_date', 'created_by', 'amount_paid'];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
+        'amount_paid' => 'decimal:2',
         'due_date' => 'date',
     ];
 

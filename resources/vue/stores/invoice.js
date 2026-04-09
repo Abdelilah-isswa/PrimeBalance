@@ -54,8 +54,13 @@ export const useInvoiceStore = defineStore('invoice', {
     async receivePayment(companyId, id, amount) {
       try {
         const response = await axios.post(`companies/${companyId}/invoices/${id}/receive`, { amount });
-        // Refresh invoice
+        // Refresh invoice and update the list
         await this.fetchInvoice(companyId, id);
+        // Update the invoice in the list as well
+        const index = this.invoices.findIndex(i => i.id === id);
+        if (index !== -1) {
+          this.invoices[index] = this.currentInvoice;
+        }
       } catch (error) {
         console.error('Receive payment error:', error);
       }

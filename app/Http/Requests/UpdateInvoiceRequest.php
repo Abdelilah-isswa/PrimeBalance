@@ -18,8 +18,9 @@ class UpdateInvoiceRequest extends FormRequest
     {
         return [
             'total_amount' => 'nullable|numeric|min:0',
-            'status' => 'required|in:draft,sent,paid,cancelled',
-            'due_date' => 'nullable|date',
+            'status' => 'required|in:draft,sent,partial,paid,cancelled',
+            'due_date' => 'nullable|date|after:today',
+            'send_email' => 'boolean',
             'items' => 'nullable|array|min:1',
             'items.*.description' => 'required|string|max:255',
             'items.*.price' => 'required|numeric|min:0',

@@ -115,12 +115,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useInvoiceStore } from '../../stores/invoice.js';
 import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
 const id = route.params.companyId;
 const invoiceId = route.params.invoiceId;
+
+const invoiceStore = useInvoiceStore();
 
 const company = ref(null);
 const invoice = ref(null);
@@ -163,6 +166,15 @@ const submit = async () => {
   try {
     const res = await axios.post(`companies/${id}/invoices/${invoiceId}/receive`, form.value);
     result.value = res.data.data;
+    // Update the store to reflect the payment in the invoices list
+    await invoiceStore.fetchInvoice(id, invoiceId);
+    const index = invoiceStore.invoices.findIndex(i => i.id === invoiceId);
+    if (index !== -1) {
+      invoiceStore.invoices[index] = invoiceStore.currentInvoice;
+    }
+    // Refresh local invoice data to show updated amount_paid
+    const invoiceRes = await axios.get(`companies/${id}/invoices/${invoiceId}/receive`);
+    invoice.value = invoiceRes.data.data.invoice;
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to record payment.';
   } finally {

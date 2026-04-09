@@ -80,12 +80,12 @@
     <section class="pb-trusted-by">
       <p class="pb-trusted-label">TRUSTED BY INNOVATIVE COMPANIES WORLDWIDE</p>
       <div class="pb-trusted-logos">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" height="26" class="pb-trusted-logo" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Shopify_logo_2018.svg" alt="Shopify" height="26" class="pb-trusted-logo" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Slack_Technologies_Logo.svg" alt="Slack" height="22" class="pb-trusted-logo" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg" alt="Figma" height="26" class="pb-trusted-logo pb-trusted-logo--icon" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS" height="26" class="pb-trusted-logo" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Hubspot_logo.svg" alt="HubSpot" height="26" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Shopify_logo_2018.svg" alt="Shopify" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Slack_Technologies_Logo.svg" alt="Slack" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg" alt="Figma" class="pb-trusted-logo" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS" class="pb-trusted-logo" />
+       
       </div>
     </section>
 
@@ -464,9 +464,14 @@ const authStore = useAuthStore();
   gap: 3.5rem;
 }
 .pb-trusted-logo {
-  filter: grayscale(100%) opacity(0.45);
-  transition: filter 0.25s;
+  height: 32px;
+  max-width: 140px;
   object-fit: contain;
+  filter: grayscale(100%) opacity(0.45);
+  transition: filter 0.25s, opacity 0.25s;
+}
+.pb-trusted-logo:hover {
+  filter: grayscale(0%) opacity(1);
 }
 .pb-trusted-logo:hover {
   filter: grayscale(0%) opacity(1);

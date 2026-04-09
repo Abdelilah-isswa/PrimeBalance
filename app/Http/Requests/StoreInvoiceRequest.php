@@ -18,7 +18,7 @@ class StoreInvoiceRequest extends FormRequest
     {
         return [
             'total_amount' => 'nullable|numeric|min:0',
-            'status' => 'required|in:draft,sent,paid,cancelled',
+            'status' => 'required|in:draft,sent,partial,paid,cancelled',
             'due_date' => 'required|date|after:today',
             'send_email' => 'boolean',
             'items' => 'nullable|array|min:1',

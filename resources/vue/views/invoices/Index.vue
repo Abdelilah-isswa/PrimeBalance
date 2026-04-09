@@ -38,7 +38,8 @@
                 <th>Status</th>
                 <th>Created By</th>
                 <th>Date</th>
-                <th class="pb-text-right">Amount</th>
+                <th class="pb-text-right">Total</th>
+                <th class="pb-text-right">Paid</th>
                 <th class="pb-text-center">Actions</th>
               </tr>
             </thead>
@@ -63,6 +64,9 @@
                 <td class="pb-text-right pb-font-bold">
                   {{ company?.currency }} {{ Number(inv.total_amount).toFixed(2) }}
                 </td>
+                <td class="pb-text-right" :style="{ color: inv.amount_paid > 0 ? '#059669' : '#94a3b8' }">
+                  <strong>{{ company?.currency }} {{ Number(inv.amount_paid || 0).toFixed(2) }}</strong>
+                </td>
                 <td class="pb-text-center">
                   <router-link :to="`/companies/${id}/invoices/${inv.id}`" class="pb-view-btn">
                     View
@@ -70,7 +74,7 @@
                 </td>
               </tr>
               <tr v-if="invoices.length === 0">
-                <td colspan="7" class="pb-empty-row">No invoices found.</td>
+                <td colspan="8" class="pb-empty-row">No invoices found.</td>
               </tr>
             </tbody>
           </table>

@@ -119,10 +119,12 @@ class InvoiceService
     {
         $amountPaid   = (float) $data['amount_paid'];
         $totalAmount  = (float) $invoice->total_amount;
+        $currentPaid  = (float) ($invoice->amount_paid ?? 0);
+        $newTotalPaid = $currentPaid + $amountPaid;
         $account      = Account::findOrFail($data['account_id']);
 
         // Determine new status
-        $newStatus = $amountPaid >= $totalAmount ? 'paid' : 'partial';
+        $newStatus = $newTotalPaid >= $totalAmount ? 'paid' : 'partial';
 
         // Create income transaction
         Transaction::create([
@@ -142,10 +144,10 @@ class InvoiceService
         // Update invoice status & track amount paid
         $invoice->update([
             'status'       => $newStatus,
-            'amount_paid'  => ($invoice->amount_paid ?? 0) + $amountPaid,
+            'amount_paid'  => $newTotalPaid,
         ]);
 
-        $remaining = max(0, $totalAmount - (($invoice->amount_paid ?? 0) + $amountPaid));
+        $remaining = max(0, $totalAmount - $newTotalPaid);
 
         return [
             'status'    => $newStatus,

@@ -2,7 +2,33 @@
   <div>
     <div style="padding:2rem; width: 100%;">
       <h1 style="margin-bottom: 0.5rem;">{{ isEdit ? 'Edit Invoice' : 'Create Invoice for ' + client?.name }}</h1>
-      <form @submit.prevent="handleSubmit">
+      
+      <!-- Success Result -->
+      <div v-if="result" class="pb-result-card">
+        <div class="pb-result-icon">✓</div>
+        <h2>Invoice Sent Successfully!</h2>
+        <div class="pb-result-rows">
+          <div class="pb-result-row">
+            <span>Invoice #</span>
+            <span class="pb-text-blue">{{ result.id }}</span>
+          </div>
+          <div class="pb-result-row">
+            <span>Status</span>
+            <span :class="['pb-status-pill', `pb-status--${result.status}`]">{{ result.status }}</span>
+          </div>
+          <div class="pb-result-row">
+            <span>Amount</span>
+            <span>{{ result.total_amount }}</span>
+          </div>
+        </div>
+        <p style="color: #64748b; margin-top: 1.5rem; font-size: 0.95rem;">The invoice has been sent to {{ result.client?.name }} and is now marked as sent.</p>
+        <router-link :to="`/companies/${companyId}/invoices/${result.id}`" class="pb-btn pb-btn-primary" style="margin-top: 1.5rem;">
+          View Invoice
+        </router-link>
+      </div>
+
+      <!-- Form -->
+      <form v-else @submit.prevent="handleSubmit">
         
         <!-- Client Selection & Due Date -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
@@ -109,6 +135,29 @@
   </div>
 </template>
 
+<style scoped>
+.pb-result-card {
+  background: white;
+  border: 1px solid #a7f3d0;
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.pb-result-icon { font-size: 2rem; width: 60px; height: 60px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #059669; }
+.pb-result-card h2 { font-size: 1.5rem; color: #1a1a2e; margin-bottom: 1.5rem; }
+.pb-result-rows { display: flex; flex-direction: column; gap: 1rem; text-align: left; max-width: 360px; margin: 0 auto; }
+.pb-result-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: #f8fafc; border-radius: 10px; font-size: 14px; }
+.pb-btn { padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-flex; align-items: center; }
+.pb-btn-primary { background: #4f46e5; color: white; }
+.pb-btn-primary:hover { background: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+.pb-status-pill { display: inline-flex; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+.pb-status--paid { background: #d1fae5; color: #065f46; }
+.pb-status--sent { background: #dbeafe; color: #1e40af; }
+.pb-status--draft { background: #f1f5f9; color: #475569; }
+.pb-text-blue { color: #2563eb; font-weight: 600; }
+</style>
+
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -126,6 +175,7 @@ const isEdit = computed(() => !!invoiceId);
 const client = ref(null);
 const submitting = ref(false);
 const showItemForm = ref(false);
+const result = ref(null);
 const form = ref({ 
   total_amount: '', 
   status: 'draft', 
@@ -221,10 +271,20 @@ const submit = async (action) => {
 
     if (isEdit.value) {
       await invoiceStore.updateInvoice(companyId, invoiceId, submitData);
-      router.push(`/companies/${companyId}/invoices/${invoiceId}`);
+      if (action === 'send') {
+        // For edit + send, show success and navigate after
+        result.value = invoiceStore.currentInvoice;
+      } else {
+        router.push(`/companies/${companyId}/invoices/${invoiceId}`);
+      }
     } else {
-      await invoiceStore.createInvoice(companyId, submitData);
-      router.push(`/companies/${companyId}`);
+      const invoice = await invoiceStore.createInvoice(companyId, submitData);
+      if (action === 'send') {
+        // Show success card for 3 seconds then navigate
+        result.value = invoice;
+      } else {
+        router.push(`/companies/${companyId}`);
+      }
     }
   } catch (error) {
     console.error('Error:', error);
@@ -238,3 +298,26 @@ const handleSubmit = async () => {
   await submit('send');
 };
 </script>
+
+<style scoped>
+.pb-result-card {
+  background: white;
+  border: 1px solid #a7f3d0;
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.pb-result-icon { font-size: 2rem; width: 60px; height: 60px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #059669; }
+.pb-result-card h2 { font-size: 1.5rem; color: #1a1a2e; margin-bottom: 1.5rem; }
+.pb-result-rows { display: flex; flex-direction: column; gap: 1rem; text-align: left; max-width: 360px; margin: 0 auto; }
+.pb-result-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: #f8fafc; border-radius: 10px; font-size: 14px; }
+.pb-btn { padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-flex; align-items: center; }
+.pb-btn-primary { background: #4f46e5; color: white; }
+.pb-btn-primary:hover { background: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+.pb-status-pill { display: inline-flex; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+.pb-status--paid { background: #d1fae5; color: #065f46; }
+.pb-status--sent { background: #dbeafe; color: #1e40af; }
+.pb-status--draft { background: #f1f5f9; color: #475569; }
+.pb-text-blue { color: #2563eb; font-weight: 600; }
+</style>
