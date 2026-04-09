@@ -19,7 +19,7 @@ class StoreInvoiceRequest extends FormRequest
         return [
             'total_amount' => 'nullable|numeric|min:0',
             'status' => 'required|in:draft,sent,paid,cancelled',
-            'due_date' => 'required|date',
+            'due_date' => 'required|date|after:today',
             'send_email' => 'boolean',
             'items' => 'nullable|array|min:1',
             'items.*.description' => 'required|string|max:255',
@@ -36,7 +36,7 @@ class StoreInvoiceRequest extends FormRequest
             'items.*.price.required' => 'Item price is required',
             'items.*.quantity.required' => 'Item quantity is required',
             'due_date.required' => 'Due date is required',
-            'due_date.after' => 'Due date must be in the future',
+            'due_date.after' => 'Due date must be in the future (after today)',
         ];
     }
 }

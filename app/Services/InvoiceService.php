@@ -18,12 +18,15 @@ class InvoiceService
             // Create invoice with initial total_amount as 0 if items exist
             $totalAmount = isset($data['items']) && !empty($data['items']) ? 0 : ($data['total_amount'] ?? 0);
 
+            // Set status to 'sent' if sending email, otherwise use provided status
+            $status = (isset($data['send_email']) && $data['send_email']) ? 'sent' : ($data['status'] ?? 'draft');
+
             $invoice = Invoice::create([
                 'company_id' => $data['company_id'],
                 'client_id'  => $data['client_id'],
                 'total_amount' => $totalAmount,
                 'due_date' => $data['due_date'] ?? null,
-                'status'     => $data['status'] ?? 'draft',
+                'status'     => $status,
             ]);
 
             // Add items if provided
@@ -54,6 +57,9 @@ class InvoiceService
     public function updateInvoice(Invoice $invoice, array $data): bool
     {
         return DB::transaction(function () use ($invoice, $data) {
+            // Determine if status should be 'sent' (when sending email)
+            $status = (isset($data['send_email']) && $data['send_email']) ? 'sent' : ($data['status'] ?? $invoice->status);
+            
             // If items are provided, recalculate total from items
             if (isset($data['items']) && is_array($data['items'])) {
                 // Delete existing items
@@ -72,19 +78,33 @@ class InvoiceService
                     $totalAmount += $itemTotal;
                 }
                 
-                return $invoice->update([
+                $updated = $invoice->update([
                     'total_amount' => $totalAmount,
                     'due_date' => $data['due_date'] ?? $invoice->due_date,
-                    'status'       => $data['status'] ?? $invoice->status,
+                    'status'       => $status,
                 ]);
+
+                // Send email if requested
+                if (isset($data['send_email']) && $data['send_email']) {
+                    Mail::to($invoice->client->email)->send(new InvoiceMail($invoice));
+                }
+
+                return $updated;
             }
 
             // If no items, allow manual total_amount update
-            return $invoice->update([
+            $updated = $invoice->update([
                 'total_amount' => $data['total_amount'] ?? $invoice->total_amount,
                 'due_date' => $data['due_date'] ?? $invoice->due_date,
-                'status'       => $data['status'] ?? $invoice->status,
+                'status'       => $status,
             ]);
+
+            // Send email if requested
+            if (isset($data['send_email']) && $data['send_email']) {
+                Mail::to($invoice->client->email)->send(new InvoiceMail($invoice));
+            }
+
+            return $updated;
         });
     }
 
