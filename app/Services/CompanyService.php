@@ -6,9 +6,11 @@ use App\Models\Company;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Mail\CompanyInvitationMail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Throwable;
 
 class CompanyService
 {
@@ -61,7 +63,7 @@ class CompanyService
         // Check if user already exists and is in company
         $user = User::where('email', $email)->first();
         if ($user && $company->users()->where('user_id', $user->id)->exists()) {
-            return ['success' => false, 'message' => 'User is already a member of this company'];
+            return ['success' => false, 'message' => 'User is already a member of this company', 'code' => 400];
         }
 
         // Check if there's already a pending invitation
@@ -72,27 +74,36 @@ class CompanyService
             ->first();
 
         if ($existingInvitation) {
-            return ['success' => false, 'message' => 'An invitation has already been sent to this email'];
+            return ['success' => false, 'message' => 'An invitation has already been sent to this email', 'code' => 400];
         }
 
-        // Create invitation
         $token = Str::random(64);
-        $invitation = Invitation::create([
-            'company_id' => $company->id,
-            'email' => $email,
-            'role' => $role,
-            'token' => $token,
-            'invited_by' => Auth::id(),
-            'expires_at' => now()->addDays(7),
-        ]);
+        try {
+            DB::transaction(function () use ($company, $email, $role, $token) {
+                Invitation::create([
+                    'company_id' => $company->id,
+                    'email' => $email,
+                    'role' => $role,
+                    'token' => $token,
+                    'invited_by' => Auth::id(),
+                    'expires_at' => now()->addDays(7),
+                ]);
 
-        // Send invitation email
-        Mail::to($email)->send(new CompanyInvitationMail(
-            $company,
-            $role,
-            Auth::user()->name,
-            $token
-        ));
+                Mail::to($email)->send(new CompanyInvitationMail(
+                    $company,
+                    $role,
+                    Auth::user()->name,
+                    $token
+                ));
+            });
+        } catch (Throwable $e) {
+            report($e);
+            return [
+                'success' => false,
+                'message' => 'Unable to send invitation email right now. Please check mail configuration and try again.',
+                'code' => 500,
+            ];
+        }
 
         return ['success' => true, 'message' => 'Invitation sent to ' . $email];
     }

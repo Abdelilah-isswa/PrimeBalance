@@ -65,7 +65,7 @@
             <td style="padding:0.5rem; border:1px solid #ddd;">{{ user.name }}</td>
             <td style="padding:0.5rem; border:1px solid #ddd;">{{ user.email }}</td>
             <td style="padding:0.5rem; border:1px solid #ddd;">
-              <select v-if="user.id !== authStore.user?.id" :value="user.pivot.role" @change="updateRole(user.id, $event.target.value)" style="padding:0.25rem;">
+              <select v-if="!isCurrentUser(user.id)" :value="user.pivot.role" @change="updateRole(user.id, $event.target.value)" style="padding:0.25rem;">
                 <option value="admin">Admin</option>
                 <option value="accountant">Accountant</option>
                 <option value="viewer">Viewer</option>
@@ -74,7 +74,7 @@
             </td>
             <td style="padding:0.5rem; border:1px solid #ddd;">{{ user.pivot.created_at?.substring(0,10) }}</td>
             <td style="padding:0.5rem; border:1px solid #ddd;">
-              <button v-if="user.id !== authStore.user?.id" @click="removeUser(user.id)" style="background:#c62828; padding:0.25rem 0.5rem;">Remove</button>
+              <button v-if="!isCurrentUser(user.id)" @click="removeUser(user.id)" style="background:#c62828; padding:0.25rem 0.5rem;">Remove</button>
             </td>
           </tr>
         </tbody>
@@ -102,6 +102,9 @@ const form = ref({ name: '', address: '', currency: '' });
 const inviteForm = ref({ email: '', role: 'viewer' });
 const inviteSuccess = ref('');
 const inviteError = ref('');
+
+const normalizeId = (value) => (value == null ? null : String(value));
+const isCurrentUser = (userId) => normalizeId(userId) === normalizeId(authStore.user?.id);
 
 onMounted(async () => {
   try {

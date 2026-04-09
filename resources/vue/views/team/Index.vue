@@ -69,25 +69,25 @@
                 </td>
                 <td class="pb-text-center">{{ formatDate(member.pivot?.created_at) }}</td>
                 <td class="pb-text-center">
-                  <div class="pb-action-group" v-if="canManageTeam && member.id !== authStore.user?.id && member.pivot?.role !== 'owner'">
+                  <div class="pb-action-group" v-if="canManageMemberActions(member)">
                     <template v-if="editRoleId === member.id">
-                      <button @click="saveRole(member.id)" class="pb-btn-icon pb-icon-success" title="Save Role" :disabled="loading">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <button @click="saveRole(member.id)" class="pb-btn-icon pb-btn-icon--with-text pb-icon-success" title="Save Role" :disabled="loading">
+                        <span>Save</span>
                       </button>
-                      <button @click="editRoleId = null" class="pb-btn-icon pb-icon-neutral" title="Cancel" :disabled="loading">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      <button @click="editRoleId = null" class="pb-btn-icon pb-btn-icon--with-text pb-icon-neutral" title="Cancel" :disabled="loading">
+                        <span>Cancel</span>
                       </button>
                     </template>
                     <template v-else>
-                      <button @click="startRoleEdit(member)" class="pb-btn-icon pb-icon-primary" title="Change Role" :disabled="loading">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      <button @click="startRoleEdit(member)" class="pb-btn-icon pb-btn-icon--with-text pb-icon-primary" title="Change Role" :disabled="loading">
+                        <span>Edit Role</span>
                       </button>
-                      <button @click="removeMember(member.id)" class="pb-btn-icon pb-icon-danger" title="Remove Member" :disabled="loading">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                      <button @click="removeMember(member.id)" class="pb-btn-icon pb-btn-icon--with-text pb-icon-danger" title="Remove Member" :disabled="loading">
+                        <span>Remove</span>
                       </button>
                     </template>
                   </div>
-                  <div v-else-if="member.id === authStore.user?.id" class="pb-text-muted">
+                  <div v-else-if="isCurrentUser(member.id)" class="pb-text-muted">
                     <small>You</small>
                   </div>
                   <div v-else class="pb-text-muted">
@@ -131,11 +131,12 @@
                 </td>
                 <td>{{ formatDate(inv.created_at) }}</td>
                 <td class="pb-text-center">
-                  <div class="pb-action-group">
-                    <button v-if="canManageTeam" @click="revokeInvitation(inv.id)" class="pb-btn-icon pb-icon-danger" title="Revoke Invitation" :disabled="loading">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                  <div class="pb-action-group" v-if="canManageTeam">
+                    <button @click="revokeInvitation(inv.id)" class="pb-btn-icon pb-btn-icon--with-text pb-icon-danger" title="Revoke Invitation" :disabled="loading">
+                      <span>Revoke</span>
                     </button>
                   </div>
+                  <div v-else class="pb-text-muted"><small>—</small></div>
                 </td>
               </tr>
               <tr v-if="invitations.length === 0">
@@ -210,8 +211,16 @@ const inviteForm = ref({ email: '', role: 'admin' });
 const successMsg = ref('');
 const errorMsg = ref('');
 
+const normalizeId = (value) => (value == null ? null : String(value));
+
+const isCurrentUser = (userId) => normalizeId(userId) === normalizeId(authStore.user?.id);
+
+const canManageMemberActions = (member) => {
+  return canManageTeam.value && !isCurrentUser(member?.id) && member?.pivot?.role !== 'owner';
+};
+
 const currentUserRole = computed(() => {
-  const me = members.value.find(m => m.id === authStore.user?.id);
+  const me = members.value.find((m) => isCurrentUser(m.id));
   return me?.pivot?.role || 'viewer';
 });
 
@@ -357,13 +366,20 @@ const getRoleBadgeClass = (role) => {
 
 .pb-input-sm { padding: 8px !important; font-size: 13px !important; border-radius: 6px !important; }
 .pb-action-group { display: flex; justify-content: center; gap: 8px; }
-.pb-btn-icon { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: #64748b; }
-.pb-btn-icon:hover:not(:disabled) { background: #f1f5f9; }
+.pb-btn-icon { width: 32px; height: 32px; border-radius: 6px; border: none; background: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: #fff; }
+.pb-btn-icon--with-text { width: auto; min-height: 34px; padding: 0 12px; gap: 6px; font-size: 12px; font-weight: 600; }
+.pb-btn-icon--with-text span { letter-spacing: 0.1px; }
+.pb-btn-icon svg { flex-shrink: 0; }
+.pb-btn-icon:hover:not(:disabled) { transform: translateY(-1px); }
 .pb-btn-icon:disabled { opacity: 0.5; cursor: not-allowed; }
-.pb-icon-primary:hover { color: #4f46e5; background: #e0e7ff; }
-.pb-icon-danger:hover { color: #e11d48; background: #ffe4e6; }
-.pb-icon-success:hover { color: #059669; background: #d1fae5; }
-.pb-icon-neutral:hover { color: #475569; background: #e2e8f0; }
+.pb-icon-primary { background: #4f46e5; color: #fff; }
+.pb-icon-danger { background: #ef4444; color: #fff; }
+.pb-icon-success { background: #10b981; color: #fff; }
+.pb-icon-neutral { background: #94a3b8; color: #fff; }
+.pb-icon-primary:hover:not(:disabled) { background: #4338ca; }
+.pb-icon-danger:hover:not(:disabled) { background: #dc2626; }
+.pb-icon-success:hover:not(:disabled) { background: #059669; }
+.pb-icon-neutral:hover:not(:disabled) { background: #64748b; }
 .pb-empty-row { text-align: center; padding: 4rem !important; color: #94a3b8; }
 
 .pb-form-card { width: 100%; }

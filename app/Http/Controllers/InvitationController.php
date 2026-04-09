@@ -28,7 +28,7 @@ class InvitationController extends BaseController
             return $this->sendResponse($result);
         }
         
-        return $this->sendError($result['message']);
+        return $this->sendError($result['message'], $result['code'] ?? 400);
     }
 
     public function index($companyId)

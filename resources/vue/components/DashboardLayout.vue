@@ -197,6 +197,27 @@ watch(currentCompanyId, (newVal, oldVal) => {
   }
 })
 
+// If the selected company disappears (e.g., owner deactivated it),
+// clear selection so the sidebar falls back to /dashboard state.
+watch(
+  () => ({
+    loaded: companiesLoaded.value,
+    companyIds: companies.value.map((c) => String(c.id)),
+    currentId: String(currentCompanyId.value || '')
+  }),
+  ({ loaded, companyIds, currentId }) => {
+    if (!loaded) return
+    if (!currentId) return
+
+    const stillExists = companyIds.includes(currentId)
+    if (!stillExists) {
+      currentCompanyId.value = ''
+      localStorage.removeItem('pb_active_company_id')
+    }
+  },
+  { deep: false }
+)
+
 const isActiveLink = (path) => {
   const currentPath = route.path;
   // Dashboard: active when on /dashboard OR /companies/:id (exact, not sub-pages like /companies/:id/invoices)

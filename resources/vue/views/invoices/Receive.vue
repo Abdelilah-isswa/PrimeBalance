@@ -33,7 +33,9 @@
 
     <!-- Success Result -->
     <div v-if="result" class="pb-result-card">
-      <div class="pb-result-icon">✓</div>
+      <div class="pb-result-icon" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
       <h2>Payment Recorded!</h2>
       <div class="pb-result-rows">
         <div class="pb-result-row">

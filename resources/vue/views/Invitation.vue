@@ -9,7 +9,9 @@
 
       <!-- Expired / Not Found -->
       <div v-else-if="error">
-        <div style="font-size:3rem; margin-bottom:1rem;">❌</div>
+        <div style="margin-bottom:1rem; display:flex; justify-content:center;">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
         <h2 style="color:#dc2626; margin-bottom:0.5rem;">Invitation Invalid</h2>
         <p style="color:#64748b;">{{ error }}</p>
         <router-link to="/"><button style="margin-top:1.5rem;">Go Home</button></router-link>
@@ -17,7 +19,9 @@
 
       <!-- Invitation Details -->
       <div v-else-if="invitation">
-        <div style="font-size:3rem; margin-bottom:1rem;">✉️</div>
+        <div style="margin-bottom:1rem; display:flex; justify-content:center;">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
         <h1 style="margin-bottom:0.5rem;">You're Invited!</h1>
         <p style="color:#64748b; margin-bottom:1.5rem;">
           You have been invited to join <strong style="color:#1a1a2e;">{{ invitation.company?.name }}</strong>
