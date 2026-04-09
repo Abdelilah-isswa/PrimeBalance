@@ -25,7 +25,7 @@ class CompanyService
             'totalExpense' => (clone $transactionsQuery)->where('type', 'expense')->sum('amount'),
             'bankBalance' => $company->accounts()->sum('balance'),
             'unpaidInvoices' => $company->invoices()->whereIn('status', ['draft', 'sent'])->count(),
-            'unpaidBills' => $company->bills()->whereIn('status', ['draft', 'sent'])->count(),
+            'unpaidBills' => $company->bills()->whereIn('status', ['unpaid', 'partial'])->count(),
         ];
     }
 
