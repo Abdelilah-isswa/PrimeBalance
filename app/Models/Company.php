@@ -9,6 +9,8 @@ class Company extends Model
 {
     use SoftDeletes;
 
+    protected $table = 'company';
+
     protected $fillable = ['name', 'address', 'currency'];
 
     public function users()
