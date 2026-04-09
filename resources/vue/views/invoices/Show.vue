@@ -46,6 +46,10 @@
               <span class="pb-meta-value">{{ formatDate(invoice?.created_at) }}</span>
             </div>
             <div class="pb-meta-row">
+              <span class="pb-meta-label">Due Date:</span>
+              <span class="pb-meta-value">{{ formatDate(invoice?.due_date) }}</span>
+            </div>
+            <div class="pb-meta-row">
               <span class="pb-meta-label">Status:</span>
               <span :class="['pb-status-pill', `pb-status--${invoice?.status}`]">{{ invoice?.status }}</span>
             </div>
@@ -75,11 +79,11 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Services Rendered (Professional Package)</td>
-                <td class="pb-text-right">1</td>
-                <td class="pb-text-right">{{ company?.currency }} {{ Number(invoice?.total_amount).toFixed(2) }}</td>
-                <td class="pb-text-right pb-font-bold">{{ company?.currency }} {{ Number(invoice?.total_amount).toFixed(2) }}</td>
+              <tr v-for="item in invoice?.items" :key="item.id">
+                <td>{{ item.description }}</td>
+                <td class="pb-text-right">{{ item.quantity }}</td>
+                <td class="pb-text-right">{{ company?.currency }} {{ Number(item.price).toFixed(2) }}</td>
+                <td class="pb-text-right pb-font-bold">{{ company?.currency }} {{ Number(item.total).toFixed(2) }}</td>
               </tr>
             </tbody>
           </table>

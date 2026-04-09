@@ -25,7 +25,7 @@ class InvoiceController extends BaseController
     public function index($companyId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $invoices = $company->invoices()->with('client')->get();
+        $invoices = $company->invoices()->with('client', 'items')->get();
         
         return $this->sendResponse(compact('company', 'invoices'));
     }
@@ -74,7 +74,7 @@ class InvoiceController extends BaseController
     public function show($companyId, $invoiceId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
+        $invoice = $company->invoices()->with('client', 'items')->findOrFail($invoiceId);
         
         return $this->sendResponse(compact('company', 'invoice'));
     }
@@ -82,7 +82,7 @@ class InvoiceController extends BaseController
     public function edit($companyId, $invoiceId)
     {
         $company = $this->getCompanyForOwner($companyId, 'edit invoices');
-        $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
+        $invoice = $company->invoices()->with('client', 'items')->findOrFail($invoiceId);
         
         return $this->sendResponse(compact('company', 'invoice'));
     }
