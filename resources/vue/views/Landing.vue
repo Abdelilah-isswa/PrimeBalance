@@ -108,7 +108,11 @@
     <section id="features" class="pb-features">
       <div class="pb-features-inner">
         <div class="pb-features-header">
-          <h2>Everything you need</h2>
+          <div class="pb-section-badge">
+            <span class="pb-section-badge-dot"></span>
+            Everything in one place
+          </div>
+          <h2>Everything you <span class="pb-outline">need</span></h2>
           <p>All the tools to run your business finances in one place.</p>
         </div>
         <div class="pb-features-grid">
@@ -154,6 +158,58 @@
             <h3>Email notifications</h3>
             <p>Send invoices and team invitations directly by email with one click.</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews -->
+    <section class="pb-reviews">
+      <div class="pb-reviews-inner">
+        <div class="pb-reviews-header">
+          <div class="pb-section-badge">
+            <span class="pb-section-badge-dot"></span>
+            Reviews
+          </div>
+          <h2>Loved by <span class="pb-outline">busy</span> teams</h2>
+          <p>Founders and finance teams use PrimeBalance to stay on top of cash flow, bills, and reporting.</p>
+        </div>
+
+        <div class="pb-reviews-grid">
+          <article class="pb-review-card">
+            <p class="pb-review-quote">“PrimeBalance made our monthly close faster and way less stressful. Everything is clear at a glance.”</p>
+            <div class="pb-review-footer">
+              <div class="pb-review-avatar">SA</div>
+              <div class="pb-review-meta">
+                <div class="pb-review-name">Sara A.</div>
+                <div class="pb-review-role">Operations Lead</div>
+              </div>
+              <div class="pb-review-rating">★★★★★</div>
+            </div>
+          </article>
+
+          <article class="pb-review-card">
+            <p class="pb-review-quote">“Bills + transactions linking is exactly what we needed. It feels simple but still powerful.”</p>
+            <div class="pb-review-footer">
+              <div class="pb-review-avatar">MK</div>
+              <div class="pb-review-meta">
+                <div class="pb-review-name">Mehdi K.</div>
+                <div class="pb-review-role">Founder</div>
+              </div>
+              <div class="pb-review-rating">★★★★★</div>
+            </div>
+          </article>
+
+          <article class="pb-review-card">
+            <p class="pb-review-quote">“The dashboard gives us confidence. We can see what’s unpaid and what’s coming next week.”</p>
+            <div class="pb-review-footer">
+              <div class="pb-review-avatar">LN</div>
+              <div class="pb-review-meta">
+                <div class="pb-review-name">Lina N.</div>
+                <div class="pb-review-role">Accountant</div>
+              </div>
+              <div class="pb-review-rating">★★★★★</div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -540,7 +596,8 @@ const authStore = useAuthStore();
 /* ── Features ─────────────────────────────────────────────── */
 .pb-features {
   padding: 5rem 2.5rem;
-  background: #ffffff;
+  background: radial-gradient(800px 440px at 20% 10%, rgba(79,70,229,0.10), rgba(255,255,255,0) 60%),
+              #ffffff;
 }
 
 .pb-features-inner {
@@ -551,6 +608,28 @@ const authStore = useAuthStore();
 .pb-features-header {
   text-align: center;
   margin-bottom: 3rem;
+}
+
+.pb-section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(237,233,254,0.9);
+  color: #4f46e5;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  border: 0.5px solid #e2e8f0;
+}
+
+.pb-section-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4f46e5;
+  display: inline-block;
 }
 
 .pb-features-header h2 {
@@ -577,22 +656,128 @@ const authStore = useAuthStore();
   border-radius: 16px;
   border: 0.5px solid #e2e8f0;
   padding: 1.5rem;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, transform 0.12s, border-color 0.2s;
 }
 
 .pb-feature-card:hover {
-  box-shadow: 0 4px 20px rgba(79,70,229,0.08);
+  box-shadow: 0 8px 24px rgba(79,70,229,0.10);
+  transform: translateY(-2px);
+  border-color: rgba(79,70,229,0.35);
 }
 
 .pb-feature-icon {
   width: 42px;
   height: 42px;
   border-radius: 10px;
-  background: #f3f4f6;
+  background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
+}
+
+/* ── Reviews ─────────────────────────────────────────────── */
+.pb-reviews {
+  padding: 5rem 2.5rem;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pb-reviews-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pb-reviews-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.pb-reviews-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f0e2e;
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.5px;
+}
+
+.pb-reviews-header p {
+  font-size: 15px;
+  color: #64748b;
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.pb-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.pb-review-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 0.5px solid #e2e8f0;
+  padding: 1.5rem;
+  box-shadow: 0 10px 26px rgba(15,14,46,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 190px;
+}
+
+.pb-review-quote {
+  font-size: 14px;
+  color: #1a1a2e;
+  line-height: 1.7;
+}
+
+.pb-review-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1.25rem;
+}
+
+.pb-review-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #4f46e5;
+  font-weight: 800;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pb-review-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pb-review-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f0e2e;
+}
+
+.pb-review-role {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.pb-review-rating {
+  margin-left: auto;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #4f46e5;
+  white-space: nowrap;
 }
 
 .pb-feature-card h3 {
@@ -748,6 +933,10 @@ const authStore = useAuthStore();
   .pb-stat-divider { display: none; }
 
   .pb-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-reviews-grid {
     grid-template-columns: 1fr;
   }
   
