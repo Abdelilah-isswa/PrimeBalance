@@ -218,10 +218,18 @@
     <section class="pb-image-banner">
       <div class="pb-banner-inner">
         <div class="pb-banner-text">
-          <h2>Focus on scale. We'll handle the numbers.</h2>
+          <div class="pb-section-badge">
+            <span class="pb-section-badge-dot"></span>
+            Built for growth
+          </div>
+          <h2>Focus on <span class="pb-outline">scale</span>. We'll handle the numbers.</h2>
           <p>Join thousands of growing startups tracking everything flawlessly in PrimeBalance.</p>
         </div>
-        <img class="pb-banner-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Team working" />
+        <div class="pb-banner-visual">
+          <div class="pb-banner-visual-inner">
+            <img class="pb-banner-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Team working" />
+          </div>
+        </div>
       </div>
     </section>
 
@@ -796,35 +804,49 @@ const authStore = useAuthStore();
 /* Image Banner */
 .pb-image-banner {
   padding: 5rem 2.5rem;
-  background: #f8fafc;
+  background: radial-gradient(900px 500px at 70% 20%, rgba(79,70,229,0.12), rgba(248,250,252,0) 60%),
+              #f8fafc;
 }
 .pb-banner-inner {
   max-width: 1100px;
   margin: 0 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
   align-items: center;
-  justify-content: space-between;
   gap: 3rem;
   background: white;
   padding: 3rem;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  border: 0.5px solid #e2e8f0;
 }
 .pb-banner-text h2 {
   font-size: 2rem;
   margin-bottom: 1rem;
   color: #1a1a2e;
+  letter-spacing: -0.5px;
 }
 .pb-banner-text p {
   color: #64748b;
   font-size: 15px;
   line-height: 1.6;
 }
+
+.pb-banner-visual-inner {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 44px rgba(15,14,46,0.12);
+  background: #f8fafc;
+}
+
 .pb-banner-img {
   width: 100%;
   max-width: 400px;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border-radius: 0;
+  box-shadow: none;
+  display: block;
+  max-height: 320px;
+  object-fit: cover;
 }
 
 /* ── CTA ──────────────────────────────────────────────────── */
@@ -911,7 +933,6 @@ const authStore = useAuthStore();
     padding-bottom: 2rem;
   }
   .pb-banner-inner {
-    flex-direction: column;
     text-align: center;
   }
 
