@@ -8,11 +8,11 @@
         <p><strong>Name:</strong> {{ company?.name }}</p>
         <p><strong>Address:</strong> {{ company?.address }}</p>
         <p><strong>Currency:</strong> {{ company?.currency }}</p>
-        <p><strong>Start Date:</strong> {{ company?.start_date }}</p>
-        <p v-if="company?.end_date"><strong>End Date:</strong> {{ company?.end_date }} <span style="color:red;">(Deactivated)</span></p>
+        <p><strong>Created At:</strong> {{ company?.created_at?.substring(0,10) }}</p>
+        <p v-if="company?.deleted_at"><strong>Deleted At:</strong> {{ company?.deleted_at?.substring(0,10) }} <span style="color:red;">(Deactivated)</span></p>
         <div style="display:flex; gap:0.5rem; margin-top:1rem;">
           <button @click="editMode = true">Update</button>
-          <button v-if="!company?.end_date" @click="deactivate" style="background:#c62828;">Deactivate Company</button>
+          <button v-if="!company?.deleted_at" @click="deactivate" style="background:#c62828;">Deactivate Company</button>
         </div>
       </div>
 

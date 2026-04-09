@@ -11,7 +11,7 @@
     <div v-else>
       <h1>
         {{ company?.name }}
-        <span v-if="company?.end_date" style="color:red;">(Deactivated)</span>
+        <span v-if="company?.deleted_at" style="color:red;">(Deactivated)</span>
       </h1>
 
       <!-- Metrics -->

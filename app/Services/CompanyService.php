@@ -35,7 +35,6 @@ class CompanyService
             'name' => $data['name'],
             'address' => $data['address'],
             'currency' => $data['currency'],
-            'start_date' => now()->toDateString(),
         ]);
         
         $company->users()->attach(Auth::id(), ['role' => 'owner']);
@@ -54,7 +53,7 @@ class CompanyService
 
     public function deactivateCompany(Company $company): bool
     {
-        return $company->update(['end_date' => now()->toDateString()]);
+        return (bool) $company->delete();
     }
 
     public function inviteUser(Company $company, string $email, string $role): array
