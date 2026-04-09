@@ -227,7 +227,7 @@
         </div>
         <div class="pb-banner-visual">
           <div class="pb-banner-visual-inner">
-            <img class="pb-banner-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Team working" />
+            <img class="pb-banner-img" src="/images/scale-banner.jpg" alt="PrimeBalance on tablet" />
           </div>
         </div>
       </div>
@@ -841,11 +841,10 @@ const authStore = useAuthStore();
 
 .pb-banner-img {
   width: 100%;
-  max-width: 400px;
   border-radius: 0;
   box-shadow: none;
   display: block;
-  max-height: 320px;
+  height: 320px;
   object-fit: cover;
 }
 
