@@ -23,7 +23,7 @@ export const useBillStore = defineStore('bill', {
       this.loading = true;
       try {
         const response = await axios.get(`companies/${companyId}/bills/${id}`);
-        this.currentBill = response.data.data;
+        this.currentBill = response.data.data.bill ?? null;
         return this.currentBill;
       } catch (error) {
         console.error('Fetch bill error:', error);
@@ -44,19 +44,27 @@ export const useBillStore = defineStore('bill', {
     async updateBill(companyId, id, data) {
       try {
         const response = await axios.put(`companies/${companyId}/bills/${id}`, data);
+        const updated = response.data.data;
         const index = this.bills.findIndex(b => b.id === id);
-        if (index !== -1) this.bills[index] = response.data.data;
-        if (this.currentBill?.id === id) this.currentBill = response.data.data;
+        if (index !== -1) this.bills[index] = updated;
+        if (this.currentBill?.id === id) this.currentBill = updated;
+        return updated;
       } catch (error) {
         console.error('Update bill error:', error);
+        throw error;
       }
     },
-    async payBill(companyId, id, amount) {
+    async payBill(companyId, id, payload) {
       try {
-        const response = await axios.post(`companies/${companyId}/bills/${id}/pay`, { amount });
-        await this.fetchBill(companyId, id);
+        const response = await axios.post(`companies/${companyId}/bills/${id}/pay`, payload);
+        const updated = response.data.data;
+        const index = this.bills.findIndex(b => b.id === id);
+        if (index !== -1) this.bills[index] = updated;
+        if (this.currentBill?.id === id) this.currentBill = updated;
+        return updated;
       } catch (error) {
         console.error('Pay bill error:', error);
+        throw error;
       }
     },
   },
