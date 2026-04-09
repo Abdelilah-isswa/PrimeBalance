@@ -36,6 +36,7 @@
                 <th>Invoice ID</th>
                 <th>Client</th>
                 <th>Status</th>
+                <th>Created By</th>
                 <th>Date</th>
                 <th class="pb-text-right">Amount</th>
                 <th class="pb-text-center">Actions</th>
@@ -57,6 +58,7 @@
                     {{ inv.status }}
                   </span>
                 </td>
+                <td>{{ inv.creator?.name || 'Unknown' }}</td>
                 <td>{{ inv.created_at?.substring(0, 10) }}</td>
                 <td class="pb-text-right pb-font-bold">
                   {{ company?.currency }} {{ Number(inv.total_amount).toFixed(2) }}
@@ -68,7 +70,7 @@
                 </td>
               </tr>
               <tr v-if="invoices.length === 0">
-                <td colspan="6" class="pb-empty-row">No invoices found.</td>
+                <td colspan="7" class="pb-empty-row">No invoices found.</td>
               </tr>
             </tbody>
           </table>
@@ -99,7 +101,8 @@
 
             <div>
               <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #64748b; font-size: 0.9rem;">Due Date *</label>
-              <input v-model="form.due_date" type="date" required style="width: 100%; padding: 0.6rem 0.75rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #fff; color: #1a1a2e;">
+              <input v-model="form.due_date" type="date" required :style="{ borderColor: dueDateError ? '#ef4444' : '#cbd5e1' }" style="width: 100%; padding: 0.6rem 0.75rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #fff; color: #1a1a2e;">
+              <div v-if="dueDateError" style="color: #ef4444; font-size: 0.85rem; margin-top: 0.3rem; font-weight: 500;">{{ dueDateError }}</div>
             </div>
           </div>
 
@@ -184,10 +187,10 @@
             <button type="button" @click="activeTab = 'manage'" style="padding: 0.55rem 1.5rem; background: #94a3b8; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">
               Cancel
             </button>
-            <button type="button" @click="submit('draft')" :disabled="submitting || form.items.length === 0" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; opacity: var(--opacity);" :style="{ opacity: (submitting || form.items.length === 0) ? 0.5 : 1 }">
+            <button type="button" @click="submit('draft')" :disabled="submitting || form.items.length === 0 || dueDateError" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; opacity: var(--opacity);" :style="{ opacity: (submitting || form.items.length === 0 || dueDateError) ? 0.5 : 1 }">
               {{ submitting ? 'Processing...' : 'Save as Draft' }}
             </button>
-            <button type="submit" :disabled="submitting || form.items.length === 0" style="padding: 0.55rem 1.5rem; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: (submitting || form.items.length === 0) ? 0.5 : 1 }">
+            <button type="submit" :disabled="submitting || form.items.length === 0 || dueDateError" style="padding: 0.55rem 1.5rem; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: (submitting || form.items.length === 0 || dueDateError) ? 0.5 : 1 }">
               {{ submitting ? 'Processing...' : 'Send Invoice' }}
             </button>
           </div>
@@ -242,9 +245,19 @@ const calculateItemTotal = (item) => {
   return (Number(item.price) || 0) * (Number(item.quantity) || 0);
 };
 
+const dueDateError = computed(() => {
+  if (!form.value.due_date) return '';
+  const selectedDate = new Date(form.value.due_date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (selectedDate <= today) {
+    return 'Due date must be after today';
+  }
+  return '';
+});
+
 const addItem = () => {
   if (!newItem.value.description || !newItem.value.price || newItem.value.quantity < 1) {
-    alert('Please fill in all item fields (description, price, and quantity)');
     return;
   }
   
@@ -277,12 +290,10 @@ onMounted(async () => {
 
 const submit = async (action) => {
   if (form.value.items.length === 0) {
-    alert('Please add at least one item');
     return;
   }
 
-  if (!form.value.due_date) {
-    alert('Please select a due date');
+  if (!form.value.due_date || dueDateError.value) {
     return;
   }
 

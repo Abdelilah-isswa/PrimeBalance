@@ -50,6 +50,10 @@
               <span class="pb-meta-value">{{ formatDate(invoice?.due_date) }}</span>
             </div>
             <div class="pb-meta-row">
+              <span class="pb-meta-label">Created By:</span>
+              <span class="pb-meta-value">{{ invoice?.creator?.name || 'Unknown' }}</span>
+            </div>
+            <div class="pb-meta-row">
               <span class="pb-meta-label">Status:</span>
               <span :class="['pb-status-pill', `pb-status--${invoice?.status}`]">{{ invoice?.status }}</span>
             </div>

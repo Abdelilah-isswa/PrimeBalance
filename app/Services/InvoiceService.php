@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Mail\InvoiceMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class InvoiceService
 {
@@ -27,6 +28,7 @@ class InvoiceService
                 'total_amount' => $totalAmount,
                 'due_date' => $data['due_date'] ?? null,
                 'status'     => $status,
+                'created_by' => Auth::id(),
             ]);
 
             // Add items if provided
