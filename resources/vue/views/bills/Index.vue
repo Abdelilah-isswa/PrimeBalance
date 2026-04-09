@@ -29,6 +29,18 @@
     <!-- Tab Content: Manage -->
     <div v-if="activeTab === 'manage'" class="pb-tab-content anim-fade-in">
       <div class="pb-card">
+        <div class="pb-table-toolbar">
+          <div class="pb-filter">
+            <label class="pb-label" style="margin:0;">Filter by status</label>
+            <select v-model="statusFilter" class="pb-input pb-input--sm">
+              <option value="">All</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="partial">Partially Paid</option>
+              <option value="paid">Fully Paid</option>
+            </select>
+          </div>
+        </div>
+
         <div class="pb-table-wrapper">
           <table class="pb-table">
             <thead>
@@ -36,13 +48,14 @@
                 <th>Bill ID</th>
                 <th>Supplier</th>
                 <th>Status</th>
-                <th>Date</th>
+                <th>Due Date</th>
                 <th class="pb-text-right">Amount</th>
+                <th class="pb-text-right">Paid</th>
                 <th class="pb-text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="bill in bills" :key="bill.id">
+              <tr v-for="bill in filteredBills" :key="bill.id">
                 <td>
                   <span class="pb-id-label">#{{ bill.id }}</span>
                 </td>
@@ -54,21 +67,42 @@
                 </td>
                 <td>
                   <span :class="['pb-status-pill', `pb-status--${bill.status}`]">
-                    {{ bill.status }}
+                    {{ bill.status === 'partial' ? 'partially paid' : bill.status }}
                   </span>
                 </td>
-                <td>{{ bill.created_at?.substring(0, 10) }}</td>
+                <td>{{ bill.due_date ? bill.due_date.substring(0, 10) : '-' }}</td>
                 <td class="pb-text-right pb-font-bold">
                   {{ company?.currency }} {{ Number(bill.total_amount).toFixed(2) }}
                 </td>
+                <td class="pb-text-right">
+                  <span :style="Number(bill.amount_paid) > 0 ? 'color:#059669; font-weight:700;' : 'color:#64748b;'">
+                    {{ company?.currency }} {{ Number(bill.amount_paid || 0).toFixed(2) }}
+                  </span>
+                </td>
                 <td class="pb-text-center">
-                  <router-link :to="`/companies/${id}/bills/${bill.id}`" class="pb-view-btn">
-                    View
-                  </router-link>
+                  <div class="pb-actions-cell">
+                    <router-link :to="`/companies/${id}/bills/${bill.id}`" class="pb-view-btn">
+                      View
+                    </router-link>
+                    <router-link
+                      v-if="bill.status !== 'paid'"
+                      :to="`/companies/${id}/bills/${bill.id}/edit`"
+                      class="pb-action-btn"
+                    >
+                      Edit
+                    </router-link>
+                    <router-link
+                      v-if="bill.status !== 'paid'"
+                      :to="`/companies/${id}/bills/${bill.id}/pay`"
+                      class="pb-action-btn pb-action-btn--primary"
+                    >
+                      Pay
+                    </router-link>
+                  </div>
                 </td>
               </tr>
-              <tr v-if="bills.length === 0">
-                <td colspan="6" class="pb-empty-row">No bills found.</td>
+              <tr v-if="filteredBills.length === 0">
+                <td colspan="7" class="pb-empty-row">No bills found.</td>
               </tr>
             </tbody>
           </table>
@@ -97,6 +131,16 @@
             </div>
 
             <div class="pb-form-group">
+              <label class="pb-label">Due Date</label>
+              <input v-model="form.due_date" type="date" class="pb-input" />
+            </div>
+
+            <div class="pb-form-group pb-form-group--full">
+              <label class="pb-label">Description</label>
+              <textarea v-model="form.description" class="pb-input" rows="3" placeholder="e.g. Office supplies, services..." />
+            </div>
+
+            <div class="pb-form-group">
               <label class="pb-label">Amount ({{ company?.currency }})</label>
               <input 
                 v-model="form.total_amount" 
@@ -111,9 +155,9 @@
             <div class="pb-form-group">
               <label class="pb-label">Status</label>
               <select v-model="form.status" class="pb-input">
-                <option value="draft">Draft</option>
                 <option value="unpaid">Unpaid</option>
-                <option value="paid">Paid</option>
+                <option value="partial">Partially Paid</option>
+                <option value="paid">Fully Paid</option>
               </select>
             </div>
           </div>
@@ -147,13 +191,20 @@ const supplierStore = useSupplierStore();
 
 const activeTab = ref('manage');
 const submitting = ref(false);
+const statusFilter = ref('');
 const form = ref({
   supplier_id: '',
+  description: '',
+  due_date: '',
   total_amount: '',
   status: 'unpaid'
 });
 
 const bills = computed(() => billStore.bills);
+const filteredBills = computed(() => {
+  if (!statusFilter.value) return bills.value;
+  return bills.value.filter(b => b.status === statusFilter.value);
+});
 const company = computed(() => companyStore.currentCompany);
 const suppliers = computed(() => supplierStore.suppliers);
 
@@ -171,7 +222,7 @@ const createBill = async () => {
     await billStore.createBill(id, form.value);
     activeTab.value = 'manage';
     // Reset form
-    form.value = { supplier_id: '', total_amount: '', status: 'unpaid' };
+    form.value = { supplier_id: '', description: '', due_date: '', total_amount: '', status: 'unpaid' };
   } catch (error) {
     console.error('Failed to record bill:', error);
   } finally {
@@ -213,6 +264,18 @@ const createBill = async () => {
   color: #64748b;
   font-size: 14px;
   margin-bottom: 1.5rem;
+}
+
+.pb-table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1rem 0;
+}
+
+.pb-input--sm {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
 }
 
 /* Tabs */
@@ -359,8 +422,10 @@ const createBill = async () => {
 
 .pb-status--paid { background: #d1fae5; color: #065f46; }
 .pb-status--unpaid { background: #fef3c7; color: #92400e; }
+.pb-status--partial { background: #dbeafe; color: #1d4ed8; }
 .pb-status--draft { background: #f1f5f9; color: #475569; }
 .pb-status--overdue { background: #fee2e2; color: #991b1b; }
+.pb-status--cancelled { background: #fee2e2; color: #991b1b; }
 
 .pb-view-btn {
   color: #4f46e5;
@@ -378,6 +443,43 @@ const createBill = async () => {
   text-align: center;
   padding: 4rem !important;
   color: #94a3b8;
+}
+
+.pb-actions-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pb-action-btn {
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 12px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.pb-action-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.pb-action-btn--primary {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.pb-action-btn--primary:hover {
+  background: #e0e7ff;
+  border-color: #a5b4fc;
+  color: #3730a3;
 }
 
 /* Form Styles */
@@ -412,6 +514,10 @@ const createBill = async () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.pb-form-group--full {
+  grid-column: 1 / -1;
 }
 
 .pb-label {

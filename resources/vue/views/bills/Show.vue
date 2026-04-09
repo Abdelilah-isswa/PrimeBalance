@@ -37,6 +37,10 @@
               <span class="pb-meta-value">{{ bill?.created_at?.substring(0, 10) }}</span>
             </div>
             <div class="pb-meta-row">
+              <span class="pb-meta-label">Due:</span>
+              <span class="pb-meta-value">{{ bill?.due_date ? bill.due_date.substring(0, 10) : '-' }}</span>
+            </div>
+            <div class="pb-meta-row">
               <span class="pb-meta-label">Status:</span>
               <span :class="['pb-status-pill', `pb-status--${bill?.status}`]">{{ bill?.status }}</span>
             </div>
@@ -73,6 +77,14 @@
 
         <div class="pb-bill-footer">
           <div class="pb-summary">
+            <div class="pb-summary-row">
+              <span>Amount Paid</span>
+              <span style="color:#059669; font-weight:800;">{{ company?.currency }} {{ Number(bill.amount_paid || 0).toFixed(2) }}</span>
+            </div>
+            <div class="pb-summary-row" v-if="Number(bill.total_amount) - Number(bill.amount_paid || 0) > 0">
+              <span>Remaining</span>
+              <span style="color:#dc2626; font-weight:800;">{{ company?.currency }} {{ (Number(bill.total_amount) - Number(bill.amount_paid || 0)).toFixed(2) }}</span>
+            </div>
             <div class="pb-summary-row pb-total-row">
               <span>Total Amount</span>
               <span>{{ company?.currency }} {{ Number(bill.total_amount).toFixed(2) }}</span>
@@ -85,10 +97,30 @@
         <div class="pb-card pb-options-card">
           <h3 class="pb-card-title-sm">Bill Options</h3>
           <div class="pb-option-list">
-            <button @click="destroy" class="pb-option-item pb-option-danger">
+            <router-link
+              v-if="bill?.status !== 'paid'"
+              :to="`/companies/${id}/bills/${billId}/edit`"
+              class="pb-option-item"
+            >
+              <span>Edit Bill</span>
+            </router-link>
+
+            <router-link
+              v-if="bill?.status !== 'paid'"
+              :to="`/companies/${id}/bills/${billId}/pay`"
+              class="pb-option-item"
+            >
+              <span>Record Payment</span>
+            </router-link>
+
+            <button v-if="Number(bill?.amount_paid || 0) === 0" @click="destroy" class="pb-option-item pb-option-danger">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               <span>Delete Bill</span>
             </button>
+
+            <div v-else style="color:#64748b; font-size:13px; font-weight:600; padding:10px 12px;">
+              Bills linked to transactions cannot be deleted.
+            </div>
           </div>
         </div>
       </div>
@@ -154,7 +186,9 @@ const destroy = async () => {
 .pb-meta-value { color: #1a1a2e; font-weight: 700; }
 .pb-status-pill { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .pb-status--paid { background: #d1fae5; color: #065f46; }
-.pb-status--pending { background: #fef3c7; color: #92400e; }
+.pb-status--unpaid { background: #fef3c7; color: #92400e; }
+.pb-status--partial { background: #dbeafe; color: #1d4ed8; }
+.pb-status--cancelled { background: #fee2e2; color: #991b1b; }
 .pb-bill-billing { margin-bottom: 3rem; }
 .pb-section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 1rem; }
 .pb-supplier-name { font-size: 18px; font-weight: 700; color: #1a1a2e; margin: 0 0 4px; }
