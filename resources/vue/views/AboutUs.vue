@@ -24,6 +24,7 @@
           </template>
           <template v-else>
             <router-link to="/login"><button class="btn-ghost">Login</button></router-link>
+            <router-link to="/register"><button class="btn-primary">Get Started</button></router-link>
           </template>
         </div>
       </div>
