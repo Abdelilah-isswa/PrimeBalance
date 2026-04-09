@@ -41,9 +41,14 @@
         <div class="pb-hero-copy">
           <div class="pb-badge">
             <span class="pb-badge-dot"></span>
-            Finances made beautifully simple
+            Next‑gen business accounting
           </div>
-          <h1>Smart books,<br><span class="pb-accent">simple life</span></h1>
+
+          <h1>
+            Smart accounting for a
+            <span class="pb-outline">smarter</span>
+            <span class="pb-accent">future</span>
+          </h1>
           <p class="pb-hero-sub">
             Track, plan, and grow your business finances with powerful tools designed exclusively for modern businesses and ambitious founders.
           </p>
@@ -70,7 +75,17 @@
         </div>
 
         <div class="pb-hero-visual">
-          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dashboard Preview" class="pb-hero-img" />
+          <div class="pb-hero-visual-inner">
+            <img
+              src="/images/landing-hero.png"
+              alt="PrimeBalance preview"
+              class="pb-hero-img"
+            />
+            <div class="pb-hero-float">
+              <div class="pb-hero-float-label">Trusted by teams worldwide</div>
+              <div class="pb-hero-float-metric">5,000+</div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -318,16 +333,20 @@ const authStore = useAuthStore();
 
 /* ── Hero ─────────────────────────────────────────────────── */
 .pb-hero-section {
-  padding: 5rem 2.5rem 0;
-  background: #ffffff;
+  padding: 5.25rem 2.5rem 0;
+  background: radial-gradient(900px 520px at 70% 20%, rgba(79,70,229,0.16), rgba(255,255,255,0) 60%),
+              radial-gradient(700px 420px at 25% 55%, rgba(237,233,254,1), rgba(255,255,255,0) 65%),
+              #ffffff;
+  position: relative;
+  overflow: hidden;
 }
 
 .pb-hero-inner {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.05fr 0.95fr;
   align-items: center;
   gap: 4rem;
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
@@ -353,15 +372,23 @@ const authStore = useAuthStore();
 }
 
 .pb-hero-copy h1 {
-  font-size: 3rem;
+  font-size: 3.15rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.08;
   color: #0f0e2e;
   margin-bottom: 1.2rem;
   letter-spacing: -1px;
 }
 
 .pb-accent { color: #4f46e5; }
+
+.pb-outline {
+  display: inline-block;
+  margin: 0 10px;
+  color: transparent;
+  -webkit-text-stroke: 1.25px #4f46e5;
+  text-stroke: 1.25px #4f46e5;
+}
 
 .pb-hero-sub {
   font-size: 15px;
@@ -429,15 +456,48 @@ const authStore = useAuthStore();
 
 /* Hero Visual Real Image */
 .pb-hero-visual {
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-  transform: translateY(-20px);
+  transform: translateY(-18px);
 }
+
+.pb-hero-visual-inner {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 18px 44px rgba(15,14,46,0.12);
+  background: #f8fafc;
+}
+
 .pb-hero-img {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.pb-hero-float {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  background: rgba(255,255,255,0.92);
+  border: 0.5px solid #e2e8f0;
+  backdrop-filter: blur(8px);
+  padding: 10px 12px;
+  border-radius: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.pb-hero-float-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pb-hero-float-metric {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f0e2e;
 }
 
 /* ── Trusted By ─────────────────────────────────────────────  */
@@ -670,7 +730,13 @@ const authStore = useAuthStore();
     text-align: center;
   }
 
-  .pb-hero-copy h1 { font-size: 2.2rem; }
+  .pb-hero-copy h1 { font-size: 2.25rem; }
+
+  .pb-outline {
+    margin: 0 6px;
+    -webkit-text-stroke: 1.1px #4f46e5;
+    text-stroke: 1.1px #4f46e5;
+  }
 
   .pb-nav-links { display: none; }
 
