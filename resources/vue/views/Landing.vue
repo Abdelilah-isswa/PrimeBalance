@@ -178,7 +178,7 @@
           <article class="pb-review-card">
             <p class="pb-review-quote">“PrimeBalance made our monthly close faster and way less stressful. Everything is clear at a glance.”</p>
             <div class="pb-review-footer">
-              <div class="pb-review-avatar">SA</div>
+              <img class="pb-review-avatar" src="https://i.pravatar.cc/80?img=32" alt="Reviewer avatar" loading="lazy" />
               <div class="pb-review-meta">
                 <div class="pb-review-name">Sara A.</div>
                 <div class="pb-review-role">Operations Lead</div>
@@ -190,7 +190,7 @@
           <article class="pb-review-card">
             <p class="pb-review-quote">“Bills + transactions linking is exactly what we needed. It feels simple but still powerful.”</p>
             <div class="pb-review-footer">
-              <div class="pb-review-avatar">MK</div>
+              <img class="pb-review-avatar" src="https://i.pravatar.cc/80?img=12" alt="Reviewer avatar" loading="lazy" />
               <div class="pb-review-meta">
                 <div class="pb-review-name">Mehdi K.</div>
                 <div class="pb-review-role">Founder</div>
@@ -202,7 +202,7 @@
           <article class="pb-review-card">
             <p class="pb-review-quote">“The dashboard gives us confidence. We can see what’s unpaid and what’s coming next week.”</p>
             <div class="pb-review-footer">
-              <div class="pb-review-avatar">LN</div>
+              <img class="pb-review-avatar" src="https://i.pravatar.cc/80?img=47" alt="Reviewer avatar" loading="lazy" />
               <div class="pb-review-meta">
                 <div class="pb-review-name">Lina N.</div>
                 <div class="pb-review-role">Accountant</div>
@@ -754,12 +754,8 @@ const authStore = useAuthStore();
   height: 36px;
   border-radius: 999px;
   background: #ede9fe;
-  color: #4f46e5;
-  font-weight: 800;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 0.5px solid #e2e8f0;
+  object-fit: cover;
   flex-shrink: 0;
 }
 
