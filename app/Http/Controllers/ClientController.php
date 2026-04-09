@@ -7,10 +7,13 @@ use App\Models\Client;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Http\Controllers\Api\BaseController;
+use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 
 class ClientController extends BaseController
 {
+    use HasCompanyAuthorization;
+
     protected $clientService;
 
     public function __construct(ClientService $clientService)
@@ -20,7 +23,7 @@ class ClientController extends BaseController
 
     public function create($companyId)
     {
-        $company = auth('sanctum')->user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'create clients');
         return $this->sendResponse(compact('company'));
     }
 
@@ -33,14 +36,14 @@ class ClientController extends BaseController
 
     public function edit($companyId, $clientId)
     {
-        $company = auth('sanctum')->user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'edit clients');
         $client = $company->clients()->findOrFail($clientId);
         return $this->sendResponse(compact('company', 'client'));
     }
 
     public function update(UpdateClientRequest $request, $companyId, $clientId)
     {
-        $company = auth('sanctum')->user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $client = $company->clients()->findOrFail($clientId);
         $this->clientService->updateClient($client, $request->validated());
         return $this->sendResponse($client->fresh(), 'Client updated');
@@ -48,7 +51,7 @@ class ClientController extends BaseController
 
     public function destroy($companyId, $clientId)
     {
-        $company = auth('sanctum')->user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete clients');
         $client = $company->clients()->findOrFail($clientId);
         
         if (!$this->clientService->deleteClient($client)) {
@@ -60,7 +63,7 @@ class ClientController extends BaseController
 
     public function balances($companyId)
     {
-        $company = auth('sanctum')->user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $clients = $company->clients()->with('invoices')->get();
         $clients = $this->clientService->calculateClientBalances($clients);
         

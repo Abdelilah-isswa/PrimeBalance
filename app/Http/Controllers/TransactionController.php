@@ -50,7 +50,7 @@ class TransactionController extends BaseController
 
     public function destroy($companyId, $transactionId)
     {
-        $company = $this->getCompanyForMember($companyId);
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete transactions');
         $transaction = $company->transactions()->findOrFail($transactionId);
 
         $this->transactionService->deleteTransaction($transaction);

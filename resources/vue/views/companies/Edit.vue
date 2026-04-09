@@ -38,9 +38,8 @@
         <div>
           <label>Role:</label><br>
           <select v-model="inviteForm.role" style="padding:0.5rem; margin-bottom:0.5rem;">
-            <option value="owner">Owner</option>
+            <option value="admin">Admin</option>
             <option value="accountant">Accountant</option>
-            <option value="standard_user">Standard User</option>
             <option value="viewer">Viewer</option>
           </select>
         </div>
@@ -67,9 +66,8 @@
             <td style="padding:0.5rem; border:1px solid #ddd;">{{ user.email }}</td>
             <td style="padding:0.5rem; border:1px solid #ddd;">
               <select v-if="user.id !== authStore.user?.id" :value="user.pivot.role" @change="updateRole(user.id, $event.target.value)" style="padding:0.25rem;">
-                <option value="owner">Owner</option>
+                <option value="admin">Admin</option>
                 <option value="accountant">Accountant</option>
-                <option value="standard_user">Standard User</option>
                 <option value="viewer">Viewer</option>
               </select>
               <span v-else>{{ user.pivot.role }}</span>
@@ -145,7 +143,7 @@ const invite = async () => {
 const updateRole = async (userId, role) => {
   await axios.put(`/companies/${id}/users/${userId}/role`, { role });
   const usersRes = await axios.get(`/companies/${id}/users`);
-  users.value = usersRes.data.data;
+  users.value = usersRes.data.data.users || [];
 };
 
 const removeUser = async (userId) => {

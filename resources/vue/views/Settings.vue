@@ -17,7 +17,7 @@
             class="pb-tab-btn" 
             :class="{ 'pb-tab-btn--active': activeTab === 'company' }"
             @click="activeTab = 'company'"
-            v-if="currentCompany"
+            v-if="currentCompany && isOwner"
           >
             Company Info
           </button>
@@ -59,7 +59,7 @@
     </div>
 
     <!-- Tab Content: Company Info -->
-    <div v-if="activeTab === 'company' && currentCompany" class="pb-tab-content anim-slide-up">
+    <div v-if="activeTab === 'company' && currentCompany && isOwner" class="pb-tab-content anim-slide-up">
       <div class="pb-card pb-form-card">
         <div class="pb-card-header">
           <h2 class="pb-card-title">Workspace Settings</h2>
@@ -139,6 +139,10 @@ const currentCompany = computed(() => {
   return companyStore.companies[0] || null;
 });
 
+const isOwner = computed(() => {
+  return (currentCompany.value?.pivot?.role || 'viewer') === 'owner';
+});
+
 onMounted(async () => {
   if (authStore.user) {
     profileForm.value.name = authStore.user.name;
@@ -152,6 +156,12 @@ onMounted(async () => {
 
 watch(currentCompany, () => {
   populateCompanyForm();
+});
+
+watch(isOwner, (newVal) => {
+  if (!newVal && activeTab.value === 'company') {
+    activeTab.value = 'profile';
+  }
 });
 
 const populateCompanyForm = () => {

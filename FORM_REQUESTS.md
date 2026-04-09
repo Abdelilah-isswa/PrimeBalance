@@ -54,12 +54,12 @@ app/Http/Requests/
 
 ### InviteUserRequest
 - **Purpose**: Validates user invitation data
-- **Rules**: email (required|email), role (required|in:owner,accountant,standard_user,viewer)
+- **Rules**: email (required|email), role (required|in:admin,accountant,viewer)
 - **Authorization**: Only company owners can invite users
 
 ### UpdateUserRoleRequest
 - **Purpose**: Validates user role update data
-- **Rules**: role (required|in:owner,accountant,standard_user,viewer)
+- **Rules**: role (required|in:admin,accountant,viewer)
 - **Authorization**: Only company owners can update user roles
 
 ## Account Management Requests

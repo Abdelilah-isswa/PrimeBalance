@@ -32,7 +32,7 @@ class BillController extends BaseController
 
     public function create($companyId, $supplierId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'create bills');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'create bills');
         $supplier = $company->suppliers()->findOrFail($supplierId);
 
         return $this->sendResponse(compact('company', 'supplier'));
@@ -54,7 +54,7 @@ class BillController extends BaseController
 
     public function showPayment($companyId, $billId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'pay bills');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'pay bills');
         $bill = $company->bills()->findOrFail($billId);
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
@@ -86,7 +86,7 @@ class BillController extends BaseController
 
     public function edit($companyId, $billId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'edit bills');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'edit bills');
         $bill = $company->bills()->with('supplier')->findOrFail($billId);
         
         return $this->sendResponse(compact('company', 'bill'));
@@ -108,7 +108,7 @@ class BillController extends BaseController
 
     public function destroy($companyId, $billId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'delete bills');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete bills');
         $bill = $company->bills()->findOrFail($billId);
         try {
             $this->billService->deleteBill($bill);

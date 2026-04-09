@@ -33,9 +33,8 @@
         <div>
             <label>Role:</label>
             <select name="role" required>
-                <option value="owner">Owner</option>
+                <option value="admin">Admin</option>
                 <option value="accountant">Accountant</option>
-                <option value="standard_user">Standard User</option>
                 <option value="viewer">Viewer</option>
             </select>
         </div>
@@ -67,9 +66,8 @@
                         @csrf
                         @method('PUT')
                         <select name="role" onchange="this.form.submit()" style="padding: 0.25rem;">
-                            <option value="owner" {{ $user->pivot->role === 'owner' ? 'selected' : '' }}>Owner</option>
+                            <option value="admin" {{ $user->pivot->role === 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="accountant" {{ $user->pivot->role === 'accountant' ? 'selected' : '' }}>Accountant</option>
-                            <option value="standard_user" {{ $user->pivot->role === 'standard_user' ? 'selected' : '' }}>Standard User</option>
                             <option value="viewer" {{ $user->pivot->role === 'viewer' ? 'selected' : '' }}>Viewer</option>
                         </select>
                     </form>

@@ -23,6 +23,7 @@
             <span class="pb-tab-badge">{{ invitations.length }}</span>
           </button>
           <button 
+            v-if="canInvite"
             class="pb-tab-btn" 
             :class="{ 'pb-tab-btn--active': activeTab === 'invite' }"
             @click="activeTab = 'invite'"
@@ -55,9 +56,8 @@
                 <td>
                   <template v-if="editRoleId === member.id">
                     <select v-model="editRoleValue" class="pb-input pb-input-sm" style="min-width: 130px;">
-                      <option value="owner">Owner</option>
+                      <option value="admin">Admin</option>
                       <option value="accountant">Accountant</option>
-                      <option value="standard_user">Standard User</option>
                       <option value="viewer">Viewer</option>
                     </select>
                   </template>
@@ -69,7 +69,7 @@
                 </td>
                 <td class="pb-text-center">{{ formatDate(member.pivot?.created_at) }}</td>
                 <td class="pb-text-center">
-                  <div class="pb-action-group" v-if="member.id !== authStore.user?.id">
+                  <div class="pb-action-group" v-if="canManageTeam && member.id !== authStore.user?.id && member.pivot?.role !== 'owner'">
                     <template v-if="editRoleId === member.id">
                       <button @click="saveRole(member.id)" class="pb-btn-icon pb-icon-success" title="Save Role" :disabled="loading">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -87,8 +87,11 @@
                       </button>
                     </template>
                   </div>
-                  <div v-else class="pb-text-muted">
+                  <div v-else-if="member.id === authStore.user?.id" class="pb-text-muted">
                     <small>You</small>
+                  </div>
+                  <div v-else class="pb-text-muted">
+                    <small>—</small>
                   </div>
                 </td>
               </tr>
@@ -129,7 +132,7 @@
                 <td>{{ formatDate(inv.created_at) }}</td>
                 <td class="pb-text-center">
                   <div class="pb-action-group">
-                    <button @click="revokeInvitation(inv.id)" class="pb-btn-icon pb-icon-danger" title="Revoke Invitation" :disabled="loading">
+                    <button v-if="canManageTeam" @click="revokeInvitation(inv.id)" class="pb-btn-icon pb-icon-danger" title="Revoke Invitation" :disabled="loading">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     </button>
                   </div>
@@ -145,7 +148,7 @@
     </div>
 
     <!-- Tab: Invite -->
-    <div v-if="activeTab === 'invite'" class="pb-tab-content anim-fade-in">
+    <div v-if="activeTab === 'invite' && canInvite" class="pb-tab-content anim-fade-in">
       <div class="pb-card pb-form-card">
         <div class="pb-card-header">
           <h2 class="pb-card-title">Send Notification</h2>
@@ -165,9 +168,8 @@
             <div class="pb-form-group pb-col-full">
               <label class="pb-label">Workspace Role</label>
               <select v-model="inviteForm.role" class="pb-input" required>
-                <option value="owner">Owner (Full Access & Billing)</option>
+                <option value="admin">Admin (Manage Workspace)</option>
                 <option value="accountant">Accountant (Manage Books)</option>
-                <option value="standard_user">Standard User (Manage Data)</option>
                 <option value="viewer">Viewer (Read Only)</option>
               </select>
             </div>
@@ -204,9 +206,17 @@ const invitations = ref([]);
 const editRoleId = ref(null);
 const editRoleValue = ref('');
 
-const inviteForm = ref({ email: '', role: 'standard_user' });
+const inviteForm = ref({ email: '', role: 'admin' });
 const successMsg = ref('');
 const errorMsg = ref('');
+
+const currentUserRole = computed(() => {
+  const me = members.value.find(m => m.id === authStore.user?.id);
+  return me?.pivot?.role || 'viewer';
+});
+
+const canInvite = computed(() => ['owner', 'admin'].includes(currentUserRole.value));
+const canManageTeam = computed(() => currentUserRole.value === 'owner');
 
 onMounted(() => {
   fetchMembers();
@@ -239,7 +249,7 @@ const sendInvite = async () => {
     await axios.post(`companies/${id}/invite`, inviteForm.value);
     successMsg.value = 'Invitation sent successfully!';
     inviteForm.value.email = '';
-    inviteForm.value.role = 'standard_user';
+    inviteForm.value.role = 'admin';
     fetchInvitations();
     setTimeout(() => { successMsg.value = ''; }, 3000);
   } catch (err) {
@@ -263,8 +273,9 @@ const revokeInvitation = async (invId) => {
 };
 
 const startRoleEdit = (member) => {
+  if (!canManageTeam.value || member?.pivot?.role === 'owner') return;
   editRoleId.value = member.id;
-  editRoleValue.value = member.pivot?.role || 'standard_user';
+  editRoleValue.value = member.pivot?.role || 'viewer';
 };
 
 const saveRole = async (userId) => {
@@ -303,7 +314,8 @@ const formatDate = (dateString) => {
 const getRoleBadgeClass = (role) => {
   switch(role) {
     case 'owner': return 'pb-status--owner';
-    case 'accountant': return 'pb-status--admin';
+    case 'admin': return 'pb-status--admin';
+    case 'accountant': return 'pb-status--active';
     default: return 'pb-status--active';
   }
 };

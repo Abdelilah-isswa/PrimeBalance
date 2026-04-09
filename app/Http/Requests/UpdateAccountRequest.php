@@ -11,7 +11,7 @@ class UpdateAccountRequest extends FormRequest
     
     public function authorize(): bool
     {
-        return $this->isCompanyOwner($this->route('companyId'));
+        return $this->isCompanyRole((int) $this->route('companyId'), ['owner', 'admin']);
     }
 
     public function rules(): array

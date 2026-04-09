@@ -32,7 +32,7 @@ class InvoiceController extends BaseController
 
     public function create($companyId, $clientId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'create invoices');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'create invoices');
         $client = $company->clients()->findOrFail($clientId);
 
         return $this->sendResponse(compact('company', 'client'));
@@ -55,7 +55,7 @@ class InvoiceController extends BaseController
 
     public function showReceivePayment($companyId, $invoiceId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'receive payments');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'receive payments');
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
@@ -81,7 +81,7 @@ class InvoiceController extends BaseController
 
     public function edit($companyId, $invoiceId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'edit invoices');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'edit invoices');
         $invoice = $company->invoices()->with('client', 'items', 'creator')->findOrFail($invoiceId);
         
         return $this->sendResponse(compact('company', 'invoice'));
@@ -97,7 +97,7 @@ class InvoiceController extends BaseController
 
     public function destroy($companyId, $invoiceId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'delete invoices');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete invoices');
         $invoice = $company->invoices()->findOrFail($invoiceId);
         
         if (!$this->invoiceService->deleteInvoice($invoice)) {

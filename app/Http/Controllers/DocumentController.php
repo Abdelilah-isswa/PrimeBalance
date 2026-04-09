@@ -12,7 +12,7 @@ class DocumentController extends BaseController
     
     public function index(Request $request, $companyId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $type = $request->get('type', 'invoices');
         
         if ($type === 'bills') {

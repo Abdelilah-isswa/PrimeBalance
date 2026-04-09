@@ -31,7 +31,7 @@ class SupplierController extends BaseController
 
     public function update(UpdateSupplierRequest $request, $companyId, $supplierId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'update suppliers');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'update suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         $this->supplierService->updateSupplier($supplier, $request->validated());
         return $this->sendResponse($supplier->fresh(), 'Supplier updated');
@@ -39,7 +39,7 @@ class SupplierController extends BaseController
 
     public function destroy($companyId, $supplierId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'delete suppliers');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete suppliers');
         $supplier = $company->suppliers()->findOrFail($supplierId);
         
         if (!$this->supplierService->deleteSupplier($supplier)) {

@@ -214,6 +214,10 @@ const selectedCompany = computed(() => {
   return companies.value.find(company => String(company.id) === currentCompanyId.value)
 })
 
+const currentCompanyRole = computed(() => {
+  return selectedCompany.value?.pivot?.role || 'viewer'
+})
+
 const onNavLinkClick = (event, link) => {
   if (link?.disabled) {
     event.preventDefault()
@@ -245,68 +249,93 @@ const navLinks = computed(() => {
   const noCompanies = companiesLoaded.value && companies.value.length === 0
   const companyRequiredDisabled = !base
 
-  return [
+  const roleAccess = {
+    owner: new Set(['dashboard', 'invoices', 'bills', 'clients', 'suppliers', 'accounts', 'categories', 'transactions', 'documents', 'team']),
+    admin: new Set(['dashboard', 'invoices', 'bills', 'clients', 'suppliers', 'accounts', 'categories', 'transactions', 'documents', 'team']),
+    accountant: new Set(['dashboard', 'invoices', 'bills', 'clients', 'suppliers', 'accounts', 'categories', 'transactions', 'documents']),
+    viewer: new Set(['dashboard', 'invoices', 'bills', 'documents'])
+  }
+
+  const allowed = roleAccess[currentCompanyRole.value] || roleAccess.viewer
+
+  const links = [
     { 
+      key: 'dashboard',
       path: base ? base : `/dashboard`, 
       label: 'Dashboard', 
       disabled: false,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`
     },
     { 
+      key: 'invoices',
       path: base ? `${base}/invoices` : `/dashboard`, 
       label: 'Invoices', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`
     },
     { 
+      key: 'bills',
       path: base ? `${base}/bills` : `/dashboard`, 
       label: 'Bills', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`
     },
     { 
+      key: 'clients',
       path: base ? `${base}/clients` : `/dashboard`, 
       label: 'Clients', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
     },
     { 
+      key: 'suppliers',
       path: base ? `${base}/suppliers` : `/dashboard`, 
       label: 'Suppliers', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`
     },
     { 
+      key: 'accounts',
       path: base ? `${base}/accounts` : `/dashboard`, 
       label: 'Accounts', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`
     },
     { 
+      key: 'categories',
       path: base ? `${base}/categories` : `/dashboard`, 
       label: 'Categories', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`
     },
     { 
+      key: 'transactions',
       path: base ? `${base}/transactions` : `/dashboard`, 
       label: 'Transactions', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`
     },
     { 
+      key: 'documents',
       path: base ? `${base}/documents` : `/dashboard`, 
       label: 'Documents', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`
     },
     { 
+      key: 'team',
       path: base ? `${base}/team` : `/dashboard`, 
       label: 'Team', 
       disabled: companyRequiredDisabled,
       iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>`
     }
   ]
+
+  if (!base) {
+    return links
+  }
+
+  return links.filter(l => allowed.has(l.key))
 })
 </script>
 

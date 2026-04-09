@@ -46,7 +46,7 @@ class CategoryController extends BaseController
 
     public function destroy($companyId, $categoryId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'delete categories');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin'], 'delete categories');
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->deleteCategory($category);
 
