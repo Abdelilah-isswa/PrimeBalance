@@ -25,7 +25,7 @@ class BillController extends BaseController
     public function index($companyId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $bills = $company->bills()->with('supplier')->get();
+        $bills = $company->bills()->with('supplier')->orderByDesc('id')->get();
         
         return $this->sendResponse(compact('company', 'bills'));
     }
@@ -66,7 +66,13 @@ class BillController extends BaseController
     {
         $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->findOrFail($billId);
-        $this->billService->payBill($bill, $request->validated());
+        try {
+            $this->billService->payBill($bill, $request->validated());
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
+        }
+
+        $bill->load('supplier');
         return $this->sendResponse($bill->fresh(), 'Bill paid successfully');
     }
 
@@ -90,7 +96,13 @@ class BillController extends BaseController
     {
         $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->findOrFail($billId);
-        $this->billService->updateBill($bill, $request->validated());
+        try {
+            $this->billService->updateBill($bill, $request->validated());
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
+        }
+
+        $bill->load('supplier');
         return $this->sendResponse($bill->fresh(), 'Bill updated successfully');
     }
 
@@ -98,7 +110,11 @@ class BillController extends BaseController
     {
         $company = $this->getCompanyForOwner($companyId, 'delete bills');
         $bill = $company->bills()->findOrFail($billId);
-        $this->billService->deleteBill($bill);
+        try {
+            $this->billService->deleteBill($bill);
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
+        }
 
         return $this->sendResponse([], 'Bill deleted successfully');
     }
