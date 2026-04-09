@@ -26,7 +26,11 @@
               {{ company.name }}
             </option>
           </select>
-          <router-link to="/companies/create" class="pb-create-company-btn pb-create-company-btn--sm">
+          <router-link
+            to="/companies/create"
+            class="pb-create-company-btn pb-create-company-btn--sm"
+            :class="{ 'pb-create-company-btn--highlight': highlightCreateCompanyCta }"
+          >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -39,32 +43,18 @@
       <nav class="pb-nav">
         <router-link
           v-for="link in navLinks"
-          :key="link.path"
+          :key="link.label"
           :to="link.path"
           class="pb-nav-link"
-          :class="{ 'pb-nav-link--active': isActiveLink(link.path) }"
+          :class="{ 'pb-nav-link--active': !link.disabled && isActiveLink(link.path), 'pb-nav-link--disabled': link.disabled }"
+          :aria-disabled="link.disabled ? 'true' : 'false'"
+          :tabindex="link.disabled ? -1 : 0"
+          :title="link.disabled ? 'Create or select a company first' : ''"
+          @click="onNavLinkClick($event, link)"
         >
           <span class="pb-nav-icon" v-html="link.iconSvg"></span>
           <span class="pb-nav-label">{{ link.label }}</span>
         </router-link>
-
-
-        <div v-if="navLinks.length === 0" class="pb-nav-empty">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <p>No companies found. Create your first company to get started!</p>
-          <router-link to="/companies/create" class="pb-create-company-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Create your first company
-          </router-link>
-        </div>
-
       </nav>
 
       <div class="pb-sidebar-footer">
@@ -137,6 +127,13 @@ const companyStore = useCompanyStore()
 const dashboardStore = useDashboardStore()
 
 const currentCompanyId = ref(String(props.companyId || route.params.companyId || ''))
+const companiesLoaded = ref(false)
+
+const companies = computed(() => companyStore.companies)
+
+const highlightCreateCompanyCta = computed(() => {
+  return companiesLoaded.value && companies.value.length === 0
+})
 
 const showDateFilter = computed(() => {
   const allowedNames = ['Home', 'CompanyDashboard', 'Invoices', 'Bills', 'Transactions'];
@@ -148,22 +145,28 @@ onMounted(async () => {
     await companyStore.fetchCompanies()
   }
 
-  // Auto-select first company if none
-  if (companyStore.companies.length > 0 && !currentCompanyId.value && !route.params.companyId) {
-    const isSpecialRoute = ['CompanyCreate', 'Settings'].includes(route.name);
-    if (!isSpecialRoute) {
-      currentCompanyId.value = String(companyStore.companies[0].id);
-      router.push(`/companies/${currentCompanyId.value}`);
-    }
+  companiesLoaded.value = true
+
+  const routeCompanyId = route.params.companyId || props.companyId
+  if (routeCompanyId) {
+    currentCompanyId.value = String(routeCompanyId)
   }
 
-  const companyId = route.params.companyId || props.companyId || localStorage.getItem('pb_active_company_id');
-  if (companyId && !currentCompanyId.value) {
-    currentCompanyId.value = String(companyId)
+  const storedCompanyId = localStorage.getItem('pb_active_company_id')
+  const storedIsValid = storedCompanyId
+    ? companyStore.companies.some((c) => String(c.id) === String(storedCompanyId))
+    : false
+
+  if (!currentCompanyId.value && storedCompanyId && storedIsValid) {
+    currentCompanyId.value = String(storedCompanyId)
+  }
+
+  if (!storedIsValid && storedCompanyId) {
+    localStorage.removeItem('pb_active_company_id')
   }
 
   if (currentCompanyId.value) {
-    localStorage.setItem('pb_active_company_id', currentCompanyId.value);
+    localStorage.setItem('pb_active_company_id', currentCompanyId.value)
   }
 })
 
@@ -207,11 +210,16 @@ const isActiveLink = (path) => {
   return currentPath.startsWith(path + '/') || currentPath === path;
 }
 
-const companies = computed(() => companyStore.companies)
-
 const selectedCompany = computed(() => {
   return companies.value.find(company => String(company.id) === currentCompanyId.value)
 })
+
+const onNavLinkClick = (event, link) => {
+  if (link?.disabled) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+}
 
 const logout = async () => {
   await authStore.logout()
@@ -232,57 +240,70 @@ const homeLink = computed(() => {
 })
 
 const navLinks = computed(() => {
-  if (!currentCompanyId.value) return []
   const id = currentCompanyId.value
+  const base = id ? `/companies/${id}` : null
+  const noCompanies = companiesLoaded.value && companies.value.length === 0
+  const companyRequiredDisabled = !base
+
   return [
     { 
-      path: currentCompanyId.value ? `/companies/${currentCompanyId.value}` : `/dashboard`, 
+      path: base ? base : `/dashboard`, 
       label: 'Dashboard', 
+      disabled: false,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`
     },
     { 
-      path: `/companies/${id}/invoices`, 
+      path: base ? `${base}/invoices` : `/dashboard`, 
       label: 'Invoices', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`
     },
     { 
-      path: `/companies/${id}/bills`, 
+      path: base ? `${base}/bills` : `/dashboard`, 
       label: 'Bills', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`
     },
     { 
-      path: `/companies/${id}/clients`, 
+      path: base ? `${base}/clients` : `/dashboard`, 
       label: 'Clients', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
     },
     { 
-      path: `/companies/${id}/suppliers`, 
+      path: base ? `${base}/suppliers` : `/dashboard`, 
       label: 'Suppliers', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`
     },
     { 
-      path: `/companies/${id}/accounts`, 
+      path: base ? `${base}/accounts` : `/dashboard`, 
       label: 'Accounts', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`
     },
     { 
-      path: `/companies/${id}/categories`, 
+      path: base ? `${base}/categories` : `/dashboard`, 
       label: 'Categories', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`
     },
     { 
-      path: `/companies/${id}/transactions`, 
+      path: base ? `${base}/transactions` : `/dashboard`, 
       label: 'Transactions', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`
     },
     { 
-      path: `/companies/${id}/documents`, 
+      path: base ? `${base}/documents` : `/dashboard`, 
       label: 'Documents', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`
     },
     { 
-      path: `/companies/${id}/team`, 
+      path: base ? `${base}/team` : `/dashboard`, 
       label: 'Team', 
+      disabled: companyRequiredDisabled,
       iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>`
     }
   ]
@@ -416,6 +437,12 @@ const navLinks = computed(() => {
   color: white;
 }
 
+.pb-nav-link--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .pb-nav-icon {
   width: 20px;
   height: 20px;
@@ -480,6 +507,42 @@ const navLinks = computed(() => {
   background: rgba(79, 70, 229, 0.1);
   color: white;
   border-color: #4f46e5;
+}
+
+.pb-create-company-btn--highlight {
+  border-style: solid;
+  border-color: rgba(165, 180, 252, 0.95);
+  background: linear-gradient(
+    110deg,
+    rgba(79, 70, 229, 0.10) 0%,
+    rgba(165, 180, 252, 0.22) 45%,
+    rgba(79, 70, 229, 0.10) 100%
+  );
+  background-size: 220% 100%;
+  color: #ffffff;
+  box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.45);
+  animation: pbCtaPulse 1.35s ease-in-out infinite, pbCtaShimmer 1.15s linear infinite;
+}
+
+@keyframes pbCtaShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pbCtaPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.42);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+  }
 }
 
 .pb-create-company-btn:not(.pb-create-company-btn--sm):hover {
