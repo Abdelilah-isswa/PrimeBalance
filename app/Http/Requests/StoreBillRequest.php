@@ -17,8 +17,11 @@ class StoreBillRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'supplier_id' => 'required|exists:suppliers,id',
+            'description' => 'nullable|string',
+            'due_date' => 'nullable|date',
             'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:draft,unpaid,paid,cancelled',
+            'status' => 'nullable|in:unpaid,partial,paid,cancelled',
         ];
     }
 }

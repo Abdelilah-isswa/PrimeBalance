@@ -20,6 +20,7 @@ class PayBillRequest extends FormRequest
             'account_id' => 'required|exists:accounts,id',
             'category_id' => 'nullable|exists:categories,id',
             'date' => 'required|date',
+            'amount' => 'required|numeric|min:0.01',
         ];
     }
 }
