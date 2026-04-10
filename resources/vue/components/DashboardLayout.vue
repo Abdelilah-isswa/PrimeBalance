@@ -136,8 +136,8 @@ const highlightCreateCompanyCta = computed(() => {
 })
 
 const showDateFilter = computed(() => {
-  const allowedNames = ['Home', 'CompanyDashboard', 'Invoices', 'Bills', 'Transactions'];
-  return allowedNames.includes(route.name);
+  const path = route.path || '';
+  return path === '/dashboard' || /^\/companies\/\d+$/.test(path);
 })
 
 onMounted(async () => {
