@@ -97,7 +97,7 @@
         </div>
       </div>
 
-      <div class="pb-sidebar anim-fade-in">
+      <div v-if="!isViewer" class="pb-sidebar anim-fade-in">
         <div class="pb-card pb-options-card">
           <h3 class="pb-card-title-sm">Bill Options</h3>
           <div class="pb-option-list">
@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -144,6 +144,10 @@ const billId = route.params.billId;
 
 const company = ref(null);
 const bill = ref(null);
+const isViewer = computed(() => {
+  const role = String(company.value?.pivot?.role || 'viewer').toLowerCase();
+  return role === 'viewer';
+});
 
 onMounted(async () => {
   try {
