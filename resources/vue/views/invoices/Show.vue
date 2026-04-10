@@ -17,7 +17,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download PDF
           </a>
-          <router-link v-if="invoice?.status !== 'paid'" :to="`/companies/${id}/invoices/${invoiceId}/receive`" class="pb-btn pb-btn-primary">
+          <router-link v-if="!isViewer && invoice?.status !== 'paid'" :to="`/companies/${id}/invoices/${invoiceId}/receive`" class="pb-btn pb-btn-primary">
             Receive Payment
           </router-link>
         </div>
@@ -124,7 +124,7 @@
       </div>
 
       <!-- Quick Options Sidebar -->
-      <div class="pb-sidebar anim-fade-in">
+      <div v-if="!isViewer" class="pb-sidebar anim-fade-in">
         <div class="pb-card pb-options-card">
           <h3 class="pb-card-title-sm">Invoice Options</h3>
           <div class="pb-option-list">
@@ -148,7 +148,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useInvoiceStore } from '../../stores/invoice.js';
 import axios from 'axios';
@@ -161,6 +161,10 @@ const invoiceId = route.params.invoiceId;
 const invoiceStore = useInvoiceStore();
 const company = ref(null);
 const invoice = ref(null);
+const isViewer = computed(() => {
+  const role = String(company.value?.pivot?.role || 'viewer').toLowerCase();
+  return role === 'viewer';
+});
 
 onMounted(async () => {
   const res = await axios.get(`/companies/${id}/invoices/${invoiceId}`);
