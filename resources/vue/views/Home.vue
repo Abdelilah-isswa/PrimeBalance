@@ -433,7 +433,7 @@ const calculateSummary = () => {
       const paid = parseFloat(i.amount_paid || 0);
       return sum + Math.max(total - paid, 0);
     }, 0);
-  summary.value.expenses = filteredBills.reduce((sum, b) => sum + parseFloat(b.total_amount || 0), 0);
+  summary.value.expenses = filteredBills.reduce((sum, b) => sum + parseFloat(b.amount_paid || 0), 0);
   summary.value.overdue = filteredInvoices.filter(i => i.status === 'overdue').length;
   summary.value.unpaidBills = filteredBills.filter(b => b.status !== 'paid').length;
   summary.value.cashBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
