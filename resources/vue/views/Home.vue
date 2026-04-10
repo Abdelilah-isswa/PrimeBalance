@@ -63,6 +63,7 @@
             <div class="pb-stat-value pb-text-blue">
               {{ formatCurrency(summary.income - summary.expenses) }}
             </div>
+              <div class="pb-stat-sub">Income - Expenses (over a period)</div>
             <div class="pb-stat-trend pb-trend-up">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               </svg>
@@ -114,11 +115,11 @@
             </svg>
           </div>
           <div class="pb-stat-content">
-            <div class="pb-stat-label">Cash Balance</div>
+            <div class="pb-stat-label">Total Balance</div>
             <div class="pb-stat-value pb-text-teal">
               {{ formatCurrency(summary.cashBalance || 0) }}
             </div>
-            <div class="pb-stat-sub">All accounts</div>
+            <div class="pb-stat-sub">Real money in accounts</div>
           </div>
         </div>
 
@@ -450,8 +451,8 @@ const calculateSummary = () => {
       return sum + Math.max(total - paid, 0);
     }, 0);
   summary.value.expenses = filteredBills.reduce((sum, b) => sum + parseFloat(b.amount_paid || 0), 0);
-  summary.value.overdue = filteredInvoices.filter(i => i.status === 'overdue').length;
-  summary.value.unpaidBills = filteredBills.filter(b => b.status !== 'paid').length;
+  summary.value.overdue = invoices.filter(i => String(i.status || '').toLowerCase() === 'overdue').length;
+  summary.value.unpaidBills = bills.filter(b => String(b.status || '').toLowerCase() !== 'paid').length;
   summary.value.cashBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
   recentTransactions.value = filteredTransactions.slice(0, 5);
   recentInvoices.value = filteredInvoices.filter(i => i.status !== 'paid').slice(0, 3);
