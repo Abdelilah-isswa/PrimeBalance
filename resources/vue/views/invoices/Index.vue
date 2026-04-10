@@ -3,7 +3,7 @@
     <div class="pb-page-header">
       <div class="pb-header-content">
         <h1 class="pb-page-title">Invoices</h1>
-        <p class="pb-page-subtitle">Manage your billing and generate new invoices for {{ company?.name }}</p>
+        <p class="pb-page-subtitle">{{ canCreateInvoice ? `Manage your billing and generate new invoices for ${company?.name || 'your company'}` : `Manage invoices for ${company?.name || 'your company'}` }}</p>
         
         <div class="pb-tabs">
           <button 
@@ -14,7 +14,8 @@
             Manage Invoices
             <span class="pb-tab-badge">{{ invoices.length }}</span>
           </button>
-          <button 
+          <button
+            v-if="canCreateInvoice"
             class="pb-tab-btn" 
             :class="{ 'pb-tab-btn--active': activeTab === 'create' }"
             @click="activeTab = 'create'"
@@ -83,7 +84,7 @@
     </div>
 
     <!-- Tab Content: Create -->
-    <div v-if="activeTab === 'create'" class="pb-tab-content anim-fade-in">
+    <div v-if="canCreateInvoice && activeTab === 'create'" class="pb-tab-content anim-fade-in">
       <div class="pb-card pb-form-card" style="max-width: 100%; width: 100%;">
         <div class="pb-card-header">
           <h2 class="pb-card-title">Generate New Invoice</h2>
@@ -243,6 +244,10 @@ const newItem = ref({
 const invoices = computed(() => invoiceStore.invoices);
 const company = computed(() => companyStore.currentCompany);
 const clients = computed(() => clientStore.clients);
+const canCreateInvoice = computed(() => {
+  const role = String(company.value?.pivot?.role || 'viewer').toLowerCase();
+  return role !== 'viewer';
+});
 
 const calculatedTotal = computed(() => {
   return form.value.items.reduce((sum, item) => {
@@ -295,6 +300,10 @@ onMounted(async () => {
     invoiceStore.fetchInvoices(id),
     clientStore.fetchClients(id)
   ]);
+
+  if (!canCreateInvoice.value) {
+    activeTab.value = 'manage';
+  }
 });
 
 const submit = async (action) => {
