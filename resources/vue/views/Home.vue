@@ -107,8 +107,8 @@
           </div>
         </div>
 
-        <!-- Cash Balance -->
-        <div class="pb-stat-card">
+        <!-- Total Balance -->
+        <div class="pb-stat-card" :class="{ 'pb-stat-card-low-balance': isLowBalance }">
           <div class="pb-stat-icon pb-stat-icon-teal">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M20 12v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-4M12 2v8M9 7l3-3 3 3"/>
@@ -121,6 +121,9 @@
               {{ formatCurrency(summary.cashBalance || 0) }}
             </div>
             <div class="pb-stat-sub">Real money in accounts</div>
+            <div v-if="isLowBalance" class="pb-stat-warning-msg">
+              Low balance.
+            </div>
           </div>
         </div>
 
@@ -403,6 +406,7 @@ const error = ref(null);
 const incomeExpenseChartLabels = ref([]);
 const incomeSeries = ref([]);
 const expenseSeries = ref([]);
+const isLowBalance = computed(() => Number(summary.value.cashBalance || 0) < 20);
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-US', {
@@ -725,6 +729,11 @@ watch(
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.pb-stat-card-low-balance {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25), 0 0 20px rgba(239, 68, 68, 0.22);
+}
+
 .pb-stat-icon {
   width: 48px;
   height: 48px;
@@ -786,6 +795,13 @@ watch(
   font-size: 11px;
   color: #94a3b8;
   margin-top: 4px;
+}
+
+.pb-stat-warning-msg {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b91c1c;
 }
 
 .pb-main-grid {
