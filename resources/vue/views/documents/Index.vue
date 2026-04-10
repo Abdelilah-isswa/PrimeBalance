@@ -12,7 +12,7 @@
             @click="type = 'invoices'; load()"
           >
             Invoices
-            <span class="pb-tab-badge" v-if="type === 'invoices'">{{ documents.length }}</span>
+            <span class="pb-tab-badge">{{ invoiceCount }}</span>
           </button>
           <button 
             class="pb-tab-btn" 
@@ -20,7 +20,7 @@
             @click="type = 'bills'; load()"
           >
             Bills
-            <span class="pb-tab-badge" v-if="type === 'bills'">{{ documents.length }}</span>
+            <span class="pb-tab-badge">{{ billCount }}</span>
           </button>
         </div>
       </div>
@@ -93,12 +93,32 @@ const id = route.params.companyId;
 const company = ref(null);
 const documents = ref([]);
 const type = ref('invoices');
+const invoiceCount = ref(0);
+const billCount = ref(0);
 
 const load = async () => {
   try {
-    const res = await axios.get(`companies/${id}/documents`, { params: { type: type.value } });
-    company.value = res.data.data.company;
-    documents.value = res.data.data.documents;
+    const activeType = type.value;
+    const otherType = activeType === 'invoices' ? 'bills' : 'invoices';
+
+    const [activeRes, otherRes] = await Promise.all([
+      axios.get(`companies/${id}/documents`, { params: { type: activeType } }),
+      axios.get(`companies/${id}/documents`, { params: { type: otherType } }),
+    ]);
+
+    company.value = activeRes.data.data.company;
+    documents.value = activeRes.data.data.documents;
+
+    const activeCount = activeRes.data.data.documents.length;
+    const otherCount = otherRes.data.data.documents.length;
+
+    if (activeType === 'invoices') {
+      invoiceCount.value = activeCount;
+      billCount.value = otherCount;
+    } else {
+      billCount.value = activeCount;
+      invoiceCount.value = otherCount;
+    }
   } catch (err) {
     console.error("Failed to load documents", err);
   }
