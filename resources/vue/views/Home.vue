@@ -19,15 +19,15 @@
             </svg>
           </div>
           <div class="pb-stat-content">
-            <div class="pb-stat-label">Total Income</div>
-            <div class="pb-stat-value pb-text-green">
-              {{ formatCurrency(summary.income) }}
+            <div style="margin:0; font-size:1rem; line-height:1.4; font-weight:600;">
+              Actual income: {{ formatCurrency(summary.income) }}
+            </div>
+            <div style="margin:0.35rem 0 0; font-size:1rem; line-height:1.4; font-weight:600;">
+              Expected income: {{ formatCurrency(summary.expectedIncome) }}
             </div>
             <div class="pb-stat-trend pb-trend-up">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <polyline points="18 15 12 9 6 15"/>
               </svg>
-              <span>+12.5% from last month</span>
             </div>
           </div>
         </div>
@@ -47,9 +47,7 @@
             </div>
             <div class="pb-stat-trend pb-trend-down">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <polyline points="6 9 12 15 18 9"/>
               </svg>
-              <span>+3.2% from last month</span>
             </div>
           </div>
         </div>
@@ -68,9 +66,7 @@
             </div>
             <div class="pb-stat-trend pb-trend-up">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <polyline points="18 15 12 9 6 15"/>
               </svg>
-              <span>+8.3% from last month</span>
             </div>
           </div>
         </div>
@@ -151,7 +147,6 @@
             >
               View all
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <polyline points="9 18 15 12 9 6"/>
               </svg>
             </router-link>
           </div>
@@ -224,7 +219,6 @@
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
                   <line x1="16" y1="13" x2="8" y2="13"/>
                   <line x1="16" y1="17" x2="8" y2="17"/>
                 </svg>
@@ -275,7 +269,6 @@
               <div class="pb-card-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
                 </svg>
               </div>
               <div>
@@ -290,7 +283,6 @@
             >
               View all
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <polyline points="9 18 15 12 9 6"/>
               </svg>
             </router-link>
           </div>
@@ -346,6 +338,7 @@ const recentTransactions = ref([]);
 const recentInvoices = ref([]);
 const summary = ref({
   income: 0,
+  expectedIncome: 0,
   expenses: 0,
   overdue: 0,
   unpaidBills: 0,
@@ -387,7 +380,20 @@ const calculateSummary = () => {
   const filteredBills = bills.filter(b => isInDateRange(b.created_at || b.date, start, end));
   const filteredTransactions = transactions.filter(t => isInDateRange(t.date || t.created_at, start, end));
 
-  summary.value.income = filteredInvoices.reduce((sum, i) => sum + parseFloat(i.total_amount || 0), 0);
+  summary.value.income = filteredTransactions
+    .filter((t) => String(t.type || "").toLowerCase() === "income")
+    .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+
+  summary.value.expectedIncome = filteredInvoices
+    .filter((i) => {
+      const status = String(i.status || "").toLowerCase();
+      return status !== "paid" && status !== "cancelled";
+    })
+    .reduce((sum, i) => {
+      const total = parseFloat(i.total_amount || 0);
+      const paid = parseFloat(i.amount_paid || 0);
+      return sum + Math.max(total - paid, 0);
+    }, 0);
   summary.value.expenses = filteredBills.reduce((sum, b) => sum + parseFloat(b.total_amount || 0), 0);
   summary.value.overdue = filteredInvoices.filter(i => i.status === 'overdue').length;
   summary.value.unpaidBills = filteredBills.filter(b => b.status !== 'paid').length;

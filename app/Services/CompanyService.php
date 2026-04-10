@@ -17,17 +17,83 @@ class CompanyService
     public function getDashboardMetrics(Company $company, ?string $startDate = null, ?string $endDate = null): array
     {
         $transactionsQuery = $company->transactions();
+        $monthStart = now()->startOfMonth()->toDateString();
+        $monthEnd = now()->endOfMonth()->toDateString();
+        $today = now()->toDateString();
+        $billsDueSoonEnd = now()->addDays(7)->toDateString();
         
         if ($startDate && $endDate) {
             $transactionsQuery->whereBetween('date', [$startDate, $endDate]);
         }
+
+        $unpaidInvoiceStatuses = ['draft', 'sent', 'partial'];
+        $unpaidBillStatuses = ['unpaid', 'partial'];
+
+        $totalIncome = (clone $transactionsQuery)->where('type', 'income')->sum('amount');
+        $totalExpense = (clone $transactionsQuery)->where('type', 'expense')->sum('amount');
+
+        $totalIncomeThisMonth = $company->transactions()
+            ->where('type', 'income')
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->sum('amount');
+
+        $totalExpenseThisMonth = $company->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->sum('amount');
+
+        $unpaidInvoicesCount = $company->invoices()->whereIn('status', $unpaidInvoiceStatuses)->count();
+        $unpaidInvoicesAmount = $company->invoices()->whereIn('status', $unpaidInvoiceStatuses)->sum('total_amount');
+        $expectedIncome = $company->invoices()
+            ->whereIn('status', $unpaidInvoiceStatuses)
+            ->get(['total_amount', 'amount_paid'])
+            ->sum(function ($invoice) {
+                $total = (float) ($invoice->total_amount ?? 0);
+                $paid = (float) ($invoice->amount_paid ?? 0);
+                return max(0, $total - $paid);
+            });
+
+        $overdueInvoicesCount = $company->invoices()
+            ->whereIn('status', $unpaidInvoiceStatuses)
+            ->whereDate('due_date', '<', $today)
+            ->count();
+
+        $overdueInvoicesAmount = $company->invoices()
+            ->whereIn('status', $unpaidInvoiceStatuses)
+            ->whereDate('due_date', '<', $today)
+            ->sum('total_amount');
+
+        $paidInvoicesThisMonth = $company->invoices()
+            ->where('status', 'paid')
+            ->whereBetween('updated_at', [$monthStart . ' 00:00:00', $monthEnd . ' 23:59:59'])
+            ->count();
+
+        $unpaidBillsCount = $company->bills()->whereIn('status', $unpaidBillStatuses)->count();
+        $paidBillsCount = $company->bills()->where('status', 'paid')->count();
+
+        $billsDueSoonCount = $company->bills()
+            ->whereIn('status', $unpaidBillStatuses)
+            ->whereBetween('due_date', [$today, $billsDueSoonEnd])
+            ->count();
         
         return [
-            'totalIncome' => (clone $transactionsQuery)->where('type', 'income')->sum('amount'),
-            'totalExpense' => (clone $transactionsQuery)->where('type', 'expense')->sum('amount'),
+            'totalIncome' => $totalIncome,
+            'totalExpense' => $totalExpense,
             'bankBalance' => $company->accounts()->sum('balance'),
-            'unpaidInvoices' => $company->invoices()->whereIn('status', ['draft', 'sent'])->count(),
-            'unpaidBills' => $company->bills()->whereIn('status', ['unpaid', 'partial'])->count(),
+            'unpaidInvoices' => $unpaidInvoicesCount,
+            'unpaidBills' => $unpaidBillsCount,
+            'totalIncomeThisMonth' => $totalIncomeThisMonth,
+            'totalExpenseThisMonth' => $totalExpenseThisMonth,
+            'profitThisMonth' => $totalIncomeThisMonth - $totalExpenseThisMonth,
+            'expectedIncome' => $expectedIncome,
+            'unpaidInvoicesCount' => $unpaidInvoicesCount,
+            'unpaidInvoicesAmount' => $unpaidInvoicesAmount,
+            'overdueInvoicesCount' => $overdueInvoicesCount,
+            'overdueInvoicesAmount' => $overdueInvoicesAmount,
+            'paidInvoicesThisMonth' => $paidInvoicesThisMonth,
+            'unpaidBillsCount' => $unpaidBillsCount,
+            'paidBillsCount' => $paidBillsCount,
+            'billsDueSoonCount' => $billsDueSoonCount,
         ];
     }
 

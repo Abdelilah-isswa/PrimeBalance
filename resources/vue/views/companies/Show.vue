@@ -18,7 +18,12 @@
       <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1rem 0;">
         <div style="padding:1rem; background:#e8f5e9;">
           <h3>Total Income</h3>
-          <p>{{ company?.currency }} {{ fmt(metrics.totalIncome) }}</p>
+          <p style="margin:0; font-size:0.95rem; color:#2e7d32; font-weight:600;">
+            Actual Income: {{ company?.currency }} {{ fmt(metrics.actualIncome) }}
+          </p>
+          <p style="margin:0.35rem 0 0; font-size:1.2rem; font-weight:bold; color:#2e7d32;">
+            Expected Income: {{ company?.currency }} {{ fmt(metrics.expectedIncome) }}
+          </p>
         </div>
 
         <div style="padding:1rem; background:#ffebee;">
@@ -50,10 +55,13 @@ const error = ref(null);
 const fmt = (v) => Number(v || 0).toFixed(2);
 
 const metrics = computed(() => {
-  const income = Number(company.value?.total_income || 0);
+  const income = Number(company.value?.total_income || company.value?.totalIncome || 0);
   const expense = Number(company.value?.total_expense || 0);
+  const expected = Number(company.value?.expectedIncome || 0);
   return {
     totalIncome: income,
+    actualIncome: income,
+    expectedIncome: expected,
     totalExpense: expense,
     netProfit: income - expense,
   };
