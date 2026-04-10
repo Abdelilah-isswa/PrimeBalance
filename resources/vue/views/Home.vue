@@ -59,7 +59,7 @@
             </svg>
           </div>
           <div class="pb-stat-content">
-            <div class="pb-stat-label">Net Profit</div>
+            <div class="pb-stat-label">Profit</div>
             <div class="pb-stat-value pb-text-blue">
               {{ formatCurrency(summary.income - summary.expenses) }}
             </div>
@@ -119,6 +119,22 @@
               {{ formatCurrency(summary.cashBalance || 0) }}
             </div>
             <div class="pb-stat-sub">All accounts</div>
+          </div>
+        </div>
+
+        <!-- Expected Income -->
+        <div class="pb-stat-card">
+          <div class="pb-stat-icon pb-stat-icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="pb-stat-content">
+            <div class="pb-stat-label">Expected Income</div>
+            <div class="pb-stat-value pb-text-green">
+              {{ formatCurrency(summary.expectedIncome) }}
+            </div>
+            <div class="pb-stat-sub">Unpaid invoices</div>
           </div>
         </div>
       </div>
@@ -423,7 +439,7 @@ const calculateSummary = () => {
     .filter((t) => String(t.type || "").toLowerCase() === "income")
     .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
 
-  summary.value.expectedIncome = filteredInvoices
+  summary.value.expectedIncome = invoices
     .filter((i) => {
       const status = String(i.status || "").toLowerCase();
       return status !== "paid" && status !== "cancelled";
