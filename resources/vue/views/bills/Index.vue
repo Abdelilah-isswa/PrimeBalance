@@ -86,14 +86,14 @@
                       View
                     </router-link>
                     <router-link
-                      v-if="bill.status !== 'paid'"
+                      v-if="canCreateBill && bill.status !== 'paid'"
                       :to="`/companies/${id}/bills/${bill.id}/edit`"
                       class="pb-action-btn"
                     >
                       Edit
                     </router-link>
                     <router-link
-                      v-if="bill.status !== 'paid'"
+                      v-if="canCreateBill && bill.status !== 'paid'"
                       :to="`/companies/${id}/bills/${bill.id}/pay`"
                       class="pb-action-btn pb-action-btn--primary"
                     >
