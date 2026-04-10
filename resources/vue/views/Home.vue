@@ -23,7 +23,7 @@
             <div class="pb-stat-value pb-text-green">
               {{ formatCurrency(summary.income) }}
             </div>
-           
+           <div class="pb-stat-sub">Paid Invoices</div>
             <div class="pb-stat-trend pb-trend-up">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               </svg>
@@ -44,6 +44,7 @@
             <div class="pb-stat-value pb-text-red">
               {{ formatCurrency(summary.expenses) }}
             </div>
+            <div class="pb-stat-sub">Paid Bills</div>
             <div class="pb-stat-trend pb-trend-down">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               </svg>
@@ -63,7 +64,7 @@
             <div class="pb-stat-value pb-text-blue">
               {{ formatCurrency(summary.income - summary.expenses) }}
             </div>
-              <div class="pb-stat-sub">Income - Expenses (over a period)</div>
+              <div class="pb-stat-sub">Income - Expenses</div>
             <div class="pb-stat-trend pb-trend-up">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               </svg>
@@ -473,7 +474,7 @@ const calculateSummary = () => {
     const dateKey = String(b.date || b.created_at || '').substring(0, 10);
     if (!dateKey) return;
     const current = trendMap.get(dateKey) || { income: 0, expense: 0 };
-    current.expense += parseFloat(b.total_amount || 0);
+    current.expense += parseFloat(b.amount_paid || 0);
     trendMap.set(dateKey, current);
   });
 
