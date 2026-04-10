@@ -191,7 +191,7 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="pb-card">
+        <div v-if="!isViewer" class="pb-card">
           <div class="pb-card-header">
             <div class="pb-card-title-section">
               <div class="pb-card-icon">
@@ -334,6 +334,11 @@ const dashboardStore = useDashboardStore();
 
 const companies = computed(() => companyStore.companies);
 const currentCompany = computed(() => companyStore.currentCompany);
+const activeCompany = computed(() => currentCompany.value?.company || currentCompany.value || null);
+const isViewer = computed(() => {
+  const role = String(activeCompany.value?.pivot?.role || '').toLowerCase();
+  return !role || role === 'viewer';
+});
 const recentTransactions = ref([]);
 const recentInvoices = ref([]);
 const summary = ref({
