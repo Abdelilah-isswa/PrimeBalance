@@ -142,6 +142,23 @@
             <div class="pb-stat-sub">Unpaid invoices</div>
           </div>
         </div>
+
+        <!-- Due Soon Bills -->
+        <div class="pb-stat-card">
+          <div class="pb-stat-icon pb-stat-icon-orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="pb-stat-content">
+            <div class="pb-stat-label">Due Soon Bills</div>
+            <div class="pb-stat-value pb-text-orange">
+              {{ summary.dueSoonBills }}
+            </div>
+            <div class="pb-stat-sub">Unpaid due in 7 days</div>
+          </div>
+        </div>
       </div>
 
       <div class="pb-middle-grid">
@@ -399,6 +416,7 @@ const summary = ref({
   expenses: 0,
   overdue: 0,
   unpaidBills: 0,
+  dueSoonBills: 0,
   cashBalance: 0,
 });
 const loading = ref(true);
@@ -458,6 +476,17 @@ const calculateSummary = () => {
   summary.value.expenses = filteredBills.reduce((sum, b) => sum + parseFloat(b.amount_paid || 0), 0);
   summary.value.overdue = invoices.filter(i => String(i.status || '').toLowerCase() === 'overdue').length;
   summary.value.unpaidBills = bills.filter(b => String(b.status || '').toLowerCase() !== 'paid').length;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const soon = new Date(today);
+  soon.setDate(soon.getDate() + 7);
+  summary.value.dueSoonBills = bills.filter((b) => {
+    const status = String(b.status || '').toLowerCase();
+    if (status === 'paid' || !b.due_date) return false;
+    const dueDate = new Date(b.due_date);
+    dueDate.setHours(0, 0, 0, 0);
+    return dueDate >= today && dueDate <= soon;
+  }).length;
   summary.value.cashBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
   recentTransactions.value = filteredTransactions.slice(0, 5);
   recentInvoices.value = filteredInvoices.filter(i => i.status !== 'paid').slice(0, 3);

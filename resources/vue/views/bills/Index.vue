@@ -206,7 +206,7 @@ const filteredBills = computed(() => {
   if (!statusFilter.value) return bills.value;
   return bills.value.filter(b => b.status === statusFilter.value);
 });
-const company = computed(() => companyStore.currentCompany);
+const company = computed(() => companyStore.currentCompany?.company || companyStore.currentCompany || null);
 const suppliers = computed(() => supplierStore.suppliers);
 const canCreateBill = computed(() => {
   const role = String(company.value?.pivot?.role || 'viewer').toLowerCase();
