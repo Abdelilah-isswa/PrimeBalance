@@ -10,6 +10,7 @@ use App\Http\Requests\PayBillRequest;
 use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BillController extends BaseController
 {
@@ -117,6 +118,15 @@ class BillController extends BaseController
         }
 
         return $this->sendResponse([], 'Bill deleted successfully');
+    }
+
+    public function downloadPdf($companyId, $billId)
+    {
+        $company = $this->getCompanyForMember($companyId);
+        $bill = $company->bills()->with('supplier')->findOrFail($billId);
+
+        $pdf = Pdf::loadView('bills.pdf', compact('company', 'bill'));
+        return $pdf->download('bill-' . $bill->id . '.pdf');
     }
 }
 

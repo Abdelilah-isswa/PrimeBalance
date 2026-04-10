@@ -84,6 +84,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.')->group(function ()
     Route::prefix('companies/{companyId}')->group(function () {
         Route::get('bills/{billId}/pay', [BillController::class, 'showPayment']);
         Route::post('bills/{billId}/pay', [BillController::class, 'pay']);
+        Route::get('bills/{billId}/pdf', [BillController::class, 'downloadPdf']);
         Route::apiResource('bills', BillController::class);
     });
 
