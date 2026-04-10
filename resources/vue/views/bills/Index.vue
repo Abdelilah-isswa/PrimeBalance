@@ -3,7 +3,7 @@
     <div class="pb-page-header">
       <div class="pb-header-content">
         <h1 class="pb-page-title">Bills</h1>
-        <p class="pb-page-subtitle">Manage your accounts payable and record new bills for {{ company?.name }}</p>
+        <p class="pb-page-subtitle">{{ canCreateBill ? `Manage your accounts payable and record new bills for ${company?.name || 'your company'}` : `Manage bills for ${company?.name || 'your company'}` }}</p>
         
         <div class="pb-tabs">
           <button 
@@ -14,7 +14,8 @@
             Manage Bills
             <span class="pb-tab-badge">{{ bills.length }}</span>
           </button>
-          <button 
+          <button
+            v-if="canCreateBill"
             class="pb-tab-btn" 
             :class="{ 'pb-tab-btn--active': activeTab === 'create' }"
             @click="activeTab = 'create'"
@@ -111,7 +112,7 @@
     </div>
 
     <!-- Tab Content: Create -->
-    <div v-if="activeTab === 'create'" class="pb-tab-content anim-fade-in">
+    <div v-if="canCreateBill && activeTab === 'create'" class="pb-tab-content anim-fade-in">
       <div class="pb-card pb-form-card">
         <div class="pb-card-header">
           <h2 class="pb-card-title">Record New Bill</h2>
@@ -207,6 +208,10 @@ const filteredBills = computed(() => {
 });
 const company = computed(() => companyStore.currentCompany);
 const suppliers = computed(() => supplierStore.suppliers);
+const canCreateBill = computed(() => {
+  const role = String(company.value?.pivot?.role || 'viewer').toLowerCase();
+  return role !== 'viewer';
+});
 
 onMounted(async () => {
   await Promise.all([
@@ -214,6 +219,10 @@ onMounted(async () => {
     billStore.fetchBills(id),
     supplierStore.fetchSuppliers(id)
   ]);
+
+  if (!canCreateBill.value) {
+    activeTab.value = 'manage';
+  }
 });
 
 const createBill = async () => {
