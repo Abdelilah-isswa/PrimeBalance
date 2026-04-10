@@ -19,12 +19,11 @@
             </svg>
           </div>
           <div class="pb-stat-content">
-            <div style="margin:0; font-size:1rem; line-height:1.4; font-weight:600;">
-              Actual income: {{ formatCurrency(summary.income) }}
+            <div class="pb-stat-label">Actual Income</div>
+            <div class="pb-stat-value pb-text-green">
+              {{ formatCurrency(summary.income) }}
             </div>
-            <div style="margin:0.35rem 0 0; font-size:1rem; line-height:1.4; font-weight:600;">
-              Expected income: {{ formatCurrency(summary.expectedIncome) }}
-            </div>
+           
             <div class="pb-stat-trend pb-trend-up">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               </svg>
@@ -41,7 +40,7 @@
             </svg>
           </div>
           <div class="pb-stat-content">
-            <div class="pb-stat-label">Total Expenses</div>
+            <div class="pb-stat-label">Expenses</div>
             <div class="pb-stat-value pb-text-red">
               {{ formatCurrency(summary.expenses) }}
             </div>
@@ -85,7 +84,7 @@
             <div class="pb-stat-value pb-text-orange">
               {{ summary.overdue }}
             </div>
-            <div class="pb-stat-sub">Need attention</div>
+            
           </div>
         </div>
 
@@ -102,7 +101,7 @@
             <div class="pb-stat-value pb-text-purple">
               {{ summary.unpaidBills }}
             </div>
-            <div class="pb-stat-sub">Due soon</div>
+            
           </div>
         </div>
 
@@ -124,10 +123,86 @@
         </div>
       </div>
 
+      <div class="pb-middle-grid">
+        <div class="pb-card pb-chart-card">
+          <div class="pb-card-header">
+            <div class="pb-card-title-section">
+              <div class="pb-card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <polyline points="22 6 13.5 14.5 8.5 9.5 2 16"/>
+                  <polyline points="16 6 22 6 22 12"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="pb-card-title">Income vs Expenses</h3>
+                <p class="pb-card-subtitle">Comparison over the selected period</p>
+              </div>
+            </div>
+          </div>
+          <div class="pb-card-body pb-chart-body">
+            <VueApexCharts
+              v-if="hasIncomeExpenseChartData"
+              type="line"
+              height="220"
+              :options="incomeExpenseChartOptions"
+              :series="incomeExpenseChartSeries"
+            />
+            <div v-else class="pb-empty-state-small">
+              <p>No income or expense data in this period.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pb-card">
+          <div class="pb-card-header">
+            <div class="pb-card-title-section">
+              <div class="pb-card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="pb-card-title">Recent Invoices</h3>
+                <p class="pb-card-subtitle">Awaiting payment</p>
+              </div>
+            </div>
+            <router-link
+              v-if="currentCompany"
+              :to="`/companies/${currentCompany.id}/invoices`"
+              class="pb-link"
+            >
+              View all
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              </svg>
+            </router-link>
+          </div>
+
+          <div class="pb-card-body">
+            <div v-if="recentInvoices.length" class="pb-invoices-list">
+              <div v-for="invoice in recentInvoices" :key="invoice.id" class="pb-invoice-item">
+                <div class="pb-invoice-info">
+                  <p class="pb-invoice-title">{{ invoice.client_name || 'Client' }}</p>
+                  <p class="pb-invoice-date">Due {{ formatDate(invoice.due_date) }}</p>
+                </div>
+                <div class="pb-invoice-right">
+                  <p class="pb-invoice-amount">{{ formatCurrency(invoice.total_amount) }}</p>
+                  <span :class="['pb-status-badge', getStatusClass(invoice.status)]">
+                    {{ getStatusLabel(invoice.status) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div v-else class="pb-empty-state-small">
+              <p>No pending invoices</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Main Content Grid -->
       <div class="pb-main-grid">
         <!-- Recent Transactions -->
-        <div class="pb-card pb-card-large">
+        <div class="pb-card" :class="{ 'pb-card-full': isViewer }">
           <div class="pb-card-header">
             <div class="pb-card-title-section">
               <div class="pb-card-icon">
@@ -262,51 +337,6 @@
           </div>
         </div>
 
-        <!-- Recent Invoices -->
-        <div class="pb-card">
-          <div class="pb-card-header">
-            <div class="pb-card-title-section">
-              <div class="pb-card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="pb-card-title">Recent Invoices</h3>
-                <p class="pb-card-subtitle">Awaiting payment</p>
-              </div>
-            </div>
-            <router-link 
-              v-if="currentCompany" 
-              :to="`/companies/${currentCompany.id}/invoices`" 
-              class="pb-link"
-            >
-              View all
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              </svg>
-            </router-link>
-          </div>
-          
-          <div class="pb-card-body">
-            <div v-if="recentInvoices.length" class="pb-invoices-list">
-              <div v-for="invoice in recentInvoices" :key="invoice.id" class="pb-invoice-item">
-                <div class="pb-invoice-info">
-                  <p class="pb-invoice-title">{{ invoice.client_name || 'Client' }}</p>
-                  <p class="pb-invoice-date">Due {{ formatDate(invoice.due_date) }}</p>
-                </div>
-                <div class="pb-invoice-right">
-                  <p class="pb-invoice-amount">{{ formatCurrency(invoice.total_amount) }}</p>
-                  <span :class="['pb-status-badge', getStatusClass(invoice.status)]">
-                    {{ getStatusLabel(invoice.status) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div v-else class="pb-empty-state-small">
-              <p>No pending invoices</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -322,6 +352,7 @@ import { useAccountStore } from '../stores/account.js';
 import { useTransactionStore } from '../stores/transaction.js';
 import { useAuthStore } from '../stores/auth.js';
 import { useDashboardStore } from '../stores/dashboard.js';
+import VueApexCharts from 'vue3-apexcharts';
 
 const route = useRoute();
 const companyStore = useCompanyStore();
@@ -351,6 +382,9 @@ const summary = ref({
 });
 const loading = ref(true);
 const error = ref(null);
+const incomeExpenseChartLabels = ref([]);
+const incomeSeries = ref([]);
+const expenseSeries = ref([]);
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-US', {
@@ -405,7 +439,87 @@ const calculateSummary = () => {
   summary.value.cashBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
   recentTransactions.value = filteredTransactions.slice(0, 5);
   recentInvoices.value = filteredInvoices.filter(i => i.status !== 'paid').slice(0, 3);
+
+  const trendMap = new Map();
+
+  filteredTransactions
+    .filter((t) => String(t.type || '').toLowerCase() === 'income')
+    .forEach((t) => {
+      const dateKey = String(t.date || t.created_at || '').substring(0, 10);
+      if (!dateKey) return;
+      const current = trendMap.get(dateKey) || { income: 0, expense: 0 };
+      current.income += parseFloat(t.amount || 0);
+      trendMap.set(dateKey, current);
+    });
+
+  filteredBills.forEach((b) => {
+    const dateKey = String(b.date || b.created_at || '').substring(0, 10);
+    if (!dateKey) return;
+    const current = trendMap.get(dateKey) || { income: 0, expense: 0 };
+    current.expense += parseFloat(b.total_amount || 0);
+    trendMap.set(dateKey, current);
+  });
+
+  const labels = Array.from(trendMap.keys()).sort();
+  incomeExpenseChartLabels.value = labels;
+  incomeSeries.value = labels.map((label) => Number((trendMap.get(label)?.income || 0).toFixed(2)));
+  expenseSeries.value = labels.map((label) => Number((trendMap.get(label)?.expense || 0).toFixed(2)));
 };
+
+const hasIncomeExpenseChartData = computed(() => {
+  return incomeExpenseChartLabels.value.length > 0;
+});
+
+const incomeExpenseChartSeries = computed(() => {
+  return [
+    { name: 'Income', data: incomeSeries.value },
+    { name: 'Expenses', data: expenseSeries.value },
+  ];
+});
+
+const incomeExpenseChartOptions = computed(() => {
+  return {
+    chart: {
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      animations: { easing: 'easeinout', speed: 350 },
+      fontFamily: 'inherit',
+    },
+    stroke: {
+      curve: 'smooth',
+      width: 3,
+    },
+    xaxis: {
+      categories: incomeExpenseChartLabels.value,
+      labels: {
+        style: { colors: '#64748b', fontSize: '11px' },
+      },
+    },
+    yaxis: {
+      labels: {
+        style: { colors: '#64748b', fontSize: '11px' },
+        formatter: (value) => `$${Number(value || 0).toFixed(0)}`,
+      },
+    },
+    grid: {
+      borderColor: '#e2e8f0',
+      strokeDashArray: 4,
+    },
+    colors: ['#10b981', '#ef4444'],
+    legend: {
+      position: 'top',
+      horizontalAlign: 'right',
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    tooltip: {
+      y: {
+        formatter: (value) => formatCurrency(value),
+      },
+    },
+  };
+});
 
 const loadCompanyData = async (companyId) => {
   if (!companyId) return;
@@ -501,7 +615,7 @@ watch(
 <style scoped>
 /* Dashboard Container */
 .pb-dashboard {
-  padding: 2rem;
+  padding: 1.25rem;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -573,18 +687,18 @@ watch(
 /* Rest of your styles remain exactly the same as your original */
 .pb-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .pb-stat-card {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
-  padding: 1.25rem;
+  padding: 1rem;
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   transition: all 0.2s;
 }
 
@@ -622,7 +736,7 @@ watch(
 }
 
 .pb-stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   margin-bottom: 4px;
 }
@@ -659,7 +773,23 @@ watch(
 .pb-main-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 1.5rem;
+  gap: 1rem;
+}
+
+.pb-middle-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pb-chart-card {
+  margin-bottom: 0;
+}
+
+.pb-chart-body {
+  padding-top: 0.25rem;
+  padding-bottom: 1rem;
 }
 
 .pb-card {
@@ -669,15 +799,15 @@ watch(
   overflow: hidden;
 }
 
-.pb-card-large {
-  grid-row: span 2;
+.pb-card-full {
+  grid-column: 1 / -1;
 }
 
 .pb-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -727,20 +857,22 @@ watch(
 }
 
 .pb-card-body {
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
 }
 
 .pb-transactions-list {
   display: flex;
   flex-direction: column;
   gap: 0;
+  max-height: 280px;
+  overflow-y: auto;
 }
 
 .pb-transaction-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -868,7 +1000,7 @@ watch(
 .pb-invoices-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .pb-invoice-item {
@@ -989,6 +1121,11 @@ watch(
 @media (max-width: 1024px) {
   .pb-dashboard {
     padding: 1.5rem;
+  }
+
+  .pb-middle-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .pb-main-grid {
