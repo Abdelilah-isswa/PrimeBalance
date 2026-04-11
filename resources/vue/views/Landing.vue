@@ -16,8 +16,9 @@
 
         <!-- Center Links -->
         <div class="pb-nav-links">
-          <router-link to="/">Home</router-link>
-          <a href="#features">Features</a>
+          <router-link to="/" :class="{ 'pb-nav-link-active': activeNav === 'home' }" @click="setActiveNav('home')">Home</router-link>
+          <a href="#features" :class="{ 'pb-nav-link-active': activeNav === 'features' }" @click="setActiveNav('features')">Features</a>
+          <router-link to="/about">Pricing</router-link>
           <router-link to="/about">About Us</router-link>
         </div>
 
@@ -41,36 +42,21 @@
         <div class="pb-hero-copy">
           <div class="pb-badge">
             <span class="pb-badge-dot"></span>
-            Next‑gen business accounting
+            Built for modern finance teams
           </div>
 
-          <h1>
-            Smart accounting for a
-            <span class="pb-outline">smarter</span>
-            <span class="pb-accent">future</span>
-          </h1>
+          <h1>Money clarity for businesses that move fast.</h1>
           <p class="pb-hero-sub">
-            Track, plan, and grow your business finances with powerful tools designed exclusively for modern businesses and ambitious founders.
+            PrimeBalance helps you manage invoices, bills, and transactions from one workspace so every decision is based on real numbers.
           </p>
           <div class="pb-hero-ctas">
             <template v-if="authStore.token">
-              <router-link to="/dashboard"><button class="btn-hero-primary">Go to Dashboard</button></router-link>
+              <router-link to="/dashboard"><button class="btn-hero-primary">Open Dashboard</button></router-link>
             </template>
             <template v-else>
-              <router-link to="/register"><button class="btn-hero-primary">Start for free</button></router-link>
-              <router-link to="/login"><button class="btn-hero-ghost">Login</button></router-link>
+              <router-link to="/register"><button class="btn-hero-primary">Get Started</button></router-link>
+              <router-link to="/login"><button class="btn-hero-ghost">See Demo</button></router-link>
             </template>
-          </div>
-          <div class="pb-stats">
-            <div class="pb-stat">
-              <div class="pb-stat-num">$1.2B</div>
-              <div class="pb-stat-label">managed through platform</div>
-            </div>
-            <div class="pb-stat-divider"></div>
-            <div class="pb-stat">
-              <div class="pb-stat-num">98%</div>
-              <div class="pb-stat-label">customer satisfaction</div>
-            </div>
           </div>
         </div>
 
@@ -78,13 +64,9 @@
           <div class="pb-hero-visual-inner">
             <img
               src="/images/landing-hero.png"
-              alt="PrimeBalance preview"
+              alt="PrimeBalance product dashboard preview"
               class="pb-hero-img"
             />
-            <div class="pb-hero-float">
-              <div class="pb-hero-float-label">Trusted by teams worldwide</div>
-              <div class="pb-hero-float-metric">5,000+</div>
-            </div>
           </div>
         </div>
 
@@ -283,8 +265,31 @@
 </template>
 
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useAuthStore } from '../stores/auth.js';
+
 const authStore = useAuthStore();
+
+const activeNav = ref('home');
+
+const setActiveNav = (section) => {
+  activeNav.value = section;
+};
+
+const syncActiveNavFromHash = () => {
+  activeNav.value = window.location.hash === '#features' ? 'features' : 'home';
+};
+
+onMounted(() => {
+  syncActiveNavFromHash();
+  window.addEventListener('hashchange', syncActiveNavFromHash);
+  window.addEventListener('popstate', syncActiveNavFromHash);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('hashchange', syncActiveNavFromHash);
+  window.removeEventListener('popstate', syncActiveNavFromHash);
+});
 </script>
 
 <style scoped>
@@ -295,6 +300,7 @@ const authStore = useAuthStore();
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
   color: #1a1a2e;
   background: #ffffff;
+  font-size: 16px;
 }
 
 /* ── Navbar ───────────────────────────────────────────────── */
@@ -322,7 +328,7 @@ const authStore = useAuthStore();
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 16px;
   color: #1a1a2e;
   text-decoration: none;
   white-space: nowrap;
@@ -347,15 +353,20 @@ const authStore = useAuthStore();
 }
 
 .pb-nav-links a {
-  font-size: 14px;
+  font-size: 15px;
   color: #64748b;
   text-decoration: none;
   transition: color 0.15s;
   white-space: nowrap;
 }
 
-.pb-nav-links a:hover, .pb-nav-links a.router-link-active {
+.pb-nav-links a:hover {
   color: #1a1a2e;
+}
+
+.pb-nav-links a.pb-nav-link-active {
+  color: #4f46e5;
+  font-weight: 600;
 }
 
 .pb-nav-right {
@@ -368,7 +379,7 @@ const authStore = useAuthStore();
 /* Buttons */
 .btn-ghost {
   padding: 7px 16px;
-  font-size: 13px;
+  font-size: 14px;
   border: 0.5px solid #d1d5db;
   border-radius: 20px;
   background: transparent;
@@ -383,7 +394,7 @@ const authStore = useAuthStore();
 
 .btn-primary {
   padding: 7px 18px;
-  font-size: 13px;
+  font-size: 14px;
   border: none;
   border-radius: 20px;
   background: #4f46e5;
@@ -397,21 +408,30 @@ const authStore = useAuthStore();
 
 /* ── Hero ─────────────────────────────────────────────────── */
 .pb-hero-section {
-  padding: 5.25rem 2.5rem 0;
-  background: radial-gradient(900px 520px at 70% 20%, rgba(79,70,229,0.16), rgba(255,255,255,0) 60%),
-              radial-gradient(700px 420px at 25% 55%, rgba(237,233,254,1), rgba(255,255,255,0) 65%),
-              #ffffff;
+  padding: 0 0 0 2.5rem;
+  background:
+    radial-gradient(800px 500px at 18% 10%, rgba(79, 70, 229, 0.1), transparent 65%),
+    radial-gradient(900px 600px at 85% 70%, rgba(59, 130, 246, 0.08), transparent 70%),
+    #f5f7fb;
   position: relative;
   overflow: hidden;
+  min-height: calc(100vh - 72px);
 }
 
 .pb-hero-inner {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: minmax(360px, 43%) 57%;
   align-items: center;
-  gap: 4rem;
-  max-width: 1180px;
+  gap: 2rem;
+  max-width: 1400px;
   margin: 0 auto;
+  width: 100%;
+  min-height: calc(100vh - 72px);
+}
+
+.pb-hero-copy {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
 }
 
 .pb-badge {
@@ -420,11 +440,11 @@ const authStore = useAuthStore();
   gap: 6px;
   background: #ede9fe;
   color: #4f46e5;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
   border-radius: 20px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .pb-badge-dot {
@@ -436,12 +456,13 @@ const authStore = useAuthStore();
 }
 
 .pb-hero-copy h1 {
-  font-size: 3.15rem;
-  font-weight: 700;
-  line-height: 1.08;
-  color: #0f0e2e;
-  margin-bottom: 1.2rem;
-  letter-spacing: -1px;
+  font-size: clamp(2.1rem, 4.8vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.05;
+  color: #0f172a;
+  margin-bottom: 1rem;
+  letter-spacing: -0.9px;
+  max-width: 560px;
 }
 
 .pb-accent { color: #4f46e5; }
@@ -451,130 +472,144 @@ const authStore = useAuthStore();
   margin: 0 10px;
   color: transparent;
   -webkit-text-stroke: 1.25px #4f46e5;
-  text-stroke: 1.25px #4f46e5;
 }
 
 .pb-hero-sub {
-  font-size: 15px;
-  color: #64748b;
-  line-height: 1.7;
-  margin-bottom: 2rem;
-  max-width: 420px;
+  font-size: 17px;
+  color: #475569;
+  line-height: 1.75;
+  margin-bottom: 1.6rem;
+  max-width: 520px;
 }
 
 .pb-hero-ctas {
   display: flex;
   gap: 10px;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
 }
 
 .btn-hero-primary {
   padding: 12px 26px;
-  font-size: 14px;
+  font-size: 15px;
   border: none;
   border-radius: 24px;
   background: #4f46e5;
   color: #ffffff;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.15s, transform 0.1s;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.12s;
 }
 .btn-hero-primary:hover { background: #4338ca; transform: translateY(-1px); }
 
 .btn-hero-ghost {
   padding: 12px 26px;
-  font-size: 14px;
-  border: 0.5px solid #d1d5db;
+  font-size: 15px;
+  border: 1px solid #cbd5e1;
   border-radius: 24px;
-  background: transparent;
-  color: #1a1a2e;
+  background: rgba(255, 255, 255, 0.7);
+  color: #0f172a;
   cursor: pointer;
   transition: background 0.15s;
 }
-.btn-hero-ghost:hover { background: #f8fafc; }
+.btn-hero-ghost:hover { background: #ffffff; }
 
 .pb-stats {
   display: flex;
-  gap: 2rem;
+  gap: 1.4rem;
   align-items: center;
 }
 
 .pb-stat-num {
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 700;
-  color: #0f0e2e;
+  color: #0f172a;
 }
 
 .pb-stat-label {
-  font-size: 12px;
+  font-size: 13px;
   color: #64748b;
-  margin-top: 2px;
 }
 
 .pb-stat-divider {
-  width: 0.5px;
-  height: 36px;
-  background: #e2e8f0;
+  width: 1px;
+  height: 34px;
+  background: #dbe2ea;
 }
 
 /* Hero Visual Real Image */
 .pb-hero-visual {
-  transform: translateY(-18px);
+  position: relative;
+  display: flex;
+  justify-content: stretch;
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 72px);
 }
 
 .pb-hero-visual-inner {
   position: relative;
-  border-radius: 22px;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: transparent;
+  border: none;
   overflow: hidden;
-  box-shadow: 0 18px 44px rgba(15,14,46,0.12);
-  background: #f8fafc;
+  box-shadow: none;
+  transform: none;
 }
 
 .pb-hero-img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
+  object-fit: cover;
+  object-position: 45% center;
 }
 
 .pb-hero-float {
   position: absolute;
-  right: 14px;
-  bottom: 14px;
-  background: rgba(255,255,255,0.92);
-  border: 0.5px solid #e2e8f0;
-  backdrop-filter: blur(8px);
-  padding: 10px 12px;
-  border-radius: 16px;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #dbe2ea;
+  border-radius: 14px;
+  padding: 9px 12px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.pb-hero-float-top {
+  right: 16px;
+  top: 16px;
+}
+
+.pb-hero-float-bottom {
+  left: 16px;
+  bottom: 16px;
 }
 
 .pb-hero-float-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
   font-weight: 600;
-  white-space: nowrap;
+  margin-bottom: 2px;
 }
 
 .pb-hero-float-metric {
   font-size: 18px;
   font-weight: 800;
-  color: #0f0e2e;
+  color: #0f172a;
 }
 
 /* ── Trusted By ─────────────────────────────────────────────  */
 .pb-trusted-by {
   padding: 4rem 2.5rem;
   text-align: center;
-  background: #f8fafc;
+  background: #ffffff;
   margin-top: 5rem;
   border-top: 1px solid #f1f5f9;
   border-bottom: 1px solid #f1f5f9;
 }
 .pb-trusted-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #94a3b8;
   margin-bottom: 2rem;
@@ -604,8 +639,7 @@ const authStore = useAuthStore();
 /* ── Features ─────────────────────────────────────────────── */
 .pb-features {
   padding: 5rem 2.5rem;
-  background: radial-gradient(800px 440px at 20% 10%, rgba(79,70,229,0.10), rgba(255,255,255,0) 60%),
-              #ffffff;
+  background: #ffffff;
 }
 
 .pb-features-inner {
@@ -641,7 +675,7 @@ const authStore = useAuthStore();
 }
 
 .pb-features-header h2 {
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 700;
   color: #0f0e2e;
   margin-bottom: 0.5rem;
@@ -649,7 +683,7 @@ const authStore = useAuthStore();
 }
 
 .pb-features-header p {
-  font-size: 15px;
+  font-size: 17px;
   color: #64748b;
 }
 
@@ -687,7 +721,7 @@ const authStore = useAuthStore();
 /* ── Reviews ─────────────────────────────────────────────── */
 .pb-reviews {
   padding: 5rem 2.5rem;
-  background: #f8fafc;
+  background: #ffffff;
   border-top: 1px solid #f1f5f9;
   border-bottom: 1px solid #f1f5f9;
 }
@@ -703,7 +737,7 @@ const authStore = useAuthStore();
 }
 
 .pb-reviews-header h2 {
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 700;
   color: #0f0e2e;
   margin-bottom: 0.6rem;
@@ -711,7 +745,7 @@ const authStore = useAuthStore();
 }
 
 .pb-reviews-header p {
-  font-size: 15px;
+  font-size: 17px;
   color: #64748b;
   max-width: 640px;
   margin: 0 auto;
@@ -737,7 +771,7 @@ const authStore = useAuthStore();
 }
 
 .pb-review-quote {
-  font-size: 14px;
+  font-size: 16px;
   color: #1a1a2e;
   line-height: 1.7;
 }
@@ -766,13 +800,13 @@ const authStore = useAuthStore();
 }
 
 .pb-review-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #0f0e2e;
 }
 
 .pb-review-role {
-  font-size: 12px;
+  font-size: 13px;
   color: #64748b;
 }
 
@@ -785,14 +819,14 @@ const authStore = useAuthStore();
 }
 
 .pb-feature-card h3 {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: #1a1a2e;
   margin-bottom: 0.4rem;
 }
 
 .pb-feature-card p {
-  font-size: 13px;
+  font-size: 15px;
   color: #64748b;
   line-height: 1.6;
 }
@@ -800,8 +834,7 @@ const authStore = useAuthStore();
 /* Image Banner */
 .pb-image-banner {
   padding: 5rem 2.5rem;
-  background: radial-gradient(900px 500px at 70% 20%, rgba(79,70,229,0.12), rgba(248,250,252,0) 60%),
-              #f8fafc;
+  background: #ffffff;
 }
 .pb-banner-inner {
   max-width: 1100px;
@@ -817,14 +850,14 @@ const authStore = useAuthStore();
   border: 0.5px solid #e2e8f0;
 }
 .pb-banner-text h2 {
-  font-size: 2rem;
+  font-size: 2.6rem;
   margin-bottom: 1rem;
   color: #1a1a2e;
   letter-spacing: -0.5px;
 }
 .pb-banner-text p {
   color: #64748b;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.6;
 }
 
@@ -852,7 +885,7 @@ const authStore = useAuthStore();
 }
 
 .pb-cta h2 {
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 700;
   color: #0f0e2e;
   margin-bottom: 0.75rem;
@@ -860,7 +893,7 @@ const authStore = useAuthStore();
 }
 
 .pb-cta p {
-  font-size: 15px;
+  font-size: 17px;
   color: #64748b;
   margin-bottom: 2rem;
 }
@@ -868,7 +901,7 @@ const authStore = useAuthStore();
 /* ── Footer ───────────────────────────────────────────────── */
 .pb-footer {
   padding: 4rem 2.5rem 1.5rem;
-  background: #f8fafc;
+  background: #ffffff;
   border-top: 1px solid #e2e8f0;
 }
 .pb-footer-content {
@@ -887,14 +920,14 @@ const authStore = useAuthStore();
   gap: 12px;
 }
 .pb-footer-links-group strong {
-  font-size: 14px;
+  font-size: 15px;
   color: #1e293b;
   margin-bottom: 4px;
 }
 .pb-footer-links-group a {
   color: #64748b;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 14px;
   transition: color 0.15s;
 }
 .pb-footer-links-group a:hover {
@@ -927,16 +960,49 @@ const authStore = useAuthStore();
     gap: 2.5rem;
     padding-bottom: 2rem;
   }
+
+  .pb-hero-inner {
+    min-height: auto;
+    gap: 1.5rem;
+    max-width: none;
+  }
+
+  .pb-hero-visual {
+    justify-content: center;
+    min-height: auto;
+    height: auto;
+  }
+
+  .pb-hero-visual-inner {
+    transform: none;
+    border-radius: 18px;
+    height: auto;
+  }
+
+  .pb-hero-section {
+    min-height: auto;
+    padding: 3rem 1rem 1.5rem;
+  }
+
+  .pb-hero-copy {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .pb-hero-img {
+    height: auto;
+    object-position: center;
+  }
+
   .pb-banner-inner {
     text-align: center;
   }
 
-  .pb-hero-copy h1 { font-size: 2.25rem; }
+  .pb-hero-copy h1 { font-size: 2.5rem; }
 
   .pb-outline {
     margin: 0 6px;
     -webkit-text-stroke: 1.1px #4f46e5;
-    text-stroke: 1.1px #4f46e5;
   }
 
   .pb-nav-links { display: none; }

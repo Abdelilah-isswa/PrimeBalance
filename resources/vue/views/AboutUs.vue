@@ -155,7 +155,7 @@ const authStore = useAuthStore();
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 16px;
   color: #1a1a2e;
   text-decoration: none;
   white-space: nowrap;
@@ -180,7 +180,7 @@ const authStore = useAuthStore();
 }
 
 .pb-nav-links a {
-  font-size: 14px;
+  font-size: 15px;
   color: #64748b;
   text-decoration: none;
   transition: color 0.15s;
@@ -202,7 +202,7 @@ const authStore = useAuthStore();
 
 .btn-ghost {
   padding: 7px 16px;
-  font-size: 13px;
+  font-size: 14px;
   border: 0.5px solid #d1d5db;
   border-radius: 20px;
   background: transparent;
@@ -214,7 +214,7 @@ const authStore = useAuthStore();
 
 .btn-primary {
   padding: 7px 18px;
-  font-size: 13px;
+  font-size: 14px;
   border: none;
   border-radius: 20px;
   background: #4f46e5;
