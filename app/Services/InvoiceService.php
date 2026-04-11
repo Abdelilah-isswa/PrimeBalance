@@ -10,6 +10,7 @@ use App\Mail\InvoiceMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
 class InvoiceService
 {
@@ -58,6 +59,10 @@ class InvoiceService
 
     public function updateInvoice(Invoice $invoice, array $data): bool
     {
+        if ($invoice->transactions()->exists()) {
+            throw new RuntimeException('Invoices linked to transactions cannot be edited.');
+        }
+
         return DB::transaction(function () use ($invoice, $data) {
             // Determine if status should be 'sent' (when sending email)
             $status = (isset($data['send_email']) && $data['send_email']) ? 'sent' : ($data['status'] ?? $invoice->status);
@@ -164,7 +169,7 @@ class InvoiceService
     public function deleteInvoice(Invoice $invoice): bool
     {
         if (!$this->canDelete($invoice)) {
-            return false;
+            throw new RuntimeException('Invoices linked to transactions cannot be deleted.');
         }
 
         return $invoice->delete();

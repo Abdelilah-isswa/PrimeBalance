@@ -74,7 +74,7 @@ class InvoiceController extends BaseController
     public function show($companyId, $invoiceId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $invoice = $company->invoices()->with('client', 'items', 'creator')->findOrFail($invoiceId);
+        $invoice = $company->invoices()->with('client', 'items', 'creator')->withCount('transactions')->findOrFail($invoiceId);
         
         return $this->sendResponse(compact('company', 'invoice'));
     }
@@ -82,7 +82,7 @@ class InvoiceController extends BaseController
     public function edit($companyId, $invoiceId)
     {
         $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'edit invoices');
-        $invoice = $company->invoices()->with('client', 'items', 'creator')->findOrFail($invoiceId);
+        $invoice = $company->invoices()->with('client', 'items', 'creator')->withCount('transactions')->findOrFail($invoiceId);
         
         return $this->sendResponse(compact('company', 'invoice'));
     }
@@ -91,7 +91,12 @@ class InvoiceController extends BaseController
     {
         $company = $this->getCompanyForMember($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
-        $this->invoiceService->updateInvoice($invoice, $request->validated());
+        try {
+            $this->invoiceService->updateInvoice($invoice, $request->validated());
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
+        }
+
         return $this->sendResponse($invoice->fresh(), 'Invoice updated successfully');
     }
 
@@ -99,9 +104,11 @@ class InvoiceController extends BaseController
     {
         $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete invoices');
         $invoice = $company->invoices()->findOrFail($invoiceId);
-        
-        if (!$this->invoiceService->deleteInvoice($invoice)) {
-            return $this->sendError('Cannot delete invoice with payments');
+
+        try {
+            $this->invoiceService->deleteInvoice($invoice);
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
         }
 
         return $this->sendResponse([], 'Invoice deleted successfully');

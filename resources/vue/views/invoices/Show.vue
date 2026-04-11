@@ -124,14 +124,23 @@
         <div class="pb-card pb-options-card">
           <h3 class="pb-card-title-sm">Invoice Options</h3>
           <div class="pb-option-list">
-            <router-link :to="`/companies/${id}/invoices/${invoiceId}/edit`" class="pb-option-item">
+            <router-link v-if="Number(invoice?.transactions_count || 0) === 0" :to="`/companies/${id}/invoices/${invoiceId}/edit`" class="pb-option-item">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               <span>Edit Invoice</span>
             </router-link>
-            <button @click="destroy" class="pb-option-item pb-option-danger">
+
+            <div v-else style="color:#64748b; font-size:13px; font-weight:600; padding:10px 12px;">
+              Invoices linked to transactions cannot be edited.
+            </div>
+
+            <button v-if="Number(invoice?.transactions_count || 0) === 0" @click="destroy" class="pb-option-item pb-option-danger">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               <span>Delete Invoice</span>
             </button>
+
+            <div v-else style="color:#64748b; font-size:13px; font-weight:600; padding:10px 12px;">
+              Invoices linked to transactions cannot be deleted.
+            </div>
           </div>
         </div>
       </div>

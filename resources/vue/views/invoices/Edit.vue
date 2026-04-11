@@ -29,12 +29,12 @@
 
           <div class="pb-form-group">
             <label class="pb-label">Amount ({{ company?.currency }})</label>
-            <input v-model="form.total_amount" type="number" step="0.01" class="pb-input" required min="0.01" />
+            <input v-model="form.total_amount" type="number" step="0.01" class="pb-input" required min="0.01" :disabled="readOnly" />
           </div>
 
           <div class="pb-form-group">
             <label class="pb-label">Status</label>
-            <select v-model="form.status" class="pb-input">
+            <select v-model="form.status" class="pb-input" :disabled="readOnly">
               <option value="draft">Draft</option>
               <option value="sent">Sent</option>
               <option value="paid">Paid</option>
@@ -46,7 +46,7 @@
 
         <div class="pb-form-actions">
           <router-link :to="`/companies/${id}/invoices/${invoiceId}`" class="pb-btn pb-btn-secondary">Cancel</router-link>
-          <button type="submit" class="pb-btn pb-btn-primary" :disabled="submitting">
+          <button type="submit" class="pb-btn pb-btn-primary" :disabled="submitting || readOnly">
             {{ submitting ? 'Saving...' : 'Save Changes' }}
           </button>
         </div>
@@ -72,6 +72,7 @@ const form = ref(null);
 const submitting = ref(false);
 const error = ref('');
 const successMsg = ref('');
+const readOnly = ref(false);
 
 onMounted(async () => {
   try {
@@ -82,13 +83,21 @@ onMounted(async () => {
       total_amount: inv.total_amount,
       status: inv.status,
       client_name: inv.client?.name || '',
+      transactions_count: inv.transactions_count || 0,
     };
+
+    if (Number(inv.transactions_count || 0) > 0) {
+      readOnly.value = true;
+      error.value = 'This invoice is linked to transactions and cannot be edited.';
+    }
   } catch (err) {
     error.value = 'Failed to load invoice.';
   }
 });
 
 const update = async () => {
+  if (readOnly.value) return;
+
   submitting.value = true;
   error.value = '';
   try {

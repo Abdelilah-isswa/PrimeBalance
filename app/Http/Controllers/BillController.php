@@ -80,7 +80,7 @@ class BillController extends BaseController
     public function show($companyId, $billId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $bill = $company->bills()->with('supplier')->findOrFail($billId);
+        $bill = $company->bills()->with('supplier')->withCount('transactions')->findOrFail($billId);
         
         return $this->sendResponse(compact('company', 'bill'));
     }
@@ -88,7 +88,7 @@ class BillController extends BaseController
     public function edit($companyId, $billId)
     {
         $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'edit bills');
-        $bill = $company->bills()->with('supplier')->findOrFail($billId);
+        $bill = $company->bills()->with('supplier')->withCount('transactions')->findOrFail($billId);
         
         return $this->sendResponse(compact('company', 'bill'));
     }

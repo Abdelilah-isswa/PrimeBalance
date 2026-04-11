@@ -25,6 +25,10 @@ class BillService
 
     public function updateBill(Bill $bill, array $data): bool
     {
+        if ($bill->transactions()->exists()) {
+            throw new RuntimeException('Bills linked to transactions cannot be edited.');
+        }
+
         if ($bill->status === 'paid') {
             throw new RuntimeException('Paid bills cannot be edited.');
         }

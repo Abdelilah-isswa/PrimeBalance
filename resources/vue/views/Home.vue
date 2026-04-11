@@ -213,9 +213,9 @@
             <div v-if="recentTransactions.length" class="pb-transactions-list">
               <div v-for="trans in recentTransactions" :key="trans.id" class="pb-transaction-item">
                 <div class="pb-transaction-left">
-                  <div class="pb-transaction-icon" :class="trans.amount > 0 ? 'pb-icon-income' : 'pb-icon-expense'">
+                  <div class="pb-transaction-icon" :class="getDisplayTransactionAmount(trans) > 0 ? 'pb-icon-income' : 'pb-icon-expense'">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path v-if="trans.amount > 0" d="M12 5v14M5 12h14"/>
+                      <path v-if="getDisplayTransactionAmount(trans) > 0" d="M12 5v14M5 12h14"/>
                       <path v-else d="M20 12H4"/>
                     </svg>
                   </div>
@@ -229,8 +229,8 @@
                   </div>
                 </div>
                 <div class="pb-transaction-right">
-                  <p :class="['pb-transaction-amount', trans.amount > 0 ? 'pb-amount-income' : 'pb-amount-expense']">
-                    {{ trans.amount > 0 ? '+' : '' }}{{ formatCurrency(trans.amount) }}
+                  <p :class="['pb-transaction-amount', getDisplayTransactionAmount(trans) > 0 ? 'pb-amount-income' : 'pb-amount-expense']">
+                    {{ getDisplayTransactionAmount(trans) > 0 ? '+' : '' }}{{ formatCurrency(getDisplayTransactionAmount(trans)) }}
                   </p>
                   <p class="pb-transaction-account">{{ trans.account?.name }}</p>
                 </div>
@@ -305,6 +305,15 @@ const formatCurrency = (amount) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount || 0);
+};
+
+const getDisplayTransactionAmount = (transaction) => {
+  const amount = Number(transaction?.amount || 0);
+  if (transaction?.bill_id || transaction?.bill?.id) {
+    return -Math.abs(amount);
+  }
+
+  return amount;
 };
 
 const isInDateRange = (dateString, start, end) => {

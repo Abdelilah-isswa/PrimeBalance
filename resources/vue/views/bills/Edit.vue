@@ -87,7 +87,9 @@ const submitting = ref(false);
 const error = ref('');
 const successMsg = ref('');
 
-const readOnly = computed(() => form.value?.status === 'paid');
+const readOnly = computed(() => {
+  return form.value?.status === 'paid' || Number(form.value?.transactions_count || 0) > 0;
+});
 
 onMounted(async () => {
   try {
@@ -106,9 +108,12 @@ onMounted(async () => {
       due_date: bill.due_date || '',
       total_amount: bill.total_amount,
       status: bill.status,
+      transactions_count: bill.transactions_count || 0,
     };
 
-    if (bill.status === 'paid') {
+    if (Number(bill.transactions_count || 0) > 0) {
+      error.value = 'This bill is linked to transactions and cannot be edited.';
+    } else if (bill.status === 'paid') {
       error.value = 'This bill is fully paid and cannot be edited.';
     }
   } catch (err) {
