@@ -142,14 +142,6 @@
               >
             </div>
 
-            <div class="pb-form-group">
-              <label class="pb-label">Status</label>
-              <select v-model="form.status" class="pb-input">
-                <option value="unpaid">Unpaid</option>
-                <option value="partial">Partially Paid</option>
-                <option value="paid">Fully Paid</option>
-              </select>
-            </div>
           </div>
 
           <div class="pb-form-actions">
@@ -188,8 +180,7 @@ const form = ref({
   supplier_id: '',
   description: '',
   due_date: '',
-  total_amount: '',
-  status: 'unpaid'
+  total_amount: ''
 });
 
 const bills = computed(() => billStore.bills);
@@ -235,10 +226,13 @@ const createBill = async () => {
 
   submitting.value = true;
   try {
-    await billStore.createBill(id, form.value);
+    await billStore.createBill(id, {
+      ...form.value,
+      status: 'unpaid',
+    });
     formSuccess.value = 'Bill created successfully.';
     // Reset form
-    form.value = { supplier_id: '', description: '', due_date: '', total_amount: '', status: 'unpaid' };
+    form.value = { supplier_id: '', description: '', due_date: '', total_amount: '' };
   } catch (error) {
     console.error('Failed to record bill:', error);
     formError.value = error?.response?.data?.message || 'Failed to create bill. Please try again.';
