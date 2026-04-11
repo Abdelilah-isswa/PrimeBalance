@@ -711,8 +711,6 @@ onBeforeUnmount(() => {
   text-align: center;
   background: #ffffff;
   margin-top: 5rem;
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
 }
 .pb-trusted-label {
   font-size: 13px;
@@ -828,8 +826,6 @@ onBeforeUnmount(() => {
 .pb-reviews {
   padding: 5rem 2.5rem;
   background: #ffffff;
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
 }
 
 .pb-reviews-inner {
@@ -890,8 +886,8 @@ onBeforeUnmount(() => {
 }
 
 .pb-review-avatar {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
   background: #ede9fe;
   border: 0.5px solid #e2e8f0;
@@ -918,7 +914,7 @@ onBeforeUnmount(() => {
 
 .pb-review-rating {
   margin-left: auto;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 1px;
   color: #4f46e5;
   white-space: nowrap;
@@ -987,7 +983,6 @@ onBeforeUnmount(() => {
 .pb-pricing {
   padding: 5rem 2.5rem;
   background: #ffffff;
-  border-top: 1px solid #f1f5f9;
 }
 
 .pb-pricing-inner {
@@ -1141,7 +1136,6 @@ onBeforeUnmount(() => {
 .pb-footer {
   padding: 4rem 2.5rem 1.5rem;
   background: #ffffff;
-  border-top: 1px solid #e2e8f0;
 }
 .pb-footer-content {
   max-width: 1100px;
