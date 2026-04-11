@@ -209,9 +209,6 @@
             <button type="button" @click="activeTab = 'manage'" style="padding: 0.55rem 1.5rem; background: #94a3b8; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">
               Cancel
             </button>
-            <button type="button" @click="submit('draft')" :disabled="submitting" style="padding: 0.55rem 1.5rem; background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; opacity: var(--opacity);" :style="{ opacity: submitting ? 0.5 : 1 }">
-              {{ submitting ? 'Processing...' : 'Save as Draft' }}
-            </button>
             <button type="submit" :disabled="submitting" style="padding: 0.55rem 1.5rem; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" :style="{ opacity: submitting ? 0.5 : 1 }">
               {{ submitting ? 'Processing...' : 'Send Invoice' }}
             </button>
