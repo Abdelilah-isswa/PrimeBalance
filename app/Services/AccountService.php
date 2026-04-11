@@ -20,6 +20,7 @@ class AccountService
     {
         return $account->update([
             'name' => $data['name'],
+            'balance' => $data['balance'],
             'is_active' => $data['is_active'] ?? false,
         ]);
     }

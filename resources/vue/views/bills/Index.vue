@@ -208,13 +208,26 @@ const filteredBills = computed(() => {
 });
 const company = computed(() => companyStore.currentCompany);
 const suppliers = computed(() => supplierStore.suppliers);
+const companyMembership = computed(() => {
+  return (companyStore.companies || []).find((c) => String(c.id) === String(id));
+});
+const currentCompanyRole = computed(() => {
+  const role =
+    companyMembership.value?.pivot?.role ||
+    company.value?.pivot?.role ||
+    company.value?.company?.pivot?.role ||
+    company.value?.userRole ||
+    'viewer';
+
+  return String(role).toLowerCase();
+});
 const canCreateBill = computed(() => {
-  const role = String(company.value?.pivot?.role || 'viewer').toLowerCase();
-  return role !== 'viewer';
+  return currentCompanyRole.value !== 'viewer' && currentCompanyRole.value !== 'viwer';
 });
 
 onMounted(async () => {
   await Promise.all([
+    companyStore.fetchCompanies(),
     companyStore.fetchCompany(id),
     billStore.fetchBills(id),
     supplierStore.fetchSuppliers(id)

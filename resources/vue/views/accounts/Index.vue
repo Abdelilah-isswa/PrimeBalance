@@ -15,6 +15,7 @@
             <span class="pb-tab-badge">{{ accounts.length }}</span>
           </button>
           <button 
+            v-if="canManageAccounts"
             class="pb-tab-btn" 
             :class="{ 'pb-tab-btn--active': activeTab === 'create' }"
             @click="openCreate"
@@ -78,7 +79,7 @@
                     </span>
                   </td>
                   <td class="pb-text-center">
-                    <div class="pb-action-group">
+                    <div v-if="canManageAccounts" class="pb-action-group">
                       <button @click="startEdit(account)" class="pb-btn-icon pb-icon-primary" title="Edit">
                         <span>Edit</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -102,7 +103,7 @@
     </div>
 
     <!-- Tab Content: Create -->
-    <div v-if="activeTab === 'create'" class="pb-tab-content anim-fade-in">
+    <div v-if="activeTab === 'create' && canManageAccounts" class="pb-tab-content anim-fade-in">
       <div class="pb-card pb-form-card">
         <div class="pb-card-header">
           <h2 class="pb-card-title">Add New Account</h2>
@@ -166,15 +167,31 @@ const form = ref({
 
 const company = computed(() => companyStore.currentCompany);
 const accounts = computed(() => accountStore.accounts || []);
+const companyMembership = computed(() => {
+  return (companyStore.companies || []).find((c) => String(c.id) === String(id));
+});
+const currentCompanyRole = computed(() => {
+  const role =
+    companyMembership.value?.pivot?.role ||
+    company.value?.pivot?.role ||
+    company.value?.company?.pivot?.role ||
+    company.value?.userRole ||
+    'viewer';
+
+  return String(role).toLowerCase();
+});
+const canManageAccounts = computed(() => ['owner', 'admin'].includes(currentCompanyRole.value));
 
 onMounted(async () => {
   await Promise.all([
+    companyStore.fetchCompanies(),
     companyStore.fetchCompany(id),
     accountStore.fetchAccounts(id)
   ]);
 });
 
 const openCreate = () => {
+  if (!canManageAccounts.value) return;
   resetForm();
   activeTab.value = 'create';
 };
@@ -188,6 +205,7 @@ const resetForm = () => {
 };
 
 const createAccount = async () => {
+  if (!canManageAccounts.value) return;
   submitting.value = true;
   try {
     await accountStore.createAccount(id, form.value);
@@ -202,6 +220,7 @@ const createAccount = async () => {
 };
 
 const startEdit = (acc) => {
+  if (!canManageAccounts.value) return;
   editId.value = acc.id;
   form.value = {
     name: acc.name,
@@ -216,6 +235,7 @@ const cancelEdit = () => {
 };
 
 const saveEdit = async () => {
+  if (!canManageAccounts.value) return;
   submitting.value = true;
   try {
     await accountStore.updateAccount(id, editId.value, form.value);
@@ -229,6 +249,7 @@ const saveEdit = async () => {
 };
 
 const destroyAccount = async (account) => {
+  if (!canManageAccounts.value) return;
   const msg = account.transactions_count > 0 ? 'Archive this account?' : 'Are you sure you want to delete this account?';
   if (!confirm(msg)) return;
   try {

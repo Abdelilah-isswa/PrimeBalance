@@ -9,9 +9,14 @@
     </div>
 
     <div v-else>
-      <div class="pb-stats-grid">
+      <div class="pb-section-head">
+        <h2 class="pb-section-title">Core Financials</h2>
+        <p class="pb-section-subtitle">Your primary performance indicators at a glance.</p>
+      </div>
+
+      <div class="pb-stats-grid pb-stats-grid--primary">
         <!-- Total Income -->
-        <div class="pb-stat-card">
+        <div class="pb-stat-card pb-stat-card--core">
           <div class="pb-stat-icon pb-stat-icon-green">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
@@ -23,16 +28,11 @@
             <div class="pb-stat-value pb-text-green">
               {{ formatCurrency(summary.income) }}
             </div>
-           
-            <div class="pb-stat-trend pb-trend-up">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              </svg>
-            </div>
           </div>
         </div>
 
         <!-- Total Expenses -->
-        <div class="pb-stat-card">
+        <div class="pb-stat-card pb-stat-card--core">
           <div class="pb-stat-icon pb-stat-icon-red">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
@@ -45,15 +45,11 @@
               {{ formatCurrency(summary.expenses) }}
             </div>
             <div class="pb-stat-sub">Paid Bills</div>
-            <div class="pb-stat-trend pb-trend-down">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              </svg>
-            </div>
           </div>
         </div>
 
         <!-- Net Profit -->
-        <div class="pb-stat-card">
+        <div class="pb-stat-card pb-stat-card--core">
           <div class="pb-stat-icon pb-stat-icon-blue">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -64,66 +60,12 @@
             <div class="pb-stat-value pb-text-blue">
               {{ formatCurrency(summary.income - summary.expenses) }}
             </div>
-              <div class="pb-stat-sub">Income - Expenses</div>
-            <div class="pb-stat-trend pb-trend-up">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Overdue Invoices -->
-        <div class="pb-stat-card">
-          <div class="pb-stat-icon pb-stat-icon-orange">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
-          <div class="pb-stat-content">
-            <div class="pb-stat-label">Overdue Invoices</div>
-            <div class="pb-stat-value pb-text-orange">
-              {{ summary.overdue }}
-            </div>
-            
-          </div>
-        </div>
-
-        <!-- Paid Invoices -->
-        <div class="pb-stat-card">
-          <div class="pb-stat-icon pb-stat-icon-green">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </div>
-          <div class="pb-stat-content">
-            <div class="pb-stat-label">Paid Invoices</div>
-            <div class="pb-stat-value pb-text-green">
-              {{ summary.paidInvoices }} ({{ formatCurrency(summary.paidInvoicesAmount) }})
-            </div>
-          </div>
-        </div>
-
-        <!-- Unpaid Bills -->
-        <div class="pb-stat-card">
-          <div class="pb-stat-icon pb-stat-icon-purple">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
-              <line x1="2" y1="10" x2="22" y2="10"/>
-            </svg>
-          </div>
-          <div class="pb-stat-content">
-            <div class="pb-stat-label">Unpaid Bills</div>
-            <div class="pb-stat-value pb-text-purple">
-              {{ summary.unpaidBills }} ({{ formatCurrency(summary.unpaidBillsAmount) }})
-            </div>
-            
+            <div class="pb-stat-sub">Income - Expenses</div>
           </div>
         </div>
 
         <!-- Total Balance -->
-        <div class="pb-stat-card" :class="{ 'pb-stat-card-low-balance': isLowBalance }">
+        <div class="pb-stat-card pb-stat-card--core" :class="{ 'pb-stat-card-low-balance': isLowBalance }">
           <div class="pb-stat-icon pb-stat-icon-teal">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M20 12v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-4M12 2v8M9 7l3-3 3 3"/>
@@ -141,37 +83,43 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Expected Income -->
-        <div class="pb-stat-card">
-          <div class="pb-stat-icon pb-stat-icon-green">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
+      <div class="pb-section-head pb-section-head--compact">
+        <h2 class="pb-section-title">Receivables & Payables</h2>
+        <p class="pb-section-subtitle">Invoices and bills status breakdown for quick follow-up.</p>
+      </div>
+
+      <div class="pb-kpi-line">
+        <div class="pb-kpi-cluster pb-kpi-cluster--invoice">
+          <div class="pb-kpi-cluster-title">Invoices</div>
+          <div class="pb-kpi-row">
+            <span class="pb-kpi-key">Paid Invoices</span>
+            <span class="pb-kpi-value">{{ summary.paidInvoices }}</span>
           </div>
-          <div class="pb-stat-content">
-            <div class="pb-stat-label">Expected Income</div>
-            <div class="pb-stat-value pb-text-green">
-              {{ formatCurrency(summary.expectedIncome) }}
-            </div>
-            <div class="pb-stat-sub">Unpaid invoices</div>
+          <div class="pb-kpi-row">
+            <span class="pb-kpi-key">Unpaid Invoices</span>
+            <span class="pb-kpi-value">{{ formatCurrency(summary.expectedIncome) }}</span>
+          </div>
+          <div class="pb-kpi-row">
+            <span class="pb-kpi-key">Overdue Invoices</span>
+            <span class="pb-kpi-value">{{ summary.overdue }}</span>
           </div>
         </div>
 
-        <!-- Due Soon Bills -->
-        <div class="pb-stat-card">
-          <div class="pb-stat-icon pb-stat-icon-orange">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
+        <div class="pb-kpi-cluster pb-kpi-cluster--bill">
+          <div class="pb-kpi-cluster-title">Bills</div>
+          <div class="pb-kpi-row">
+            <span class="pb-kpi-key">Paid Bills</span>
+            <span class="pb-kpi-value">{{ formatCurrency(summary.expenses) }}</span>
           </div>
-          <div class="pb-stat-content">
-            <div class="pb-stat-label">Due Soon Bills</div>
-            <div class="pb-stat-value pb-text-orange">
-              {{ summary.dueSoonBills }} ({{ formatCurrency(summary.dueSoonBillsAmount) }})
-            </div>
-            <div class="pb-stat-sub">Due in the next 7 days</div>
+          <div class="pb-kpi-row">
+            <span class="pb-kpi-key">Unpaid Bills</span>
+            <span class="pb-kpi-value">{{ formatCurrency(summary.unpaidBillsAmount) }}</span>
+          </div>
+          <div class="pb-kpi-row">
+            <span class="pb-kpi-key">Due Soon Bills</span>
+            <span class="pb-kpi-value">{{ summary.dueSoonBills }} ({{ formatCurrency(summary.dueSoonBillsAmount) }})</span>
           </div>
         </div>
       </div>
@@ -704,6 +652,101 @@ watch(
   margin-bottom: 1rem;
 }
 
+.pb-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 0.65rem;
+}
+
+.pb-section-head--compact {
+  margin-top: 0.15rem;
+}
+
+.pb-section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 0.1px;
+}
+
+.pb-section-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.pb-stats-grid--primary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.pb-kpi-line {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: stretch;
+}
+
+.pb-kpi-cluster {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.pb-kpi-cluster--invoice {
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.pb-kpi-cluster--bill {
+  background: white;
+  border-color: #e2e8f0;
+}
+
+.pb-kpi-cluster-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.45rem;
+}
+
+.pb-kpi-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-radius: 10px;
+}
+
+.pb-kpi-row + .pb-kpi-row {
+  border-top: 1px dashed #e2e8f0;
+}
+
+.pb-kpi-key {
+  font-size: 13px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.pb-kpi-value {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
 .pb-stat-card {
   background: white;
   border: 1px solid #e2e8f0;
@@ -712,6 +755,11 @@ watch(
   display: flex;
   gap: 0.75rem;
   transition: all 0.2s;
+}
+
+.pb-stats-grid--primary .pb-stat-card {
+  min-height: 104px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .pb-stat-card:hover {
@@ -771,6 +819,10 @@ watch(
   gap: 4px;
   font-size: 11px;
   font-weight: 500;
+}
+
+.pb-stat-trend:empty {
+  display: none;
 }
 
 .pb-trend-up {
@@ -1160,6 +1212,10 @@ watch(
   .pb-stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
+
+  .pb-stats-grid--primary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -1167,6 +1223,14 @@ watch(
     padding: 1rem;
   }
   
+
+  .pb-kpi-line {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-stats-grid--primary {
+    grid-template-columns: 1fr;
+  }
   .pb-page-title {
     font-size: 24px;
   }

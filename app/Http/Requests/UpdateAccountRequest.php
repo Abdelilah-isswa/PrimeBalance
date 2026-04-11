@@ -18,6 +18,7 @@ class UpdateAccountRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'balance' => 'required|numeric',
             'is_active' => 'boolean',
         ];
     }
@@ -25,7 +26,7 @@ class UpdateAccountRequest extends FormRequest
     public function prepareForValidation(): void
     {
         $this->merge([
-            'is_active' => $this->has('is_active'),
+            'is_active' => $this->boolean('is_active'),
         ]);
     }
 }
