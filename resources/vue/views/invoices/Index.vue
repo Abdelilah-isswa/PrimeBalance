@@ -242,7 +242,7 @@ const newItem = ref({
 });
 
 const invoices = computed(() => invoiceStore.invoices);
-const company = computed(() => companyStore.currentCompany?.company || companyStore.currentCompany || null);
+const company = computed(() => companyStore.currentCompany);
 const clients = computed(() => clientStore.clients);
 const canCreateInvoice = computed(() => {
   const role = String(company.value?.pivot?.role || 'viewer').toLowerCase();

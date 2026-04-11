@@ -118,6 +118,7 @@
             <div class="pb-stat-value pb-text-purple">
               {{ summary.unpaidBills }} ({{ formatCurrency(summary.unpaidBillsAmount) }})
             </div>
+            
           </div>
         </div>
 
@@ -254,7 +255,7 @@
       <!-- Main Content Grid -->
       <div class="pb-main-grid">
         <!-- Recent Transactions -->
-        <div class="pb-card" :class="{ 'pb-card-full': isViewer }">
+        <div class="pb-card pb-card-full">
           <div class="pb-card-header">
             <div class="pb-card-title-section">
               <div class="pb-card-icon">
@@ -317,78 +318,6 @@
           </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div v-if="!isViewer" class="pb-card">
-          <div class="pb-card-header">
-            <div class="pb-card-title-section">
-              <div class="pb-card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <polygon points="13 2 3 7 3 17 13 22 23 17 23 7 13 2"/>
-                  <line x1="3" y1="7" x2="13" y2="12"/>
-                  <line x1="13" y1="12" x2="23" y2="7"/>
-                  <line x1="3" y1="17" x2="13" y2="22"/>
-                  <line x1="13" y1="22" x2="23" y2="17"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="pb-card-title">Quick Actions</h3>
-                <p class="pb-card-subtitle">Common tasks and shortcuts</p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="pb-card-body">
-            <div class="pb-actions-list">
-              <router-link 
-                v-if="currentCompany" 
-                :to="`/companies/${currentCompany.id}/invoices`" 
-                class="pb-action-btn pb-action-primary"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                </svg>
-                New Invoice
-              </router-link>
-              
-              <router-link 
-                v-if="currentCompany" 
-                :to="`/companies/${currentCompany.id}/bills`" 
-                class="pb-action-btn pb-action-secondary"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
-                  <line x1="2" y1="10" x2="22" y2="10"/>
-                </svg>
-                Add Bill
-              </router-link>
-              
-              <router-link 
-                :to="`/companies`" 
-                class="pb-action-btn pb-action-outline"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                </svg>
-                Manage Companies
-              </router-link>
-              
-              <router-link 
-                v-if="currentCompany" 
-                :to="`/companies/${currentCompany.id}/transactions/new`" 
-                class="pb-action-btn pb-action-outline"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-                Add Transaction
-              </router-link>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
@@ -417,11 +346,6 @@ const dashboardStore = useDashboardStore();
 
 const companies = computed(() => companyStore.companies);
 const currentCompany = computed(() => companyStore.currentCompany);
-const activeCompany = computed(() => currentCompany.value?.company || currentCompany.value || null);
-const isViewer = computed(() => {
-  const role = String(activeCompany.value?.pivot?.role || '').toLowerCase();
-  return !role || role === 'viewer';
-});
 const recentTransactions = ref([]);
 const recentInvoices = ref([]);
 const summary = ref({
@@ -493,11 +417,12 @@ const calculateSummary = () => {
     }, 0);
   summary.value.expenses = filteredBills.reduce((sum, b) => sum + parseFloat(b.amount_paid || 0), 0);
   summary.value.overdue = invoices.filter(i => String(i.status || '').toLowerCase() === 'overdue').length;
-  const paidInvoices = invoices.filter(i => String(i.status || '').toLowerCase() === 'paid');
+  const paidInvoices = invoices.filter((i) => String(i.status || '').toLowerCase() === 'paid');
   summary.value.paidInvoices = paidInvoices.length;
   summary.value.paidInvoicesAmount = paidInvoices.reduce((sum, i) => {
     return sum + parseFloat(i.total_amount || i.amount_paid || 0);
   }, 0);
+
   const unpaidBills = bills.filter((b) => String(b.status || '').toLowerCase() !== 'paid');
   summary.value.unpaidBills = unpaidBills.length;
   summary.value.unpaidBillsAmount = unpaidBills.reduce((sum, b) => {
@@ -505,13 +430,13 @@ const calculateSummary = () => {
     const paid = parseFloat(b.amount_paid || 0);
     return sum + Math.max(total - paid, 0);
   }, 0);
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const soon = new Date(today);
   soon.setDate(soon.getDate() + 7);
-  const dueSoonBills = bills.filter((b) => {
-    const status = String(b.status || '').toLowerCase();
-    if (status === 'paid' || !b.due_date) return false;
+  const dueSoonBills = unpaidBills.filter((b) => {
+    if (!b.due_date) return false;
     const dueDate = new Date(b.due_date);
     dueDate.setHours(0, 0, 0, 0);
     return dueDate >= today && dueDate <= soon;
@@ -522,6 +447,7 @@ const calculateSummary = () => {
     const paid = parseFloat(b.amount_paid || 0);
     return sum + Math.max(total - paid, 0);
   }, 0);
+
   summary.value.cashBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
   recentTransactions.value = filteredTransactions.slice(0, 5);
   recentInvoices.value = filteredInvoices.filter(i => i.status !== 'paid').slice(0, 3);
