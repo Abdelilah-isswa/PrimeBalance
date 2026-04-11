@@ -13,8 +13,9 @@
         </router-link>
 
         <div class="pb-nav-links">
-          <router-link to="/">Home</router-link>
-          <a href="/#features">Features</a>
+          <router-link :to="{ path: '/', hash: '' }">Home</router-link>
+          <router-link :to="{ path: '/', hash: '#features' }">Features</router-link>
+          <router-link :to="{ path: '/', hash: '#pricing' }">Pricing</router-link>
           <router-link to="/about" class="pb-active-link">About Us</router-link>
         </div>
 

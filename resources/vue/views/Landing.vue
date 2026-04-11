@@ -16,10 +16,10 @@
 
         <!-- Center Links -->
         <div class="pb-nav-links">
-          <router-link to="/" :class="{ 'pb-nav-link-active': activeNav === 'home' }" @click="setActiveNav('home')">Home</router-link>
-          <a href="#features" :class="{ 'pb-nav-link-active': activeNav === 'features' }" @click="setActiveNav('features')">Features</a>
-          <a href="#pricing">Pricing</a>
-          <router-link to="/about">About Us</router-link>
+          <router-link to="/" :class="{ 'pb-nav-link-active': activeNav === 'home' }" @click.prevent="goHome">Home</router-link>
+          <a href="#features" :class="{ 'pb-nav-link-active': activeNav === 'features' }" @click.prevent="goToSection('features')">Features</a>
+          <a href="#pricing" :class="{ 'pb-nav-link-active': activeNav === 'pricing' }" @click.prevent="goToSection('pricing')">Pricing</a>
+          <router-link to="/about" :class="{ 'pb-nav-link-active': activeNav === 'about' }" @click="setActiveNav('about')">About Us</router-link>
         </div>
 
         <!-- Right Actions -->
@@ -320,9 +320,12 @@
 
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth.js';
 
 const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
 
 const activeNav = ref('home');
 
@@ -330,8 +333,56 @@ const setActiveNav = (section) => {
   activeNav.value = section;
 };
 
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const goHome = async () => {
+  setActiveNav('home');
+
+  if (route.path !== '/') {
+    await router.push('/');
+  }
+
+  if (window.location.hash) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+
+  scrollToTop();
+};
+
+const goToSection = async (section) => {
+  setActiveNav(section);
+
+  if (route.path !== '/') {
+    await router.push('/');
+  }
+
+  const el = document.getElementById(section);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  history.replaceState(null, '', `#${section}`);
+};
+
 const syncActiveNavFromHash = () => {
-  activeNav.value = window.location.hash === '#features' ? 'features' : 'home';
+  if (route.path === '/about') {
+    activeNav.value = 'about';
+    return;
+  }
+
+  if (window.location.hash === '#features') {
+    activeNav.value = 'features';
+    return;
+  }
+
+  if (window.location.hash === '#pricing') {
+    activeNav.value = 'pricing';
+    return;
+  }
+
+  activeNav.value = 'home';
 };
 
 onMounted(() => {
