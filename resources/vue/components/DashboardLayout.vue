@@ -1,5 +1,5 @@
 <template>
-  <div class="pb-dashboard-layout">
+  <div class="pb-dashboard-layout" :class="{ 'pb-theme-dark': isDarkMode }">
     <!-- Sidebar -->
     <aside class="pb-sidebar">
       <div class="pb-sidebar-header">
@@ -58,16 +58,43 @@
       </nav>
 
       <div class="pb-sidebar-footer">
-        <div class="pb-footer-links">
-          <router-link to="/dashboard/settings" class="pb-footer-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Settings
-          </router-link>
-          <button class="pb-footer-link" @click="copySupportEmail" title="Copy Support Email">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Support
-          </button>
-        </div>
+        <router-link to="/dashboard/settings" class="pb-user-summary" title="Open settings">
+          <div class="pb-user-avatar">
+            {{ userInitial }}
+          </div>
+          <div class="pb-user-meta">
+            <p class="pb-user-name">{{ authStore.user?.name || 'User' }}</p>
+            <p class="pb-user-role">{{ formattedCurrentCompanyRole }}</p>
+          </div>
+        </router-link>
+
+        <button class="pb-contact-btn" @click="copySupportEmail" type="button" title="Copy support email">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Contact us
+        </button>
+
+        <button class="pb-theme-toggle" @click="toggleTheme" type="button">
+          <svg v-if="isDarkMode" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3c0.5 0 0.72 0.61 0.36 0.97A7 7 0 0 0 20.03 12.43c0.36-0.36 0.97-0.14 0.97 0.36z"/>
+          </svg>
+          {{ isDarkMode ? 'Light mode' : 'Dark mode' }}
+        </button>
+
         <button class="pb-logout-btn" @click="logout">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -128,6 +155,7 @@ const dashboardStore = useDashboardStore()
 
 const currentCompanyId = ref(String(props.companyId || route.params.companyId || ''))
 const companiesLoaded = ref(false)
+const isDarkMode = ref(false)
 
 const companies = computed(() => companyStore.companies)
 
@@ -141,6 +169,10 @@ const showDateFilter = computed(() => {
 })
 
 onMounted(async () => {
+  const savedTheme = localStorage.getItem('pb_theme_mode')
+  isDarkMode.value = savedTheme === 'dark'
+  applyTheme()
+
   if (companyStore.companies.length === 0) {
     await companyStore.fetchCompanies()
   }
@@ -239,6 +271,16 @@ const currentCompanyRole = computed(() => {
   return selectedCompany.value?.pivot?.role || 'viewer'
 })
 
+const formattedCurrentCompanyRole = computed(() => {
+  const role = String(currentCompanyRole.value || 'viewer').toLowerCase()
+  return role.charAt(0).toUpperCase() + role.slice(1)
+})
+
+const userInitial = computed(() => {
+  const name = String(authStore.user?.name || 'U').trim()
+  return (name.charAt(0) || 'U').toUpperCase()
+})
+
 const onNavLinkClick = (event, link) => {
   if (link?.disabled) {
     event.preventDefault()
@@ -251,12 +293,23 @@ const logout = async () => {
   router.push('/login')
 }
 
+const applyTheme = () => {
+  if (typeof document === 'undefined') return
+  document.documentElement.classList.toggle('pb-dark-mode', isDarkMode.value)
+}
+
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+  localStorage.setItem('pb_theme_mode', isDarkMode.value ? 'dark' : 'light')
+  applyTheme()
+}
+
 const copySupportEmail = async () => {
   try {
-    await navigator.clipboard.writeText('support@primebalance.com');
-    alert('Support email (support@primebalance.com) copied to clipbaord! We look forward to hearing from you.');
+    await navigator.clipboard.writeText('support@primebalance.com')
+    alert('Support email copied: support@primebalance.com')
   } catch (err) {
-    alert('The support email is: support@primebalance.com');
+    alert('Contact us at support@primebalance.com')
   }
 }
 
@@ -608,34 +661,100 @@ const navLinks = computed(() => {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.pb-footer-links {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.pb-footer-link {
-  flex: 1;
+.pb-user-summary {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  color: #94a3b8;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 10px;
   text-decoration: none;
   transition: all 0.15s;
 }
 
-.pb-footer-link:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
-  border-color: rgba(255, 255, 255, 0.15);
+.pb-user-summary:hover {
+  border-color: rgba(99, 102, 241, 0.55);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.pb-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(79, 70, 229, 0.2);
+  color: #c7d2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pb-user-meta {
+  min-width: 0;
+}
+
+.pb-user-name {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.pb-user-role {
+  margin: 2px 0 0;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.pb-contact-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pb-contact-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.pb-theme-toggle {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid rgba(79, 70, 229, 0.35);
+  border-radius: 10px;
+  color: #c7d2fe;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pb-theme-toggle:hover {
+  background: rgba(79, 70, 229, 0.2);
+  color: #ffffff;
 }
 
 .pb-logout-btn {
@@ -671,6 +790,27 @@ const navLinks = computed(() => {
   padding: 0 1.5rem 1.5rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+.pb-dashboard-layout.pb-theme-dark {
+  background: #0f172a;
+}
+
+.pb-dashboard-layout.pb-theme-dark .pb-main-content {
+  background: #0f172a;
+}
+
+.pb-dashboard-layout.pb-theme-dark .pb-dashboard-header {
+  background: #111827;
+  border-bottom-color: #1f2937;
+}
+
+.pb-dashboard-layout.pb-theme-dark .pb-greeting-title {
+  color: #f8fafc;
+}
+
+.pb-dashboard-layout.pb-theme-dark .pb-greeting-subtitle {
+  color: #94a3b8;
 }
 
 /* New Top Header Styles */
