@@ -18,7 +18,7 @@
         <div class="pb-nav-links">
           <router-link to="/" :class="{ 'pb-nav-link-active': activeNav === 'home' }" @click="setActiveNav('home')">Home</router-link>
           <a href="#features" :class="{ 'pb-nav-link-active': activeNav === 'features' }" @click="setActiveNav('features')">Features</a>
-          <router-link to="/about">Pricing</router-link>
+          <a href="#pricing">Pricing</a>
           <router-link to="/about">About Us</router-link>
         </div>
 
@@ -210,6 +210,61 @@
           <div class="pb-banner-visual-inner">
             <img class="pb-banner-img" src="/images/scale-banner.jpg" alt="PrimeBalance on tablet" />
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="pb-pricing">
+      <div class="pb-pricing-inner">
+        <div class="pb-pricing-header">
+          <div class="pb-section-badge">
+            <span class="pb-section-badge-dot"></span>
+            Pricing
+          </div>
+          <h2>Flexible Plans for Every Need</h2>
+          <p>Whether you're a solo founder or managing a team, choose the plan that fits your workflow.</p>
+        </div>
+
+        <div class="pb-pricing-grid">
+          <article class="pb-price-card">
+            <h3>Free Plan</h3>
+            <p class="pb-price-desc">For daily tracking and lightweight finance management.</p>
+            <div class="pb-price-row"><span class="pb-price">$0</span><span class="pb-price-period">/month</span></div>
+            <ul class="pb-price-features">
+              <li>Secure storage and transfers</li>
+              <li>Real-time balance tracking</li>
+              <li>Basic market insights</li>
+              <li>Core AI support</li>
+            </ul>
+            <router-link to="/register"><button class="pb-price-btn">Get started</button></router-link>
+          </article>
+
+          <article class="pb-price-card pb-price-card-featured">
+            <h3>Pro + AI</h3>
+            <p class="pb-price-desc">For growing teams who need smarter automation and insights.</p>
+            <div class="pb-price-row"><span class="pb-price">$23</span><span class="pb-price-period">/month</span></div>
+            <ul class="pb-price-features">
+              <li>Everything in Free</li>
+              <li>Smart AI assistant</li>
+              <li>Personalized recommendations</li>
+              <li>Multi-currency support</li>
+            </ul>
+            <router-link to="/register"><button class="pb-price-btn pb-price-btn-featured">Get started</button></router-link>
+          </article>
+
+          <article class="pb-price-card">
+            <h3>Business Plan</h3>
+            <p class="pb-price-desc">For companies with multi-user access and advanced reporting needs.</p>
+            <div class="pb-price-row"><span class="pb-price">$36</span><span class="pb-price-period">/month</span></div>
+            <ul class="pb-price-features">
+              <li>Everything in Pro + AI</li>
+              <li>Role-based team access</li>
+              <li>Shared workspaces</li>
+              <li>Exportable financial reports</li>
+            </ul>
+            <router-link to="/register"><button class="pb-price-btn">Get started</button></router-link>
+          </article>
         </div>
       </div>
     </section>
@@ -877,6 +932,139 @@ onBeforeUnmount(() => {
   object-fit: cover;
 }
 
+/* Pricing */
+.pb-pricing {
+  padding: 5rem 2.5rem;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pb-pricing-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pb-pricing-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.pb-pricing-header h2 {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #0f0e2e;
+  margin-bottom: 0.7rem;
+  letter-spacing: -0.5px;
+}
+
+.pb-pricing-header p {
+  font-size: 17px;
+  color: #64748b;
+  max-width: 660px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.pb-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.pb-price-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.pb-price-card h3 {
+  font-size: 1.7rem;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+}
+
+.pb-price-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+  margin-bottom: 1rem;
+  min-height: 44px;
+}
+
+.pb-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 1rem;
+}
+
+.pb-price {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.pb-price-period {
+  font-size: 28px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.pb-price-features {
+  list-style: none;
+  margin: 0 0 1.2rem;
+  padding: 0;
+  border-top: 1px solid #edf2f7;
+  padding-top: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.pb-price-features li {
+  position: relative;
+  padding-left: 1.6rem;
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.pb-price-features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.34rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #0f172a;
+}
+
+.pb-price-btn {
+  margin-top: auto;
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.pb-price-card-featured {
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #bfdbfe;
+}
+
+.pb-price-btn-featured {
+  background: #ffffff;
+}
+
 /* ── CTA ──────────────────────────────────────────────────── */
 .pb-cta {
   padding: 5rem 2.5rem;
@@ -1019,6 +1207,10 @@ onBeforeUnmount(() => {
   }
 
   .pb-reviews-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-pricing-grid {
     grid-template-columns: 1fr;
   }
   
