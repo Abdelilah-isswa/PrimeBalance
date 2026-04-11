@@ -104,11 +104,11 @@
                   <td>{{ getTransactionCreatedBy(tx) }}</td>
                   <td class="pb-text-center">
                     <div class="pb-action-group">
-                      <button @click="startEdit(tx)" class="pb-btn-action pb-icon-primary" title="Edit">
+                      <button v-if="!isSystemTransaction(tx)" @click="startEdit(tx)" class="pb-btn-action pb-icon-primary" title="Edit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         Edit
                       </button>
-                      <button @click="destroyTx(tx.id)" class="pb-btn-action pb-icon-danger" title="Delete">
+                      <button v-if="!isSystemTransaction(tx)" @click="destroyTx(tx.id)" class="pb-btn-action pb-icon-danger" title="Delete">
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         Delete
                       </button>
@@ -134,6 +134,9 @@
         </div>
         
         <form @submit.prevent="createTx" class="pb-form">
+          <div v-if="formError" class="pb-alert pb-alert-error">{{ formError }}</div>
+          <div v-if="formSuccess" class="pb-alert pb-alert-success">{{ formSuccess }}</div>
+
           <div class="pb-form-grid">
             <div class="pb-form-group">
               <label class="pb-label">Date</label>
@@ -205,6 +208,8 @@ const txStore = useTransactionStore();
 const activeTab = ref('manage');
 const submitting = ref(false);
 const editId = ref(null);
+const formError = ref('');
+const formSuccess = ref('');
 
 const accounts = ref([]);
 const categories = ref([]);
@@ -263,22 +268,27 @@ const resetForm = () => {
 };
 
 const createTx = async () => {
+  formError.value = '';
+  formSuccess.value = '';
+
   submitting.value = true;
   try {
     const payload = { ...form.value };
     if (!payload.category_id) delete payload.category_id; // null category 
     await txStore.createTransaction(id, payload);
+    formSuccess.value = 'Transaction created successfully.';
     resetForm();
-    activeTab.value = 'manage';
   } catch (err) {
     console.error('Failed to create tx', err);
-    alert(err.response?.data?.message || 'Error creating transaction');
+    formError.value = err.response?.data?.message || 'Error creating transaction';
   } finally {
     submitting.value = false;
   }
 };
 
 const startEdit = (tx) => {
+  if (isSystemTransaction(tx)) return;
+
   editId.value = tx.id;
   form.value = {
     date: tx.date.substring(0, 10),
@@ -311,6 +321,9 @@ const saveEdit = async () => {
 };
 
 const destroyTx = async (txId) => {
+  const tx = (txStore.transactions || []).find((item) => item.id === txId);
+  if (tx && isSystemTransaction(tx)) return;
+
   if (!confirm('Are you sure you want to delete this transaction? Balance will be adjusted.')) return;
   try {
     await txStore.deleteTransaction(id, txId);
@@ -334,6 +347,10 @@ const getTransactionCreatedBy = (tx) => {
   }
 
   return tx?.creator?.name || 'Unknown';
+};
+
+const isSystemTransaction = (tx) => {
+  return Boolean(tx?.invoice_id || tx?.bill_id);
 };
 </script>
 
@@ -669,6 +686,26 @@ const getTransactionCreatedBy = (tx) => {
 .pb-btn-secondary:hover {
   background: #f8fafc;
   color: #1e293b;
+}
+
+.pb-alert {
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pb-alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.pb-alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 /* Utilities */
