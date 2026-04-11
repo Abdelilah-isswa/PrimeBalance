@@ -14,7 +14,7 @@
     <div class="pb-card pb-form-card" v-if="form">
       <div class="pb-card-header">
         <h2 class="pb-card-title">Invoice Details</h2>
-        <p class="pb-card-subtitle">Modify the invoice amount or status below.</p>
+        <p class="pb-card-subtitle">Modify the invoice amount below.</p>
       </div>
 
       <div v-if="error" class="pb-alert pb-alert-error">{{ error }}</div>
@@ -32,16 +32,6 @@
             <input v-model="form.total_amount" type="number" step="0.01" class="pb-input" required min="0.01" :disabled="readOnly" />
           </div>
 
-          <div class="pb-form-group">
-            <label class="pb-label">Status</label>
-            <select v-model="form.status" class="pb-input" :disabled="readOnly">
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="paid">Paid</option>
-              <option value="partial">Partial</option>
-              <option value="overdue">Overdue</option>
-            </select>
-          </div>
         </div>
 
         <div class="pb-form-actions">
@@ -81,7 +71,6 @@ onMounted(async () => {
     const inv = res.data.data.invoice;
     form.value = {
       total_amount: inv.total_amount,
-      status: inv.status,
       client_name: inv.client?.name || '',
       transactions_count: inv.transactions_count || 0,
     };
@@ -103,7 +92,6 @@ const update = async () => {
   try {
     await axios.put(`companies/${id}/invoices/${invoiceId}`, {
       total_amount: form.value.total_amount,
-      status: form.value.status,
     });
     successMsg.value = 'Invoice updated successfully!';
     setTimeout(() => router.push(`/companies/${id}/invoices/${invoiceId}`), 1000);
