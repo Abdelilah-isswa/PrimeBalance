@@ -23,7 +23,7 @@
             <div class="pb-stat-value pb-text-green">
               {{ formatCurrency(summary.income) }}
             </div>
-           <div class="pb-stat-sub">Paid Invoices</div>
+           
             <div class="pb-stat-trend pb-trend-up">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               </svg>
@@ -90,6 +90,21 @@
           </div>
         </div>
 
+        <!-- Paid Invoices -->
+        <div class="pb-stat-card">
+          <div class="pb-stat-icon pb-stat-icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="pb-stat-content">
+            <div class="pb-stat-label">Paid Invoices</div>
+            <div class="pb-stat-value pb-text-green">
+              {{ summary.paidInvoices }} ({{ formatCurrency(summary.paidInvoicesAmount) }})
+            </div>
+          </div>
+        </div>
+
         <!-- Unpaid Bills -->
         <div class="pb-stat-card">
           <div class="pb-stat-icon pb-stat-icon-purple">
@@ -101,9 +116,8 @@
           <div class="pb-stat-content">
             <div class="pb-stat-label">Unpaid Bills</div>
             <div class="pb-stat-value pb-text-purple">
-              {{ summary.unpaidBills }}
+              {{ summary.unpaidBills }} ({{ formatCurrency(summary.unpaidBillsAmount) }})
             </div>
-            
           </div>
         </div>
 
@@ -154,9 +168,9 @@
           <div class="pb-stat-content">
             <div class="pb-stat-label">Due Soon Bills</div>
             <div class="pb-stat-value pb-text-orange">
-              {{ summary.dueSoonBills }}
+              {{ summary.dueSoonBills }} ({{ formatCurrency(summary.dueSoonBillsAmount) }})
             </div>
-            <div class="pb-stat-sub">Unpaid due in 7 days</div>
+            <div class="pb-stat-sub">Due in the next 7 days</div>
           </div>
         </div>
       </div>
@@ -415,8 +429,12 @@ const summary = ref({
   expectedIncome: 0,
   expenses: 0,
   overdue: 0,
+  paidInvoices: 0,
+  paidInvoicesAmount: 0,
   unpaidBills: 0,
+  unpaidBillsAmount: 0,
   dueSoonBills: 0,
+  dueSoonBillsAmount: 0,
   cashBalance: 0,
 });
 const loading = ref(true);
@@ -475,18 +493,35 @@ const calculateSummary = () => {
     }, 0);
   summary.value.expenses = filteredBills.reduce((sum, b) => sum + parseFloat(b.amount_paid || 0), 0);
   summary.value.overdue = invoices.filter(i => String(i.status || '').toLowerCase() === 'overdue').length;
-  summary.value.unpaidBills = bills.filter(b => String(b.status || '').toLowerCase() !== 'paid').length;
+  const paidInvoices = invoices.filter(i => String(i.status || '').toLowerCase() === 'paid');
+  summary.value.paidInvoices = paidInvoices.length;
+  summary.value.paidInvoicesAmount = paidInvoices.reduce((sum, i) => {
+    return sum + parseFloat(i.total_amount || i.amount_paid || 0);
+  }, 0);
+  const unpaidBills = bills.filter((b) => String(b.status || '').toLowerCase() !== 'paid');
+  summary.value.unpaidBills = unpaidBills.length;
+  summary.value.unpaidBillsAmount = unpaidBills.reduce((sum, b) => {
+    const total = parseFloat(b.total_amount || 0);
+    const paid = parseFloat(b.amount_paid || 0);
+    return sum + Math.max(total - paid, 0);
+  }, 0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const soon = new Date(today);
   soon.setDate(soon.getDate() + 7);
-  summary.value.dueSoonBills = bills.filter((b) => {
+  const dueSoonBills = bills.filter((b) => {
     const status = String(b.status || '').toLowerCase();
     if (status === 'paid' || !b.due_date) return false;
     const dueDate = new Date(b.due_date);
     dueDate.setHours(0, 0, 0, 0);
     return dueDate >= today && dueDate <= soon;
-  }).length;
+  });
+  summary.value.dueSoonBills = dueSoonBills.length;
+  summary.value.dueSoonBillsAmount = dueSoonBills.reduce((sum, b) => {
+    const total = parseFloat(b.total_amount || 0);
+    const paid = parseFloat(b.amount_paid || 0);
+    return sum + Math.max(total - paid, 0);
+  }, 0);
   summary.value.cashBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
   recentTransactions.value = filteredTransactions.slice(0, 5);
   recentInvoices.value = filteredInvoices.filter(i => i.status !== 'paid').slice(0, 3);
