@@ -12,10 +12,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download PDF
           </button>
-          <button @click="window.print()" class="pb-btn pb-btn-secondary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Print
-          </button>
+          <router-link v-if="!isViewer && bill?.status !== 'paid'" :to="`/companies/${id}/bills/${billId}/pay`" class="pb-btn pb-btn-primary">
+            Record Payment
+          </router-link>
         </div>
       </div>
     </div>
@@ -106,15 +105,8 @@
               :to="`/companies/${id}/bills/${billId}/edit`"
               class="pb-option-item"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               <span>Edit Bill</span>
-            </router-link>
-
-            <router-link
-              v-if="bill?.status !== 'paid'"
-              :to="`/companies/${id}/bills/${billId}/pay`"
-              class="pb-option-item"
-            >
-              <span>Record Payment</span>
             </router-link>
 
             <button v-if="Number(bill?.amount_paid || 0) === 0" @click="destroy" class="pb-option-item pb-option-danger">
@@ -198,6 +190,8 @@ const downloadPdf = async () => {
 .pb-actions { display: flex; gap: 12px; }
 .pb-btn { padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; border: none; }
 .pb-btn-secondary { background: white; color: #1a1a2e; border: 1px solid #e2e8f0; }
+.pb-btn-primary { background: #4f46e5; color: white; text-decoration: none; }
+.pb-btn-primary:hover { background: #4338ca; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
 .pb-bill-container { display: grid; grid-template-columns: 1fr 300px; gap: 2rem; align-items: start; }
 .pb-card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow: hidden; }
 .pb-bill-card { padding: 3rem; }
@@ -229,12 +223,11 @@ const downloadPdf = async () => {
 .pb-total-row { border-bottom: none; color: #1a1a2e; font-size: 18px; font-weight: 800; }
 .pb-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
 .pb-options-card { padding: 1.5rem; }
-.pb-card-title-sm { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.pb-card-title-sm { font-size: 14px; font-weight: 700; color: #94a3b8; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
 .pb-option-list { display: flex; flex-direction: column; gap: 8px; }
-.pb-option-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #475569; text-decoration: none; font-size: 14px; font-weight: 600; border: none; background: #f8fafc; cursor: pointer; text-align: left; }
-.pb-option-item:hover { background: #f1f5f9; color: #1a1a2e; }
-.pb-option-danger { color: #e11d48; background: #fff1f2; }
-.pb-option-danger:hover { background: #ffe4e6; color: #be123c; }
+.pb-option-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; color: #475569; text-decoration: none; font-size: 14px; font-weight: 600; transition: all 0.2s; background: transparent; width: 100%; border: none; text-align: left; cursor: pointer; }
+.pb-option-item:hover { background: #f8fafc; color: #4f46e5; }
+.pb-option-danger:hover { background: #fff1f2; color: #e11d48; }
 .anim-slide-up { animation: slideUp 0.5s ease-out; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
