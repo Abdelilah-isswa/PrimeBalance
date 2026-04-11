@@ -1,5 +1,5 @@
 <template>
-  <div class="pb-dashboard-layout" :class="{ 'pb-theme-dark': isDarkMode }">
+  <div class="pb-dashboard-layout">
     <!-- Sidebar -->
     <aside class="pb-sidebar">
       <div class="pb-sidebar-header">
@@ -58,41 +58,26 @@
       </nav>
 
       <div class="pb-sidebar-footer">
-        <router-link to="/dashboard/settings" class="pb-user-summary" title="Open settings">
-          <div class="pb-user-avatar">
+        <router-link to="/dashboard/settings" class="pb-user-summary pb-footer-item" title="Open settings">
+          <div class="pb-user-avatar pb-footer-icon">
             {{ userInitial }}
           </div>
           <div class="pb-user-meta">
             <p class="pb-user-name">{{ authStore.user?.name || 'User' }}</p>
             <p class="pb-user-role">{{ formattedCurrentCompanyRole }}</p>
           </div>
+          <svg class="pb-footer-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
         </router-link>
 
-        <button class="pb-contact-btn" @click="copySupportEmail" type="button" title="Copy support email">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
+        <button class="pb-contact-btn pb-footer-item" @click="copySupportEmail" type="button" title="Copy support email">
+          <span class="pb-footer-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
+          </span>
           Contact us
-        </button>
-
-        <button class="pb-theme-toggle" @click="toggleTheme" type="button">
-          <svg v-if="isDarkMode" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3c0.5 0 0.72 0.61 0.36 0.97A7 7 0 0 0 20.03 12.43c0.36-0.36 0.97-0.14 0.97 0.36z"/>
-          </svg>
-          {{ isDarkMode ? 'Light mode' : 'Dark mode' }}
         </button>
 
         <button class="pb-logout-btn" @click="logout">
@@ -155,7 +140,6 @@ const dashboardStore = useDashboardStore()
 
 const currentCompanyId = ref(String(props.companyId || route.params.companyId || ''))
 const companiesLoaded = ref(false)
-const isDarkMode = ref(false)
 
 const companies = computed(() => companyStore.companies)
 
@@ -169,10 +153,6 @@ const showDateFilter = computed(() => {
 })
 
 onMounted(async () => {
-  const savedTheme = localStorage.getItem('pb_theme_mode')
-  isDarkMode.value = savedTheme === 'dark'
-  applyTheme()
-
   if (companyStore.companies.length === 0) {
     await companyStore.fetchCompanies()
   }
@@ -291,17 +271,6 @@ const onNavLinkClick = (event, link) => {
 const logout = async () => {
   await authStore.logout()
   router.push('/login')
-}
-
-const applyTheme = () => {
-  if (typeof document === 'undefined') return
-  document.documentElement.classList.toggle('pb-dark-mode', isDarkMode.value)
-}
-
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value
-  localStorage.setItem('pb_theme_mode', isDarkMode.value ? 'dark' : 'light')
-  applyTheme()
 }
 
 const copySupportEmail = async () => {
@@ -661,33 +630,53 @@ const navLinks = computed(() => {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.pb-user-summary {
+.pb-footer-item {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  margin-bottom: 10px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
   transition: all 0.15s;
 }
 
-.pb-user-summary:hover {
-  border-color: rgba(99, 102, 241, 0.55);
-  background: rgba(99, 102, 241, 0.12);
+.pb-footer-item:hover {
+  background: rgba(79, 70, 229, 0.1);
+  color: #c7d2fe;
 }
 
-.pb-user-avatar {
+.pb-footer-icon {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: rgba(79, 70, 229, 0.2);
-  color: #c7d2fe;
+  background: #2d2d44;
+  color: #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.pb-footer-item:hover .pb-footer-icon {
+  background: #3d3d54;
+}
+
+.pb-footer-chevron {
+  margin-left: auto;
+  opacity: 0.6;
+}
+
+.pb-user-summary {
+  margin-bottom: 10px;
+}
+
+.pb-user-avatar {
   font-size: 14px;
   font-weight: 700;
 }
@@ -698,7 +687,7 @@ const navLinks = computed(() => {
 
 .pb-user-name {
   margin: 0;
-  color: #f8fafc;
+  color: #e2e8f0;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
@@ -712,49 +701,8 @@ const navLinks = computed(() => {
 }
 
 .pb-contact-btn {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
   margin-bottom: 10px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  color: #cbd5e1;
-  font-size: 13px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
-}
-
-.pb-contact-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-}
-
-.pb-theme-toggle {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  margin-bottom: 10px;
-  background: rgba(79, 70, 229, 0.1);
-  border: 1px solid rgba(79, 70, 229, 0.35);
-  border-radius: 10px;
-  color: #c7d2fe;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.pb-theme-toggle:hover {
-  background: rgba(79, 70, 229, 0.2);
-  color: #ffffff;
 }
 
 .pb-logout-btn {
@@ -790,27 +738,6 @@ const navLinks = computed(() => {
   padding: 0 1.5rem 1.5rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
-}
-
-.pb-dashboard-layout.pb-theme-dark {
-  background: #0f172a;
-}
-
-.pb-dashboard-layout.pb-theme-dark .pb-main-content {
-  background: #0f172a;
-}
-
-.pb-dashboard-layout.pb-theme-dark .pb-dashboard-header {
-  background: #111827;
-  border-bottom-color: #1f2937;
-}
-
-.pb-dashboard-layout.pb-theme-dark .pb-greeting-title {
-  color: #f8fafc;
-}
-
-.pb-dashboard-layout.pb-theme-dark .pb-greeting-subtitle {
-  color: #94a3b8;
 }
 
 /* New Top Header Styles */
