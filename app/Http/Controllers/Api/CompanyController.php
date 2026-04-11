@@ -23,6 +23,7 @@ class CompanyController extends BaseController
     public function index()
     {
         $companies = auth('sanctum')->user()->companies;
+        $companies->loadCount('transactions');
         return $this->sendResponse($companies->toArray());
     }
 
@@ -70,6 +71,11 @@ class CompanyController extends BaseController
     public function deactivate($id)
     {
         $company = $this->getCompanyForOwner($id, 'deactivate company');
+
+        if ($company->transactions()->exists()) {
+            return $this->sendError('You cannot deactivate this company because it has transactions.', 422);
+        }
+
         $this->companyService->deactivateCompany($company);
         return $this->sendResponse([], 'Company deactivated successfully');
     }

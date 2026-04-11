@@ -94,8 +94,14 @@
             </div>
           </div>
 
-          <div class="pb-form-actions" style="justify-content: space-between;">
-            <button type="button" class="pb-btn pb-btn-danger" @click="deactivateCompany" :disabled="submitting">
+          <div class="pb-form-actions" :style="canDeactivateCompany ? { justifyContent: 'space-between' } : null">
+            <button
+              v-if="canDeactivateCompany"
+              type="button"
+              class="pb-btn pb-btn-danger"
+              @click="deactivateCompany"
+              :disabled="submitting"
+            >
               Deactivate Company
             </button>
             <button type="submit" class="pb-btn pb-btn-primary" :disabled="submitting">
@@ -141,6 +147,10 @@ const currentCompany = computed(() => {
 
 const isOwner = computed(() => {
   return (currentCompany.value?.pivot?.role || 'viewer') === 'owner';
+});
+
+const canDeactivateCompany = computed(() => {
+  return Number(currentCompany.value?.transactions_count || 0) === 0;
 });
 
 onMounted(async () => {
@@ -206,10 +216,11 @@ const updateCompany = async () => {
 };
 
 const deactivateCompany = async () => {
-  if (!currentCompany.value) return;
+  if (!currentCompany.value || !canDeactivateCompany.value) return;
   if (!confirm("Are you sure you want to deactivate this company? This action cannot be undone.")) return;
-  
+
   submitting.value = true;
+  companyError.value = '';
   try {
     await axios.post(`/companies/${currentCompany.value.id}/deactivate`);
     await companyStore.fetchCompanies();
