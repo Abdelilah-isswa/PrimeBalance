@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Transaction;
 use App\Models\Account;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionService
 {
@@ -19,6 +20,7 @@ class TransactionService
             'amount' => $data['amount'],
             'description' => $data['description'],
             'date' => $data['date'],
+            'created_by' => Auth::id(),
         ]);
 
         // Update account balance

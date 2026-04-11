@@ -39,6 +39,7 @@
                 <th>Account</th>
                 <th>Category</th>
                 <th class="pb-text-right">Amount</th>
+                <th>Created By</th>
                 <th class="pb-text-center">Actions</th>
               </tr>
             </thead>
@@ -72,6 +73,9 @@
                   <td style="padding: 8px;">
                     <input v-model="form.amount" type="number" step="0.01" class="pb-input pb-input-sm pb-text-right" required>
                   </td>
+                  <td>
+                    {{ getTransactionCreatedBy(tx) }}
+                  </td>
                   <td class="pb-text-center">
                     <div class="pb-action-group">
                       <button @click="saveEdit" class="pb-btn-icon pb-icon-success" title="Save" :disabled="submitting">
@@ -97,6 +101,7 @@
                   <td class="pb-text-right pb-font-bold" :class="tx.type === 'income' ? 'pb-text-success' : 'pb-text-danger'">
                     {{ tx.type === 'income' ? '+' : '-' }}{{ company?.currency }} {{ Number(tx.amount).toFixed(2) }}
                   </td>
+                  <td>{{ getTransactionCreatedBy(tx) }}</td>
                   <td class="pb-text-center">
                     <div class="pb-action-group">
                       <button @click="startEdit(tx)" class="pb-btn-action pb-icon-primary" title="Edit">
@@ -112,7 +117,7 @@
                 </template>
               </tr>
               <tr v-if="filteredTransactions.length === 0">
-                <td colspan="7" class="pb-empty-row">No transactions found for this period.</td>
+                <td colspan="8" class="pb-empty-row">No transactions found for this period.</td>
               </tr>
             </tbody>
           </table>
@@ -321,6 +326,14 @@ const formatDate = (dateString) => {
     month: 'short',
     day: 'numeric'
   });
+};
+
+const getTransactionCreatedBy = (tx) => {
+  if (tx?.invoice_id || tx?.bill_id) {
+    return 'System';
+  }
+
+  return tx?.creator?.name || 'Unknown';
 };
 </script>
 

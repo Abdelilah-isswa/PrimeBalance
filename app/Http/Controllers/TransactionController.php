@@ -24,7 +24,7 @@ class TransactionController extends BaseController
     {
         $company = $this->getCompanyForMember($companyId);
         $transactions = $company->transactions()
-            ->with(['account', 'category', 'invoice.client', 'bill.supplier'])
+            ->with(['account', 'category', 'invoice.client', 'bill.supplier', 'creator'])
             ->orderBy('date', 'desc')
             ->get();
         
@@ -45,7 +45,7 @@ class TransactionController extends BaseController
         
         $this->transactionService->updateTransaction($transaction, $request->validated());
         
-        return $this->sendResponse($transaction->fresh(['account', 'category', 'invoice.client', 'bill.supplier']));
+        return $this->sendResponse($transaction->fresh(['account', 'category', 'invoice.client', 'bill.supplier', 'creator']));
     }
 
     public function destroy($companyId, $transactionId)

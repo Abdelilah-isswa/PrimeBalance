@@ -81,7 +81,13 @@
                     </template>
                     <template v-else>
                       <button class="pb-action-btn" @click="startEdit(client)">Edit</button>
-                      <button class="pb-action-btn pb-action-btn--danger" @click="deleteClient(client)">Delete</button>
+                      <button
+                        v-if="Number(client.invoices_count ?? client.invoices?.length ?? 0) === 0"
+                        class="pb-action-btn pb-action-btn--danger"
+                        @click="deleteClient(client)"
+                      >
+                        Delete
+                      </button>
                     </template>
                   </div>
                 </td>
