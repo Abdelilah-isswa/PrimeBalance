@@ -120,6 +120,9 @@
         </div>
         
         <form @submit.prevent="createBill" class="pb-form">
+          <div v-if="formError" class="pb-alert pb-alert-error">{{ formError }}</div>
+          <div v-if="formSuccess" class="pb-alert pb-alert-success">{{ formSuccess }}</div>
+
           <div class="pb-form-grid">
             <div class="pb-form-group">
               <label class="pb-label">Supplier</label>
@@ -193,6 +196,8 @@ const supplierStore = useSupplierStore();
 const activeTab = ref('manage');
 const submitting = ref(false);
 const statusFilter = ref('');
+const formError = ref('');
+const formSuccess = ref('');
 const form = ref({
   supplier_id: '',
   description: '',
@@ -239,14 +244,18 @@ onMounted(async () => {
 });
 
 const createBill = async () => {
+  formError.value = '';
+  formSuccess.value = '';
+
   submitting.value = true;
   try {
     await billStore.createBill(id, form.value);
-    activeTab.value = 'manage';
+    formSuccess.value = 'Bill created successfully.';
     // Reset form
     form.value = { supplier_id: '', description: '', due_date: '', total_amount: '', status: 'unpaid' };
   } catch (error) {
     console.error('Failed to record bill:', error);
+    formError.value = error?.response?.data?.message || 'Failed to create bill. Please try again.';
   } finally {
     submitting.value = false;
   }
@@ -630,6 +639,26 @@ const createBill = async () => {
 .pb-btn-secondary:hover {
   background: #f8fafc;
   color: #1e293b;
+}
+
+.pb-alert {
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pb-alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.pb-alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 /* Utilities */

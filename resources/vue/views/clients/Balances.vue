@@ -15,6 +15,7 @@
             <span class="pb-tab-badge">{{ clients.length }}</span>
           </button>
           <button 
+            v-if="canManageClients"
             class="pb-tab-btn" 
             :class="{ 'pb-tab-btn--active': activeTab === 'create' }"
             @click="activeTab = 'create'"
@@ -37,11 +38,15 @@
                 <th>Email Address</th>
                 <th>Status</th>
                 <th class="pb-text-right">Balance</th>
+                <th v-if="canManageClients" class="pb-text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="client in clients" :key="client.id">
-                <td>
+                <td v-if="editId === client.id">
+                  <input v-model="editForm.name" type="text" class="pb-input pb-input-sm" required>
+                </td>
+                <td v-else>
                   <div class="pb-client-cell">
                     <div class="pb-client-avatar">{{ client.name?.charAt(0) }}</div>
                     <div>
@@ -50,7 +55,10 @@
                     </div>
                   </div>
                 </td>
-                <td>{{ client.email }}</td>
+                <td v-if="editId === client.id">
+                  <input v-model="editForm.email" type="email" class="pb-input pb-input-sm" required>
+                </td>
+                <td v-else>{{ client.email }}</td>
                 <td>
                   <span v-if="client.balance < 0" class="pb-status-pill pb-status--overdue">
                     Owes {{ company?.currency }}{{ Math.abs(client.balance).toFixed(2) }}
@@ -65,9 +73,21 @@
                 <td class="pb-text-right pb-font-bold" :style="{ color: client.balance < 0 ? '#b91c1c' : (client.balance > 0 ? '#059669' : '#475569') }">
                   {{ company?.currency }} {{ Number(client.balance).toFixed(2) }}
                 </td>
+                <td v-if="canManageClients" class="pb-text-center">
+                  <div class="pb-actions-cell">
+                    <template v-if="editId === client.id">
+                      <button class="pb-action-btn pb-action-btn--primary" :disabled="submitting" @click="saveEdit">Save</button>
+                      <button class="pb-action-btn" :disabled="submitting" @click="cancelEdit">Cancel</button>
+                    </template>
+                    <template v-else>
+                      <button class="pb-action-btn" @click="startEdit(client)">Edit</button>
+                      <button class="pb-action-btn pb-action-btn--danger" @click="deleteClient(client)">Delete</button>
+                    </template>
+                  </div>
+                </td>
               </tr>
               <tr v-if="clients.length === 0">
-                <td colspan="4" class="pb-empty-row">No clients found.</td>
+                <td :colspan="canManageClients ? 5 : 4" class="pb-empty-row">No clients found.</td>
               </tr>
             </tbody>
           </table>
@@ -76,7 +96,7 @@
     </div>
 
     <!-- Tab Content: Create -->
-    <div v-if="activeTab === 'create'" class="pb-tab-content anim-fade-in">
+    <div v-if="canManageClients && activeTab === 'create'" class="pb-tab-content anim-fade-in">
       <div class="pb-card pb-form-card">
         <div class="pb-card-header">
           <h2 class="pb-card-title">Add New Client</h2>
@@ -132,6 +152,8 @@ const clientStore = useClientStore();
 
 const activeTab = ref('manage');
 const submitting = ref(false);
+const editId = ref(null);
+const editForm = ref({ name: '', email: '', phone: '', address: '' });
 const form = ref({
   name: '',
   email: '',
@@ -141,15 +163,35 @@ const form = ref({
 
 const clients = computed(() => clientStore.clients);
 const company = computed(() => companyStore.currentCompany);
+const companyMembership = computed(() => {
+  return (companyStore.companies || []).find((c) => String(c.id) === String(id));
+});
+const currentCompanyRole = computed(() => {
+  const role =
+    companyMembership.value?.pivot?.role ||
+    company.value?.pivot?.role ||
+    company.value?.company?.pivot?.role ||
+    company.value?.userRole ||
+    'viewer';
+
+  return String(role).toLowerCase();
+});
+const canManageClients = computed(() => ['owner', 'admin', 'accountant'].includes(currentCompanyRole.value));
 
 onMounted(async () => {
   await Promise.all([
+    companyStore.fetchCompanies(),
     companyStore.fetchCompany(id),
     clientStore.fetchClients(id)
   ]);
+
+  if (!canManageClients.value) {
+    activeTab.value = 'manage';
+  }
 });
 
 const createClient = async () => {
+  if (!canManageClients.value) return;
   submitting.value = true;
   try {
     await clientStore.createClient(id, form.value);
@@ -160,6 +202,50 @@ const createClient = async () => {
     console.error('Failed to add client:', error);
   } finally {
     submitting.value = false;
+  }
+};
+
+const startEdit = (client) => {
+  if (!canManageClients.value) return;
+
+  editId.value = client.id;
+  editForm.value = {
+    name: client.name || '',
+    email: client.email || '',
+    phone: client.phone || '',
+    address: client.address || '',
+  };
+};
+
+const cancelEdit = () => {
+  editId.value = null;
+  editForm.value = { name: '', email: '', phone: '', address: '' };
+};
+
+const saveEdit = async () => {
+  if (!canManageClients.value || !editId.value) return;
+
+  submitting.value = true;
+  try {
+    await clientStore.updateClient(id, editId.value, editForm.value);
+    await clientStore.fetchClients(id);
+    cancelEdit();
+  } catch (error) {
+    alert(error?.response?.data?.message || 'Failed to update client');
+  } finally {
+    submitting.value = false;
+  }
+};
+
+const deleteClient = async (client) => {
+  if (!canManageClients.value) return;
+
+  if (!confirm(`Delete client ${client.name}?`)) return;
+
+  try {
+    await clientStore.deleteClient(id, client.id);
+  } catch (error) {
+    alert(error?.response?.data?.message || 'Failed to delete client');
   }
 };
 </script>
@@ -408,6 +494,12 @@ const createClient = async () => {
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
 
+.pb-input-sm {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
 .pb-form-actions {
   display: flex;
   justify-content: flex-end;
@@ -446,6 +538,32 @@ const createClient = async () => {
 .pb-btn-secondary:hover {
   background: #f8fafc;
   color: #1e293b;
+}
+
+.pb-actions-cell {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.pb-action-btn {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pb-action-btn--primary {
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+.pb-action-btn--danger {
+  border-color: #ef4444;
+  color: #ef4444;
 }
 
 /* Utilities */

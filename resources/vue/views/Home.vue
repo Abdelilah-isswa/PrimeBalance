@@ -167,15 +167,6 @@
                 <p class="pb-card-subtitle">Awaiting payment</p>
               </div>
             </div>
-            <router-link
-              v-if="currentCompany"
-              :to="`/companies/${currentCompany.id}/invoices`"
-              class="pb-link"
-            >
-              View all
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              </svg>
-            </router-link>
           </div>
 
           <div class="pb-card-body">
@@ -216,15 +207,6 @@
                 <p class="pb-card-subtitle">Your latest financial activity</p>
               </div>
             </div>
-            <router-link 
-              v-if="currentCompany" 
-              :to="`/companies/${currentCompany.id}/transactions`" 
-              class="pb-link"
-            >
-              View all
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              </svg>
-            </router-link>
           </div>
           
           <div class="pb-card-body">

@@ -47,8 +47,19 @@ export const useClientStore = defineStore('client', {
         const index = this.clients.findIndex(c => c.id === id);
         if (index !== -1) this.clients[index] = response.data.data;
         if (this.currentClient?.id === id) this.currentClient = response.data.data;
+        return response.data.data;
       } catch (error) {
         console.error('Update client error:', error);
+        throw error;
+      }
+    },
+    async deleteClient(companyId, id) {
+      try {
+        await axios.delete(`companies/${companyId}/clients/${id}`);
+        this.clients = this.clients.filter((c) => c.id !== id);
+      } catch (error) {
+        console.error('Delete client error:', error);
+        throw error;
       }
     },
   },

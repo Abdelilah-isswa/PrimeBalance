@@ -47,8 +47,19 @@ export const useSupplierStore = defineStore('supplier', {
         const index = this.suppliers.findIndex(s => s.id === id);
         if (index !== -1) this.suppliers[index] = response.data.data;
         if (this.currentSupplier?.id === id) this.currentSupplier = response.data.data;
+        return response.data.data;
       } catch (error) {
         console.error('Update supplier error:', error);
+        throw error;
+      }
+    },
+    async deleteSupplier(companyId, id) {
+      try {
+        await axios.delete(`companies/${companyId}/suppliers/${id}`);
+        this.suppliers = this.suppliers.filter((s) => s.id !== id);
+      } catch (error) {
+        console.error('Delete supplier error:', error);
+        throw error;
       }
     },
   },

@@ -378,7 +378,9 @@ const submit = async (action) => {
     formSuccess.value = action === 'send'
       ? 'Invoice created and email was requested for sending.'
       : 'Invoice saved as draft.';
-    activeTab.value = 'manage';
+    if (action !== 'send') {
+      activeTab.value = 'manage';
+    }
     // Reset form
     form.value = { client_id: '', status: 'draft', due_date: '', items: [] };
     showItemForm.value = false;
