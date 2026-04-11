@@ -30,6 +30,20 @@
     <!-- Tab Content: Manage -->
     <div v-if="activeTab === 'manage'" class="pb-tab-content anim-fade-in">
       <div class="pb-card">
+        <div class="pb-table-toolbar">
+          <div class="pb-filter">
+            <span class="pb-filter-label">Filter by status</span>
+            <select v-model="statusFilter" class="pb-input pb-input--sm">
+              <option value="">All</option>
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="partial">Partially Paid</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+        </div>
+
         <div class="pb-table-wrapper">
           <table class="pb-table">
             <thead>
@@ -45,7 +59,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="inv in invoices" :key="inv.id">
+              <tr v-for="inv in filteredInvoices" :key="inv.id">
                 <td>
                   <span class="pb-id-label">#{{ inv.id }}</span>
                 </td>
@@ -74,7 +88,7 @@
                   </router-link>
                 </td>
               </tr>
-              <tr v-if="invoices.length === 0">
+              <tr v-if="filteredInvoices.length === 0">
                 <td colspan="8" class="pb-empty-row">No invoices found.</td>
               </tr>
             </tbody>
@@ -226,6 +240,7 @@ const clientStore = useClientStore();
 const activeTab = ref('manage');
 const submitting = ref(false);
 const showItemForm = ref(false);
+const statusFilter = ref('');
 const formError = ref('');
 const formSuccess = ref('');
 const form = ref({
@@ -242,6 +257,10 @@ const newItem = ref({
 });
 
 const invoices = computed(() => invoiceStore.invoices);
+const filteredInvoices = computed(() => {
+  if (!statusFilter.value) return invoices.value;
+  return invoices.value.filter((inv) => String(inv.status || '').toLowerCase() === statusFilter.value);
+});
 const company = computed(() => companyStore.currentCompany);
 const clients = computed(() => clientStore.clients);
 const companyMembership = computed(() => {
@@ -484,6 +503,32 @@ const handleSubmit = async (e) => {
   overflow: hidden;
 }
 
+.pb-table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1rem 0;
+}
+
+.pb-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pb-filter-label {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pb-input--sm {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
 .pb-table-wrapper {
   overflow-x: auto;
 }
@@ -714,5 +759,19 @@ const handleSubmit = async (e) => {
 
 .anim-fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+@media (max-width: 640px) {
+  .pb-table-toolbar {
+    justify-content: flex-start;
+  }
+
+  .pb-filter {
+    width: 100%;
+  }
+
+  .pb-filter .pb-input--sm {
+    flex: 1;
+  }
 }
 </style>

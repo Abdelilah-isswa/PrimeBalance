@@ -32,7 +32,7 @@
       <div class="pb-card">
         <div class="pb-table-toolbar">
           <div class="pb-filter">
-            <label class="pb-label" style="margin:0;">Filter by status</label>
+            <span class="pb-filter-label">Filter by status</span>
             <select v-model="statusFilter" class="pb-input pb-input--sm">
               <option value="">All</option>
               <option value="unpaid">Unpaid</option>
@@ -294,10 +294,38 @@ const createBill = async () => {
   padding: 1rem 1rem 0;
 }
 
+.pb-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pb-filter-label {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .pb-input--sm {
   padding: 8px 10px;
   border-radius: 10px;
   font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .pb-table-toolbar {
+    justify-content: flex-start;
+  }
+
+  .pb-filter {
+    width: 100%;
+  }
+
+  .pb-filter .pb-input--sm {
+    flex: 1;
+  }
 }
 
 /* Tabs */
