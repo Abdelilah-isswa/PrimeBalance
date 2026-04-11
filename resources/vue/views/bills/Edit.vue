@@ -45,15 +45,6 @@
             <input v-model="form.total_amount" type="number" step="0.01" min="0" class="pb-input" :disabled="readOnly" required />
           </div>
 
-          <div class="pb-form-group">
-            <label class="pb-label">Status</label>
-            <select v-model="form.status" class="pb-input" :disabled="readOnly">
-              <option value="unpaid">Unpaid</option>
-              <option value="partial">Partially Paid</option>
-              <option value="paid">Fully Paid</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
         </div>
 
         <div class="pb-form-actions">
@@ -107,7 +98,6 @@ onMounted(async () => {
       description: bill.description || '',
       due_date: bill.due_date || '',
       total_amount: bill.total_amount,
-      status: bill.status,
       transactions_count: bill.transactions_count || 0,
     };
 
