@@ -271,14 +271,16 @@
 
     <!-- CTA -->
     <section class="pb-cta">
-      <h2>Ready to get started?</h2>
-      <p>Create your free account and start managing your finances today.</p>
-      <router-link v-if="authStore.token" to="/dashboard">
-        <button class="btn-hero-primary">Go to Dashboard</button>
-      </router-link>
-      <router-link v-else to="/register">
-        <button class="btn-hero-primary">Create free account</button>
-      </router-link>
+      <div class="pb-cta-content">
+        <h2>Ready to get started?</h2>
+        <p>Create your free account and start managing your finances today.</p>
+        <router-link v-if="authStore.token" to="/dashboard">
+          <button class="btn-hero-primary">Go to Dashboard</button>
+        </router-link>
+        <router-link v-else to="/register">
+          <button class="btn-hero-primary">Create free account</button>
+        </router-link>
+      </div>
     </section>
 
     <!-- Footer with Links and Socials -->
@@ -1119,23 +1121,39 @@ onBeforeUnmount(() => {
 
 /* ── CTA ──────────────────────────────────────────────────── */
 .pb-cta {
-  padding: 5rem 2.5rem;
-  text-align: center;
-  background: #ffffff;
+  padding: 0 2.5rem;
+  text-align: left;
+  min-height: 460px;
+  display: flex;
+  align-items: center;
+  background:
+    linear-gradient(120deg, rgba(15, 23, 42, 0.62), rgba(30, 41, 59, 0.54)),
+    url('/images/imagepc.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin: 0;
 }
 
 .pb-cta h2 {
   font-size: 2.6rem;
   font-weight: 700;
-  color: #0f0e2e;
+  color: #ffffff;
   margin-bottom: 0.75rem;
   letter-spacing: -0.5px;
 }
 
 .pb-cta p {
   font-size: 17px;
-  color: #64748b;
+  color: rgba(248, 250, 252, 0.92);
   margin-bottom: 2rem;
+}
+
+.pb-cta-content {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
 }
 
 /* ── Footer ───────────────────────────────────────────────── */
@@ -1282,6 +1300,16 @@ onBeforeUnmount(() => {
 
   .pb-pricing-grid {
     grid-template-columns: 1fr;
+  }
+
+  .pb-cta {
+    margin: 0;
+    padding: 0 2.5rem;
+    min-height: 390px;
+  }
+
+  .pb-cta-content {
+    padding: 0;
   }
   
   .pb-footer-content {
