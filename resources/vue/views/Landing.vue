@@ -808,28 +808,72 @@ onBeforeUnmount(() => {
 }
 
 .pb-feature-card {
-  background: #ffffff;
+  position: relative;
+  background-size: cover;
+  background-position: center;
   border-radius: 16px;
-  border: 0.5px solid #e2e8f0;
+  border: 0.5px solid rgba(255,255,255,0.06);
   padding: 1.5rem;
   transition: box-shadow 0.2s, transform 0.12s, border-color 0.2s;
+  overflow: hidden;
 }
 
 .pb-feature-card:hover {
-  box-shadow: 0 8px 24px rgba(79,70,229,0.10);
-  transform: translateY(-2px);
-  border-color: rgba(79,70,229,0.35);
+  box-shadow: 0 18px 44px rgba(15,23,42,0.18);
+  transform: translateY(-4px);
+  border-color: rgba(255,255,255,0.08);
 }
+
+.pb-feature-card::before {
+  /* background layer (image only) */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.pb-feature-card::after {
+  /* dark overlay above the image to improve contrast (does not affect icons/text) */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(2,6,23,0.5);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Use distinct nature images for each feature card */
+.pb-features-grid .pb-feature-card:nth-child(1)::before { background-image: url('/images/img1.jpg'); }
+.pb-features-grid .pb-feature-card:nth-child(2)::before { background-image: url('/images/img2.jpg'); }
+.pb-features-grid .pb-feature-card:nth-child(3)::before { background-image: url('/images/img3.jpg'); }
+.pb-features-grid .pb-feature-card:nth-child(4)::before { background-image: url('/images/img4.jpg'); }
+.pb-features-grid .pb-feature-card:nth-child(5)::before { background-image: url('/images/img5.jpg'); }
+.pb-features-grid .pb-feature-card:nth-child(6)::before { background-image: url('/images/img6.jpg'); }
 
 .pb-feature-icon {
   width: 42px;
   height: 42px;
   border-radius: 10px;
-  background: #f8fafc;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
+  position: relative;
+  z-index: 4;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.12);
+}
+
+.pb-feature-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #0f172a;
+  stroke: currentColor !important;
+  fill: none;
 }
 
 /* ── Reviews ─────────────────────────────────────────────── */
@@ -933,30 +977,30 @@ onBeforeUnmount(() => {
 .pb-feature-card h3 {
   font-size: 17px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: #ffffff;
   margin-bottom: 0.4rem;
+  position: relative;
+  z-index: 4;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
 
 .pb-feature-card p {
   font-size: 15px;
-  color: #64748b;
+  color: rgba(255,255,255,0.98);
   line-height: 1.6;
-}
-
-/* Image Banner */
-.pb-image-banner {
-  padding: 5rem 2.5rem;
-  background: #ffffff;
+  position: relative;
+  z-index: 4;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.55);
 }
 .pb-banner-inner {
   max-width: 1400px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
-  align-items: center;
+  align-items: stretch;
   gap: 3rem;
   background: white;
-  padding: 3rem;
+  padding: 0;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   border: 0.5px solid #e2e8f0;
@@ -973,11 +1017,16 @@ onBeforeUnmount(() => {
   line-height: 1.6;
 }
 
+.pb-banner-text {
+  padding: 3rem;
+}
+
 .pb-banner-visual-inner {
-  border-radius: 18px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 18px 44px rgba(15,14,46,0.12);
   background: #f8fafc;
+  height: auto;
 }
 
 .pb-banner-img {
@@ -1128,7 +1177,7 @@ onBeforeUnmount(() => {
 .pb-cta {
   padding: 0 2.5rem;
   text-align: left;
-  min-height: 460px;
+  min-height: 560px;
   display: flex;
   align-items: center;
   background:
@@ -1323,7 +1372,7 @@ onBeforeUnmount(() => {
   .pb-cta {
     margin: 0;
     padding: 0 2.5rem;
-    min-height: 390px;
+    min-height: 480px;
   }
 
   .pb-cta-content {
