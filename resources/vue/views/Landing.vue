@@ -74,14 +74,15 @@
 
     <!-- Trusted By -->
     <section class="pb-trusted-by">
-      <p class="pb-trusted-label">TRUSTED BY INNOVATIVE COMPANIES WORLDWIDE</p>
-      <div class="pb-trusted-logos">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" class="pb-trusted-logo" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Shopify_logo_2018.svg" alt="Shopify" class="pb-trusted-logo" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Slack_Technologies_Logo.svg" alt="Slack" class="pb-trusted-logo" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg" alt="Figma" class="pb-trusted-logo" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS" class="pb-trusted-logo" />
-       
+      <div class="pb-trusted-by-inner">
+        <p class="pb-trusted-label">TRUSTED BY INNOVATIVE COMPANIES WORLDWIDE</p>
+        <div class="pb-trusted-logos">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" class="pb-trusted-logo" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Shopify_logo_2018.svg" alt="Shopify" class="pb-trusted-logo" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Slack_Technologies_Logo.svg" alt="Slack" class="pb-trusted-logo" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg" alt="Figma" class="pb-trusted-logo" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS" class="pb-trusted-logo" />
+        </div>
       </div>
     </section>
 
@@ -717,32 +718,36 @@ onBeforeUnmount(() => {
   background: #ffffff;
   margin-top: 5rem;
 }
+
+.pb-trusted-by-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 .pb-trusted-label {
   font-size: 13px;
   font-weight: 700;
   color: #94a3b8;
   margin-bottom: 2rem;
   letter-spacing: 1px;
+  text-align: center;
+  width: 100%;
 }
 .pb-trusted-logos {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  flex-wrap: wrap;
-  gap: 3.5rem;
+  gap: 1.5rem;
 }
 .pb-trusted-logo {
   height: 32px;
   max-width: 140px;
+  margin: 0 auto;
   object-fit: contain;
-  filter: grayscale(100%) opacity(0.45);
+  filter: none;
   transition: filter 0.25s, opacity 0.25s;
-}
-.pb-trusted-logo:hover {
-  filter: grayscale(0%) opacity(1);
-}
-.pb-trusted-logo:hover {
-  filter: grayscale(0%) opacity(1);
 }
 
 /* ── Features ─────────────────────────────────────────────── */
@@ -798,7 +803,7 @@ onBeforeUnmount(() => {
 
 .pb-features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -1300,6 +1305,19 @@ onBeforeUnmount(() => {
 
   .pb-pricing-grid {
     grid-template-columns: 1fr;
+  }
+
+  .pb-trusted-by-inner {
+    align-items: center;
+  }
+
+  .pb-trusted-label {
+    text-align: center;
+  }
+
+  .pb-trusted-logos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
   }
 
   .pb-cta {
