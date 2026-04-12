@@ -1022,7 +1022,7 @@ onBeforeUnmount(() => {
 }
 
 .pb-banner-visual-inner {
-  border-radius: 0;
+  border-radius: 0 20px 20px 0;
   overflow: hidden;
   box-shadow: 0 18px 44px rgba(15,14,46,0.12);
   background: #f8fafc;
@@ -1031,11 +1031,16 @@ onBeforeUnmount(() => {
 
 .pb-banner-img {
   width: 100%;
-  border-radius: 0;
+  border-radius: 0 20px 20px 0;
   box-shadow: none;
   display: block;
   height: 320px;
   object-fit: cover;
+}
+
+/* add spacing below the image banner so the next section breathes */
+.pb-image-banner {
+  margin-bottom: 2.5rem;
 }
 
 /* Pricing */

@@ -5,8 +5,8 @@
       <div class="pb-nav-inner">
         <router-link to="/" class="pb-logo">
           <div class="pb-logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="14" height="14">
-              <path d="M3 12h2l2-5 3 8 2-5 2 5 2-5 2 5h2" stroke="white" fill="none"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="18" height="18">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
             </svg>
           </div>
           <span>PrimeBalance</span>
@@ -157,18 +157,18 @@ const authStore = useAuthStore();
 .pb-logo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 16px;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
   color: #1a1a2e;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .pb-logo-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background: #4f46e5;
   display: flex;
   align-items: center;
