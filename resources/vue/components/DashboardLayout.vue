@@ -851,4 +851,18 @@ const navLinks = computed(() => {
     display: none;
   }
 }
+
+/* Hide greeting title (name) at <=670px as requested */
+@media (max-width: 670px) {
+  .pb-greeting-title {
+    display: none;
+  }
+}
+
+/* Also hide the greeting subtitle at <=670px */
+@media (max-width: 670px) {
+  .pb-greeting-subtitle {
+    display: none;
+  }
+}
 </style>
