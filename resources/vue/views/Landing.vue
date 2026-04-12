@@ -752,7 +752,7 @@ onBeforeUnmount(() => {
 }
 
 .pb-features-inner {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -834,7 +834,7 @@ onBeforeUnmount(() => {
 }
 
 .pb-reviews-inner {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -944,7 +944,7 @@ onBeforeUnmount(() => {
   background: #ffffff;
 }
 .pb-banner-inner {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
@@ -994,7 +994,7 @@ onBeforeUnmount(() => {
 }
 
 .pb-pricing-inner {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -1164,7 +1164,7 @@ onBeforeUnmount(() => {
     #0f172a;
 }
 .pb-footer-content {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto 3rem;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
@@ -1225,7 +1225,7 @@ onBeforeUnmount(() => {
   color: #94a3b8;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(148, 163, 184, 0.35);
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
