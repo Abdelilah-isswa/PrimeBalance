@@ -844,4 +844,11 @@ const navLinks = computed(() => {
     transform: translateX(0);
   }
 }
+
+/* Hide welcome text (greeting) on very small screens (≤639px) to match sidebar collapse */
+@media (max-width: 639px) {
+  .pb-welcome-text {
+    display: none;
+  }
+}
 </style>

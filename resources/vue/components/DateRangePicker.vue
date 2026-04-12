@@ -179,6 +179,23 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
   min-width: 120px;
 }
 
+/* At narrower widths, hide the textual range and caret, leaving only the calendar icon */
+@media (max-width: 920px) {
+  .pb-datepicker-trigger {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .pb-datepicker-trigger span {
+    display: none;
+    min-width: 0;
+  }
+
+  .pb-datepicker-trigger > svg:last-child {
+    display: none;
+  }
+}
+
 .pb-datepicker-dropdown {
   position: absolute;
   top: calc(100% + 8px);
