@@ -14,7 +14,62 @@
 
 # Backend Architecture Overview
 
-This project is a modern finance management backend built with Laravel. It provides a robust API for managing companies, users, invoices, bills, transactions, and more. Below is a detailed breakdown of the backend structure and its main components:
+
+## A Senior's Walkthrough: How This Backend Works
+
+Welcome! If you're new to this codebase, let me walk you through how everything fits together, why it's structured this way, and how the data flows from the user to the database and back.
+
+### The Big Picture
+
+This backend is built with Laravel, a PHP framework that helps us organize code, handle requests, and talk to the database efficiently. The goal is to let businesses manage their finances—companies, users, invoices, bills, transactions, and more—using a clean, secure API.
+
+### How a Request Flows
+
+1. **A user (or frontend app) makes an HTTP request** to our API (for example, to create an invoice).
+2. **Routes** (in `routes/api.php`) decide which controller should handle the request. Think of routes as traffic cops, sending each request to the right place.
+3. **Controllers** (in `app/Http/Controllers/`) receive the request. They don't do heavy lifting themselves—instead, they validate the data (using Form Requests), call the right Service for business logic, and return a response.
+4. **Form Requests** (in `app/Http/Requests/`) make sure the data is clean and valid before we do anything with it. This keeps our app safe and predictable.
+5. **Services** (in `app/Services/`) contain the real business logic. For example, creating an invoice, updating balances, sending emails, etc. This keeps controllers simple and our logic reusable.
+6. **Models** (in `app/Models/`) represent our database tables. They let us fetch, create, and update records using PHP objects instead of raw SQL.
+7. **Database**: All data is stored in a relational database (like MySQL or PostgreSQL). Migrations define the structure, and Eloquent models handle the data.
+8. **Response**: The controller sends a JSON response back to the user or frontend app.
+
+### Why This Structure?
+
+- **Separation of concerns**: Each part of the code has a clear job. This makes it easier to test, debug, and extend.
+- **Security**: Validation and authentication (using Sanctum) are built-in at every step.
+- **Scalability**: By keeping business logic in services, we can add features or change how things work without breaking everything else.
+
+### Example: Creating an Invoice
+
+1. The frontend sends a POST request to `/api/v1/companies/{companyId}/invoices` with invoice data.
+2. The route sends this to `InvoiceController@store`.
+3. The controller uses `StoreInvoiceRequest` to validate the data.
+4. If valid, it calls `InvoiceService` to handle the creation logic (e.g., saving the invoice, updating balances, maybe sending an email).
+5. The service uses the `Invoice` model to save data to the database.
+6. A response is sent back—success or error.
+
+### Multi-Tenancy & Roles
+
+All business data is scoped to companies. Users can belong to multiple companies, each with their own role (admin, accountant, etc.). This is managed through pivot tables and role checks in the code.
+
+### Invitations & Onboarding
+
+When you invite a teammate, we generate a token and send an email (using Laravel's mail system). The invitee clicks the link, accepts, and joins the company. This flow is handled by the `InvitationController` and related services.
+
+### Payments, Bills, and Transactions
+
+Invoices and bills can be paid or received. When this happens, we update balances and log transactions. This ensures the financial data is always up to date and auditable.
+
+### Soft Deletes & Data Safety
+
+Most entities use soft deletes, so data isn't lost immediately—it's just hidden until permanently deleted. This helps prevent accidental data loss.
+
+### Summary
+
+This structure lets us build a secure, maintainable, and scalable finance backend. If you want to add a feature, start by thinking: What model does it affect? What business logic is needed? Should it be a new service or part of an existing one? Then wire up the route, controller, request, and service.
+
+If you have questions, check the code in each directory or ask a teammate—no question is too basic!
 
 ## Main Directories & Their Roles
 

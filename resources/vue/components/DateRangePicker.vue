@@ -41,10 +41,7 @@
         </div>
       </div>
 
-      <div class="pb-datepicker-footer">
-        <button class="pb-clear-btn" @click="clear">Clear</button>
-        <button class="pb-apply-btn" @click="isOpen = false">Apply</button>
-      </div>
+      <!-- Removed extra buttons from beside the date picker -->
     </div>
   </div>
 </template>

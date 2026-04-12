@@ -1,7 +1,7 @@
 <template>
   <div class="pb-dashboard-layout">
     <!-- Sidebar -->
-    <aside class="pb-sidebar">
+    <aside :class="['pb-sidebar', { 'pb-sidebar--open': isMobileMenuOpen }]">
       <div class="pb-sidebar-header">
         <router-link :to="homeLink" class="pb-logo">
           <div class="pb-logo-icon">
@@ -106,9 +106,25 @@
             <p class="pb-greeting-subtitle">Welcome back. Here's what's happening with your business.</p>
           </div>
         </div>
-        <div class="pb-header-actions" v-if="showDateFilter">
-           <DateRangePicker />
+        <div class="pb-header-actions">
+          <DateRangePicker v-if="showDateFilter" />
+
+          <!-- Simple hamburger only -->
+          <button
+            class="pb-hamburger"
+            type="button"
+            aria-label="Toggle menu"
+            @click="toggleMobileMenu"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="7" x2="20" y2="7" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="17" x2="20" y2="17" />
+            </svg>
+          </button>
         </div>
+        <!-- backdrop for mobile drawer -->
+        <div v-if="isMobileMenuOpen" class="pb-drawer-backdrop" @click="closeMobileMenu"></div>
       </header>
       <div class="pb-content-wrapper">
         <router-view />
@@ -118,7 +134,7 @@
 </template>
 
 <script setup>
-import { computed, watch, ref, onMounted } from 'vue'
+import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import { useCompanyStore } from '../stores/company.js'
@@ -285,6 +301,34 @@ const copySupportEmail = async () => {
 const homeLink = computed(() => {
   return '/'
 })
+
+// Mobile drawer state
+const isMobileMenuOpen = ref(false)
+
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
+
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false
+}
+
+const onKeydown = (e) => {
+  if (e.key === 'Escape' || e.key === 'Esc') {
+    closeMobileMenu()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown)
+})
+
+// close when route changes
+watch(() => route.path, () => { isMobileMenuOpen.value = false })
 
 const navLinks = computed(() => {
   const id = currentCompanyId.value
@@ -843,6 +887,31 @@ const navLinks = computed(() => {
   .pb-sidebar.pb-sidebar--open {
     transform: translateX(0);
   }
+}
+
+/* style for inline hamburger placed next to month picker */
+.pb-hamburger-inline { display: none; }
+
+/* Make the hamburger visually match the DateRangePicker trigger */
+.pb-hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #1e293b;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: all 0.15s;
+}
+.pb-hamburger svg { stroke: #1e293b; }
+.pb-hamburger:hover { background: #f8fafc; border-color: #4f46e5; }
+
+@media (min-width: 641px) {
+  /* keep hamburger hidden on larger screens if desired; shown per earlier rules */
 }
 
 /* Hide welcome text (greeting) on very small screens (≤639px) to match sidebar collapse */
