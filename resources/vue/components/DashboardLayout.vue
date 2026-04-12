@@ -948,4 +948,15 @@ const navLinks = computed(() => {
     display: none;
   }
 }
+
+/* Slightly reduce greeting font sizes on medium-small screens (<=770px) */
+@media (max-width: 770px) {
+  .pb-greeting-title {
+    font-size: 20px;
+  }
+
+  .pb-greeting-subtitle {
+    font-size: 13px;
+  }
+}
 </style>
