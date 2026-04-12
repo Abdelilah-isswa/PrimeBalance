@@ -889,29 +889,43 @@ const navLinks = computed(() => {
   }
 }
 
+/* Drawer backdrop: fixed full-viewport layer so inserting the backdrop
+   does not affect header layout or push the hamburger button */
+.pb-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  z-index: 90;
+  transition: opacity 0.15s ease;
+}
+
 /* style for inline hamburger placed next to month picker */
 .pb-hamburger-inline { display: none; }
 
-/* Make the hamburger visually match the DateRangePicker trigger */
+/* Make the hamburger visually match the DateRangePicker trigger
+   Hidden by default and only shown at screen widths <= 640px */
 .pb-hamburger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  color: #1e293b;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  transition: all 0.15s;
+  display: none;
 }
-.pb-hamburger svg { stroke: #1e293b; }
-.pb-hamburger:hover { background: #f8fafc; border-color: #4f46e5; }
 
-@media (min-width: 641px) {
-  /* keep hamburger hidden on larger screens if desired; shown per earlier rules */
+@media (max-width: 640px) {
+  .pb-hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: #1e293b;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.15s;
+  }
+
+  .pb-hamburger svg { stroke: #1e293b; }
+  .pb-hamburger:hover { background: #f8fafc; border-color: #4f46e5; }
 }
 
 /* Hide welcome text (greeting) on very small screens (≤639px) to match sidebar collapse */
