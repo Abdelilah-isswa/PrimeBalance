@@ -5,16 +5,36 @@ namespace App\Http\Traits;
 use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 
-use Illuminate\Foundation\Http\FormRequest;
-
 trait HasCompanyAuthorization
 {
+    /**
+     * Alias used in older docs/controllers.
+     */
+    protected function getAuthorizedCompany(int $companyId): Company
+    {
+        return $this->getCompanyForMember($companyId);
+    }
+
     /**
      * Get company and ensure user has access to it (any member)
      */
     protected function getCompanyForMember(int $companyId): Company
     {
         return Auth::user()->companies()->findOrFail($companyId);
+    }
+
+    /**
+     * Check if user has one of the given roles in the company.
+     */
+    protected function isCompanyRole(int $companyId, array|string $roles): bool
+    {
+        $company = Auth::user()->companies()->find($companyId);
+        if (!$company) {
+            return false;
+        }
+
+        $roles = is_array($roles) ? $roles : [$roles];
+        return in_array($company->pivot->role, $roles, true);
     }
 
     /**
@@ -36,13 +56,9 @@ trait HasCompanyAuthorization
      */
     protected function isCompanyOwner(int $companyId): bool
     {
-        $company = Auth::user()->companies()->find($companyId);
-        return $company && $company->pivot->role === 'owner';
+        return $this->isCompanyRole($companyId, 'owner');
     }
 
-    /**
-     * Get company and ensure user has specific role(s)
-     */
     /**
      * Get company and ensure user has specific role(s)
      */

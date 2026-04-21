@@ -6,11 +6,11 @@ use App\Services\CategoryService;
 use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class CategoryController extends Controller
+class CategoryController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -26,14 +26,14 @@ class CategoryController extends Controller
         $company = $this->getCompanyForMember($companyId);
         $categories = $company->categories;
         
-        return view('categories.index', compact('company', 'categories'));
+        return $this->sendResponse(compact('company', 'categories'));
     }
 
     public function store(StoreCategoryRequest $request, $companyId)
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
-        $this->categoryService->createCategory($data);
-        return redirect()->route('categories.index', $companyId);
+        $category = $this->categoryService->createCategory($data);
+        return $this->sendCreated($category);
     }
 
     public function update(UpdateCategoryRequest $request, $companyId, $categoryId)
@@ -41,15 +41,16 @@ class CategoryController extends Controller
         $company = $this->getCompanyForMember($companyId);
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->updateCategory($category, $request->validated());
-        return redirect()->route('categories.index', $companyId);
+        return $this->sendResponse($category->fresh());
     }
 
     public function destroy($companyId, $categoryId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'delete categories');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin'], 'delete categories');
         $category = $company->categories()->findOrFail($categoryId);
         $this->categoryService->deleteCategory($category);
 
-        return redirect()->route('categories.index', $companyId);
+        return $this->sendResponse([], 'Category deleted');
     }
 }
+

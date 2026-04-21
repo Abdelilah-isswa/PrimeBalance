@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Services\CompanyService;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class CompanyController extends Controller
+class CompanyController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -22,12 +23,14 @@ class CompanyController extends Controller
 
     public function index()
     {
-        $companies = Auth::user()->companies;
-        return view('companies.index', compact('companies'));
+        $companies = auth('sanctum')->user()->companies;
+        $companies->loadCount('transactions');
+        return $this->sendResponse($companies);
     }
 
-    public function show(Request $request, $id)
+    public function show(Request $request, $company)
     {
+        $id = $company;
         $company = $this->getCompanyForMember($id);
         
         $startDate = $request->get('start_date');
@@ -36,44 +39,60 @@ class CompanyController extends Controller
         $metrics = $this->companyService->getDashboardMetrics($company, $startDate, $endDate);
         $netProfit = $metrics['totalIncome'] - $metrics['totalExpense'];
         
-        return view('companies.show', array_merge(
+        $data = array_merge(
             compact('company', 'startDate', 'endDate', 'netProfit'),
             $metrics
-        ));
+        );
+
+        return $this->sendResponse($data);
     }
 
     public function create()
     {
-        return view('companies.create');
+        return $this->sendResponse([]);
     }
 
     public function store(StoreCompanyRequest $request)
     {
-        $this->companyService->createCompany($request->validated());
-        return redirect()->route('home')->with('success', 'Company created successfully');
+        $company = $this->companyService->createCompany($request->validated());
+        return $this->sendCreated($company, 'Company created successfully');
     }
 
     public function edit($id)
     {
         $company = $this->getCompanyForOwner($id, 'edit company');
         $userRole = $company->users()
-            ->where('user_id', auth()->id())
+            ->where('user_id', auth('sanctum')->id())
             ->first()
             ->pivot->role ?? 'viewer';
-        return view('companies.edit', compact('company', 'userRole'));
+        return $this->sendResponse(compact('company', 'userRole'));
     }
 
-    public function update(UpdateCompanyRequest $request, $id)
+    public function update(UpdateCompanyRequest $request, $company)
     {
-        $company = $this->getCompanyForMember($id);
+        $id = $company;
+        $company = $this->getCompanyForOwner($id, 'update company');
         $this->companyService->updateCompany($company, $request->validated());
-        return redirect()->route('companies.show', $id)->with('success', 'Company updated successfully');
+        return $this->sendResponse($company->fresh(), 'Company updated successfully');
+    }
+
+    public function destroy($company)
+    {
+        $id = $company;
+        $company = $this->getCompanyForOwner($id, 'delete company');
+        $company->delete();
+        return $this->sendResponse([], 'Company deleted');
     }
 
     public function deactivate($id)
     {
         $company = $this->getCompanyForOwner($id, 'deactivate company');
+
+        if ($company->transactions()->exists()) {
+            return $this->sendError('You cannot deactivate this company because it has transactions.', 422);
+        }
+
         $this->companyService->deactivateCompany($company);
-        return redirect()->route('companies.index')->with('success', 'Company deactivated successfully');
+        return $this->sendResponse([], 'Company deactivated successfully');
     }
 }

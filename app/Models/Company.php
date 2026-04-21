@@ -3,10 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
-    protected $fillable = ['name', 'address', 'currency', 'start_date'];
+    use SoftDeletes;
+
+    protected $table = 'company';
+
+    protected $fillable = ['name', 'address', 'currency'];
 
     public function users()
     {
@@ -46,5 +51,10 @@ class Company extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function invitations()
+    {
+        return $this->hasMany(Invitation::class);
     }
 }

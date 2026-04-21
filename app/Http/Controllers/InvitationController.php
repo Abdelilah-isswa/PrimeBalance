@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Services\CompanyService;
 use App\Models\Invitation;
 use App\Http\Requests\InviteUserRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
-use Illuminate\Support\Facades\Auth;
 
-class InvitationController extends Controller
+class InvitationController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -25,59 +25,114 @@ class InvitationController extends Controller
         $result = $this->companyService->inviteUser($company, $request->email, $request->role);
         
         if ($result['success']) {
-            return back()->with('success', $result['message']);
+            return $this->sendResponse($result);
         }
         
-        return back()->with('error', $result['message']);
+        return $this->sendError($result['message'], $result['code'] ?? 400);
+    }
+
+    public function index($companyId)
+    {
+        $company = $this->getCompanyForMember($companyId);
+        $invitations = $company->invitations()->where('status', 'pending')
+                               ->orWhere('status', 'expired') // Perhaps show all non-accepted
+                               ->orderBy('created_at', 'desc')->get();
+        // Just show all invitations for the company that are not accepted
+        $invitations = $company->invitations()->where('status', '!=', 'accepted')->orderBy('created_at', 'desc')->get();
+        return $this->sendResponse(compact('company', 'invitations'));
+    }
+
+    public function destroy($companyId, $invitationId)
+    {
+        $company = $this->getCompanyForOwner($companyId, 'manage invitations');
+        $invitation = $company->invitations()->findOrFail($invitationId);
+        $invitation->delete();
+        return $this->sendResponse([], 'Invitation deleted');
     }
 
     public function show($token)
     {
         $invitation = Invitation::where('token', $token)
-            ->where('status', 'pending')
-            ->firstOrFail();
+            ->with('company')
+            ->first();
+
+        if (!$invitation) {
+            return $this->sendError('Invitation not found');
+        }
+
+        if ($invitation->status === 'accepted') {
+            return $this->sendError('This invitation has already been accepted');
+        }
+
+        if ($invitation->status === 'expired') {
+            return $this->sendError('Invitation expired');
+        }
+
+        if ($invitation->status !== 'pending') {
+            return $this->sendError('Invitation invalid or already processed');
+        }
 
         if ($invitation->isExpired()) {
             $invitation->update(['status' => 'expired']);
-            return view('invitations.expired');
+            return $this->sendError('Invitation expired');
         }
 
-        return view('invitations.accept', compact('invitation'));
+        return $this->sendResponse($invitation);
     }
 
     public function accept($token)
     {
-        $invitation = Invitation::where('token', $token)
-            ->where('status', 'pending')
-            ->firstOrFail();
+        $invitation = Invitation::where('token', $token)->first();
 
-        if ($invitation->isExpired()) {
-            $invitation->update(['status' => 'expired']);
-            return redirect()->route('login')->with('error', 'This invitation has expired');
+        if (!$invitation) {
+            return $this->sendError('Invitation not found');
         }
 
-        if (!Auth::check()) {
-            session(['invitation_token' => $token]);
-            return redirect()->route('login')->with('message', 'Please login or register to accept the invitation');
+        if ($invitation->status === 'accepted') {
+            return $this->sendError('This invitation has already been accepted');
+        }
+
+        if ($invitation->status === 'expired' || $invitation->isExpired()) {
+            $invitation->update(['status' => 'expired']);
+            return $this->sendError('This invitation has expired');
+        }
+
+        if ($invitation->status !== 'pending') {
+            return $this->sendError('Invitation invalid or already processed');
         }
 
         $result = $this->companyService->acceptInvitation($invitation);
         
         if ($result['success']) {
-            return redirect()->route('companies.show', $invitation->company_id)->with('success', $result['message']);
+            return $this->sendResponse($result);
         }
         
-        return redirect()->route('home')->with('error', $result['message']);
+        return $this->sendError($result['message']);
     }
 
     public function decline($token)
     {
-        $invitation = Invitation::where('token', $token)
-            ->where('status', 'pending')
-            ->firstOrFail();
+        $invitation = Invitation::where('token', $token)->first();
 
-        $invitation->update(['status' => 'expired']);
+        if (!$invitation) {
+            return $this->sendError('Invitation not found');
+        }
 
-        return redirect()->route('login')->with('message', 'Invitation declined');
+        if ($invitation->status === 'accepted') {
+            return $this->sendError('This invitation has already been accepted');
+        }
+
+        if ($invitation->status === 'expired' || $invitation->isExpired()) {
+            $invitation->update(['status' => 'expired']);
+            return $this->sendError('This invitation has expired');
+        }
+
+        if ($invitation->status !== 'pending') {
+            return $this->sendError('Invitation invalid or already processed');
+        }
+
+        $invitation->update(['status' => 'declined']);
+
+        return $this->sendResponse([], 'Invitation declined');
     }
 }

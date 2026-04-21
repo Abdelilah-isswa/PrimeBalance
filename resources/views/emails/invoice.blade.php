@@ -24,6 +24,7 @@
             <div class="invoice-details">
                 <p><strong>Invoice Number:</strong> #{{ $invoice->id }}</p>
                 <p><strong>Date:</strong> {{ $invoice->created_at->format('F d, Y') }}</p>
+                <p><strong>Due Date:</strong> {{ $invoice->due_date->format('F d, Y') }}</p>
                 <p><strong>Status:</strong> {{ ucfirst($invoice->status) }}</p>
                 <p><strong>Amount:</strong> {{ $company->currency }} {{ number_format($invoice->total_amount, 2) }}</p>
             </div>

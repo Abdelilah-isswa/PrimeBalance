@@ -3,56 +3,162 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\Account;
 use App\Models\Transaction;
 use App\Mail\InvoiceMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
 class InvoiceService
 {
     public function createInvoice(array $data): Invoice
     {
-        $invoice = Invoice::create([
-            'company_id' => $data['company_id'],
-            'client_id' => $data['client_id'],
-            'total_amount' => $data['total_amount'],
-            'status' => $data['status'],
-        ]);
+        return DB::transaction(function () use ($data) {
+            // Create invoice with initial total_amount as 0 if items exist
+            $totalAmount = isset($data['items']) && !empty($data['items']) ? 0 : ($data['total_amount'] ?? 0);
 
-        if (isset($data['send_email']) && $data['send_email']) {
-            Mail::to($invoice->client->email)->send(new InvoiceMail($invoice));
-        }
+            // Set status to 'sent' if sending email, otherwise use provided status
+            $status = (isset($data['send_email']) && $data['send_email']) ? 'sent' : ($data['status'] ?? 'draft');
 
-        return $invoice;
+            $invoice = Invoice::create([
+                'company_id' => $data['company_id'],
+                'client_id'  => $data['client_id'],
+                'total_amount' => $totalAmount,
+                'due_date' => $data['due_date'] ?? null,
+                'status'     => $status,
+                'created_by' => Auth::id(),
+            ]);
+
+            // Add items if provided
+            if (isset($data['items']) && is_array($data['items'])) {
+                $totalAmount = 0;
+                foreach ($data['items'] as $item) {
+                    $itemTotal = (float)$item['price'] * (int)$item['quantity'];
+                    InvoiceItem::create([
+                        'invoice_id' => $invoice->id,
+                        'description' => $item['description'],
+                        'price' => $item['price'],
+                        'quantity' => $item['quantity'],
+                        'total' => $itemTotal,
+                    ]);
+                    $totalAmount += $itemTotal;
+                }
+                $invoice->update(['total_amount' => $totalAmount]);
+            }
+
+            if (isset($data['send_email']) && $data['send_email']) {
+                Mail::to($invoice->client->email)->send(new InvoiceMail($invoice));
+            }
+
+            return $invoice;
+        });
     }
 
     public function updateInvoice(Invoice $invoice, array $data): bool
     {
-        return $invoice->update([
-            'total_amount' => $data['total_amount'],
-            'status' => $data['status'],
-        ]);
+        if ($invoice->transactions()->exists()) {
+            throw new RuntimeException('Invoices linked to transactions cannot be edited.');
+        }
+
+        return DB::transaction(function () use ($invoice, $data) {
+            // Determine if status should be 'sent' (when sending email)
+            $status = (isset($data['send_email']) && $data['send_email']) ? 'sent' : ($data['status'] ?? $invoice->status);
+            
+            // If items are provided, recalculate total from items
+            if (isset($data['items']) && is_array($data['items'])) {
+                // Delete existing items
+                $invoice->items()->delete();
+                
+                $totalAmount = 0;
+                foreach ($data['items'] as $item) {
+                    $itemTotal = (float)$item['price'] * (int)$item['quantity'];
+                    InvoiceItem::create([
+                        'invoice_id' => $invoice->id,
+                        'description' => $item['description'],
+                        'price' => $item['price'],
+                        'quantity' => $item['quantity'],
+                        'total' => $itemTotal,
+                    ]);
+                    $totalAmount += $itemTotal;
+                }
+                
+                $updated = $invoice->update([
+                    'total_amount' => $totalAmount,
+                    'due_date' => $data['due_date'] ?? $invoice->due_date,
+                    'status'       => $status,
+                ]);
+
+                // Send email if requested
+                if (isset($data['send_email']) && $data['send_email']) {
+                    Mail::to($invoice->client->email)->send(new InvoiceMail($invoice));
+                }
+
+                return $updated;
+            }
+
+            // If no items, allow manual total_amount update
+            $updated = $invoice->update([
+                'total_amount' => $data['total_amount'] ?? $invoice->total_amount,
+                'due_date' => $data['due_date'] ?? $invoice->due_date,
+                'status'       => $status,
+            ]);
+
+            // Send email if requested
+            if (isset($data['send_email']) && $data['send_email']) {
+                Mail::to($invoice->client->email)->send(new InvoiceMail($invoice));
+            }
+
+            return $updated;
+        });
     }
 
-    public function receivePayment(Invoice $invoice, array $data): bool
+    /**
+     * Mark invoice as paid (full or partial).
+     * Creates an income transaction for the amount paid.
+     * If amount_paid < total_amount the status becomes 'partial'.
+     */
+    public function receivePayment(Invoice $invoice, array $data): array
     {
-        $account = Account::findOrFail($data['account_id']);
-        
+        $amountPaid   = (float) $data['amount_paid'];
+        $totalAmount  = (float) $invoice->total_amount;
+        $currentPaid  = (float) ($invoice->amount_paid ?? 0);
+        $newTotalPaid = $currentPaid + $amountPaid;
+        $account      = Account::findOrFail($data['account_id']);
+
+        // Determine new status
+        $newStatus = $newTotalPaid >= $totalAmount ? 'paid' : 'partial';
+
+        // Create income transaction
         Transaction::create([
-            'company_id' => $invoice->company_id,
-            'account_id' => $data['account_id'],
+            'company_id'  => $invoice->company_id,
+            'account_id'  => $data['account_id'],
             'category_id' => $data['category_id'] ?? null,
-            'type' => 'income',
-            'amount' => $invoice->total_amount,
-            'description' => 'Payment received for invoice #' . $invoice->id . ' - ' . $invoice->client->name,
-            'date' => $data['date'],
-            'invoice_id' => $invoice->id,
+            'type'        => 'income',
+            'amount'      => $amountPaid,
+            'description' => 'Payment received for Invoice #' . $invoice->id . ' (' . $invoice->client->name . ')',
+            'date'        => $data['date'],
+            'invoice_id'  => $invoice->id,
         ]);
 
-        $account->increment('balance', $invoice->total_amount);
-        $invoice->update(['status' => 'paid']);
+        // Update account balance
+        $account->increment('balance', $amountPaid);
 
-        return true;
+        // Update invoice status & track amount paid
+        $invoice->update([
+            'status'       => $newStatus,
+            'amount_paid'  => $newTotalPaid,
+        ]);
+
+        $remaining = max(0, $totalAmount - $newTotalPaid);
+
+        return [
+            'status'    => $newStatus,
+            'paid'      => $amountPaid,
+            'remaining' => $remaining,
+        ];
     }
 
     public function canDelete(Invoice $invoice): bool
@@ -63,7 +169,7 @@ class InvoiceService
     public function deleteInvoice(Invoice $invoice): bool
     {
         if (!$this->canDelete($invoice)) {
-            return false;
+            throw new RuntimeException('Invoices linked to transactions cannot be deleted.');
         }
 
         return $invoice->delete();

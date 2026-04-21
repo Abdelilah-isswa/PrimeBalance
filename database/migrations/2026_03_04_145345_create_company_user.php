@@ -22,8 +22,8 @@ return new class extends Migration
                   ->onDelete('cascade');
             $table->enum('role', [
                 'owner',
+                'admin',
                 'accountant',
-                'standard_user',
                 'viewer'
             ]);
             $table->timestamps();

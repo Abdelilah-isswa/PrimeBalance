@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class DocumentController extends Controller
+class DocumentController extends BaseController
 {
     use HasCompanyAuthorization;
     
     public function index(Request $request, $companyId)
     {
-        $company = $this->getAuthorizedCompany($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $type = $request->get('type', 'invoices');
         
         if ($type === 'bills') {
@@ -21,6 +21,7 @@ class DocumentController extends Controller
             $documents = $company->invoices()->with('client')->orderBy('created_at', 'desc')->get();
         }
         
-        return view('documents.index', compact('company', 'documents', 'type'));
+        return $this->sendResponse(compact('company', 'documents', 'type'));
     }
 }
+

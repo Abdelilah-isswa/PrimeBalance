@@ -8,7 +8,7 @@ class Transaction extends Model
 {
     protected $fillable = [
         'company_id', 'account_id', 'category_id', 'type', 
-        'amount', 'description', 'date', 'invoice_id', 'bill_id'
+        'amount', 'description', 'date', 'invoice_id', 'bill_id', 'created_by'
     ];
 
     protected $casts = [
@@ -39,5 +39,10 @@ class Transaction extends Model
     public function bill()
     {
         return $this->belongsTo(Bill::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

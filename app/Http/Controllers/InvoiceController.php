@@ -7,11 +7,11 @@ use App\Models\Invoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Http\Requests\ReceivePaymentRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class InvoiceController extends Controller
+class InvoiceController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -25,84 +25,93 @@ class InvoiceController extends Controller
     public function index($companyId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $invoices = $company->invoices()->with('client')->get();
+        $invoices = $company->invoices()->with('client', 'items', 'creator')->get();
         
-        return view('invoices.index', compact('company', 'invoices'));
+        return $this->sendResponse(compact('company', 'invoices'));
     }
 
     public function create($companyId, $clientId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'create invoices');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'create invoices');
         $client = $company->clients()->findOrFail($clientId);
 
-        return view('invoices.create', compact('company', 'client'));
+        return $this->sendResponse(compact('company', 'client'));
     }
 
-    public function store(StoreInvoiceRequest $request, $companyId, $clientId)
+    public function store(StoreInvoiceRequest $request, $companyId)
     {
+        $clientId = $request->input('client_id');
         $data = array_merge($request->validated(), [
             'company_id' => $companyId,
             'client_id' => $clientId,
         ]);
 
         $invoice = $this->invoiceService->createInvoice($data);
+        $invoice->load('client');
 
         $message = 'Invoice created' . ($request->has('send_email') && $request->send_email ? ' and sent to client' : '');
-        return redirect()->route('companies.show', $companyId)->with('success', $message);
+        return $this->sendCreated($invoice, $message);
     }
 
     public function showReceivePayment($companyId, $invoiceId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'receive payments');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'receive payments');
         $invoice = $company->invoices()->findOrFail($invoiceId);
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
 
-        return view('invoices.receive', compact('company', 'invoice', 'accounts', 'categories'));
+        return $this->sendResponse(compact('company', 'invoice', 'accounts', 'categories'));
     }
 
     public function receivePayment(ReceivePaymentRequest $request, $companyId, $invoiceId)
     {
         $company = $this->getCompanyForMember($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
-        $this->invoiceService->receivePayment($invoice, $request->validated());
-        return redirect()->route('invoices.index', $companyId)->with('success', 'Payment received successfully');
+        $result = $this->invoiceService->receivePayment($invoice, $request->validated());
+        return $this->sendResponse($result, 'Payment received successfully');
     }
 
     public function show($companyId, $invoiceId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
+        $invoice = $company->invoices()->with('client', 'items', 'creator')->withCount('transactions')->findOrFail($invoiceId);
         
-        return view('invoices.show', compact('company', 'invoice'));
+        return $this->sendResponse(compact('company', 'invoice'));
     }
 
     public function edit($companyId, $invoiceId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'edit invoices');
-        $invoice = $company->invoices()->with('client')->findOrFail($invoiceId);
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'edit invoices');
+        $invoice = $company->invoices()->with('client', 'items', 'creator')->withCount('transactions')->findOrFail($invoiceId);
         
-        return view('invoices.edit', compact('company', 'invoice'));
+        return $this->sendResponse(compact('company', 'invoice'));
     }
 
     public function update(UpdateInvoiceRequest $request, $companyId, $invoiceId)
     {
         $company = $this->getCompanyForMember($companyId);
         $invoice = $company->invoices()->findOrFail($invoiceId);
-        $this->invoiceService->updateInvoice($invoice, $request->validated());
-        return redirect()->route('invoices.show', [$companyId, $invoiceId])->with('success', 'Invoice updated successfully');
+        try {
+            $this->invoiceService->updateInvoice($invoice, $request->validated());
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
+        }
+
+        return $this->sendResponse($invoice->fresh(), 'Invoice updated successfully');
     }
 
     public function destroy($companyId, $invoiceId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'delete invoices');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete invoices');
         $invoice = $company->invoices()->findOrFail($invoiceId);
-        
-        if (!$this->invoiceService->deleteInvoice($invoice)) {
-            return back()->with('error', 'Cannot delete invoice with payments');
+
+        try {
+            $this->invoiceService->deleteInvoice($invoice);
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
         }
 
-        return redirect()->route('invoices.index', $companyId)->with('success', 'Invoice deleted successfully');
+        return $this->sendResponse([], 'Invoice deleted successfully');
     }
 
     public function downloadPdf($companyId, $invoiceId)
@@ -114,3 +123,4 @@ class InvoiceController extends Controller
         return $pdf->download('invoice-' . $invoice->id . '.pdf');
     }
 }
+

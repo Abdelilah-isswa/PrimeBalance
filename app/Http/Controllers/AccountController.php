@@ -7,10 +7,13 @@ use App\Models\Account;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Api\BaseController;
+use App\Http\Traits\HasCompanyAuthorization;
 
-class AccountController extends Controller
+class AccountController extends BaseController
 {
+    use HasCompanyAuthorization;
+
     protected $accountService;
 
     public function __construct(AccountService $accountService)
@@ -20,44 +23,45 @@ class AccountController extends Controller
 
     public function index($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $accounts = $company->accounts()->withCount('transactions')->get();
-        return view('accounts.index', compact('company', 'accounts'));
+        return $this->sendResponse(compact('company', 'accounts'));
     }
 
     public function create($companyId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
-        return view('accounts.create', compact('company'));
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin'], 'create accounts');
+        return $this->sendResponse(compact('company'));
     }
 
     public function store(StoreAccountRequest $request, $companyId)
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
-        $this->accountService->createAccount($data);
-        return redirect()->route('accounts.index', $companyId)->with('success', 'Account created');
+        $account = $this->accountService->createAccount($data);
+        return $this->sendCreated($account, 'Account created');
     }
 
     public function edit($companyId, $accountId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin'], 'edit accounts');
         $account = $company->accounts()->findOrFail($accountId);
-        return view('accounts.edit', compact('company', 'account'));
+        return $this->sendResponse(compact('company', 'account'));
     }
 
     public function update(UpdateAccountRequest $request, $companyId, $accountId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyForMember($companyId);
         $account = $company->accounts()->findOrFail($accountId);
         $this->accountService->updateAccount($account, $request->validated());
-        return redirect()->route('accounts.index', $companyId)->with('success', 'Account updated');
+        return $this->sendResponse($account->fresh(), 'Account updated');
     }
 
     public function destroy($companyId, $accountId)
     {
-        $company = Auth::user()->companies()->findOrFail($companyId);
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin'], 'delete accounts');
         $account = $company->accounts()->findOrFail($accountId);
         $result = $this->accountService->deleteOrArchiveAccount($account);
-        return redirect()->route('accounts.index', $companyId)->with('success', $result['message']);
+        return $this->sendResponse($result, $result['message']);
     }
 }
+

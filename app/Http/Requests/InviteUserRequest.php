@@ -11,14 +11,14 @@ class InviteUserRequest extends FormRequest
     
     public function authorize(): bool
     {
-        return $this->isCompanyOwner($this->route('id'));
+        return $this->isCompanyRole((int) $this->route('id'), ['owner', 'admin']);
     }
 
     public function rules(): array
     {
         return [
             'email' => 'required|email',
-            'role' => 'required|in:owner,accountant,standard_user,viewer',
+            'role' => 'required|in:admin,accountant,viewer',
         ];
     }
 }

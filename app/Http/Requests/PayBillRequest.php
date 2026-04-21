@@ -11,7 +11,7 @@ class PayBillRequest extends FormRequest
     
     public function authorize(): bool
     {
-        return $this->isCompanyOwner($this->route('companyId'));
+        return $this->isCompanyRole((int) $this->route('companyId'), ['owner', 'admin', 'accountant']);
     }
 
     public function rules(): array
@@ -20,6 +20,7 @@ class PayBillRequest extends FormRequest
             'account_id' => 'required|exists:accounts,id',
             'category_id' => 'nullable|exists:categories,id',
             'date' => 'required|date',
+            'amount' => 'required|numeric|min:0.01',
         ];
     }
 }

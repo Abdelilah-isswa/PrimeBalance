@@ -14,7 +14,7 @@
                     <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Name</th>
                     <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Address</th>
                     <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Currency</th>
-                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Start Date</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Created At</th>
                     <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #ddd;">Role</th>
                 </tr>
             </thead>
@@ -24,7 +24,7 @@
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $company->name }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $company->address }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $company->currency }}</td>
-                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $company->start_date }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ optional($company->created_at)->format('Y-m-d') }}</td>
                         <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ $company->pivot->role }}</td>
                     </tr>
                 @endforeach

@@ -45,7 +45,7 @@ class SupplierService
     {
         return $suppliers->map(function($supplier) {
             $totalBilled = $supplier->bills->sum('total_amount');
-            $totalPaid = $supplier->bills->where('status', 'paid')->sum('total_amount');
+            $totalPaid = $supplier->bills->sum('amount_paid');
             $supplier->balance = $totalPaid - $totalBilled;
             return $supplier;
         });

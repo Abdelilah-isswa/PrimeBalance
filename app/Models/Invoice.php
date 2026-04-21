@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    protected $fillable = ['company_id', 'client_id', 'status', 'total_amount'];
+    protected $fillable = ['company_id', 'client_id', 'status', 'total_amount', 'due_date', 'created_by', 'amount_paid'];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
+        'amount_paid' => 'decimal:2',
+        'due_date' => 'date',
     ];
 
     public function company()
@@ -20,5 +22,20 @@ class Invoice extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
     }
 }

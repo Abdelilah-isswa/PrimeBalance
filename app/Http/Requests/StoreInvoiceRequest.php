@@ -11,15 +11,32 @@ class StoreInvoiceRequest extends FormRequest
     
     public function authorize(): bool
     {
-        return $this->isCompanyOwner($this->route('companyId'));
+        return $this->isCompanyRole((int) $this->route('companyId'), ['owner', 'admin', 'accountant']);
     }
 
     public function rules(): array
     {
         return [
-            'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:draft,sent,paid,cancelled',
+            'total_amount' => 'nullable|numeric|min:0',
+            'status' => 'required|in:draft,sent,partial,paid,cancelled',
+            'due_date' => 'required|date|after:today',
             'send_email' => 'boolean',
+            'items' => 'nullable|array|min:1',
+            'items.*.description' => 'required|string|max:255',
+            'items.*.price' => 'required|numeric|min:0',
+            'items.*.quantity' => 'required|integer|min:1',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'items.min' => 'At least one item is required',
+            'items.*.description.required' => 'Item description is required',
+            'items.*.price.required' => 'Item price is required',
+            'items.*.quantity.required' => 'Item quantity is required',
+            'due_date.required' => 'Due date is required',
+            'due_date.after' => 'Due date must be in the future (after today)',
         ];
     }
 }

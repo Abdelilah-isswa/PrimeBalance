@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->string('email');
-            $table->enum('role', ['owner', 'accountant', 'standard_user', 'viewer']);
+            $table->enum('role', ['owner', 'admin', 'accountant', 'viewer']);
             $table->string('token')->unique();
             $table->enum('status', ['pending', 'accepted', 'expired'])->default('pending');
             $table->foreignId('invited_by')->constrained('users')->onDelete('cascade');

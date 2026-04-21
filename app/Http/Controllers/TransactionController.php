@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Services\TransactionService;
 use App\Http\Requests\StoreTransactionRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class TransactionController extends Controller
+class TransactionController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -23,26 +24,37 @@ class TransactionController extends Controller
     {
         $company = $this->getCompanyForMember($companyId);
         $transactions = $company->transactions()
-            ->with(['account', 'category', 'invoice.client', 'bill.supplier'])
+            ->with(['account', 'category', 'invoice.client', 'bill.supplier', 'creator'])
             ->orderBy('date', 'desc')
             ->get();
         
-        return view('transactions.index', compact('company', 'transactions'));
-    }
-
-    public function create($companyId)
-    {
-        $company = $this->getCompanyForOwner($companyId, 'create transactions');
-        $accounts = $company->accounts()->where('is_active', true)->get();
-        $categories = $company->categories;
-
-        return view('transactions.create', compact('company', 'accounts', 'categories'));
+        return $this->sendResponse(compact('company', 'transactions'));
     }
 
     public function store(StoreTransactionRequest $request, $companyId)
     {
         $data = array_merge($request->validated(), ['company_id' => $companyId]);
-        $this->transactionService->createTransaction($data);
-        return redirect()->route('transactions.index', $companyId)->with('success', 'Transaction created successfully');
+        $transaction = $this->transactionService->createTransaction($data);
+        return $this->sendCreated($transaction);
+    }
+    
+    public function update(StoreTransactionRequest $request, $companyId, $transactionId)
+    {
+        $company = $this->getCompanyForMember($companyId);
+        $transaction = $company->transactions()->findOrFail($transactionId);
+        
+        $this->transactionService->updateTransaction($transaction, $request->validated());
+        
+        return $this->sendResponse($transaction->fresh(['account', 'category', 'invoice.client', 'bill.supplier', 'creator']));
+    }
+
+    public function destroy($companyId, $transactionId)
+    {
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete transactions');
+        $transaction = $company->transactions()->findOrFail($transactionId);
+
+        $this->transactionService->deleteTransaction($transaction);
+
+        return $this->sendResponse([], 'Transaction deleted');
     }
 }

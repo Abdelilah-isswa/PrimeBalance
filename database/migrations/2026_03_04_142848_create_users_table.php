@@ -11,20 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['admin', 'user'])->default('user')->after('password');
-            $table->enum('status', ['active', 'inactive', 'suspended'])->default('active')->after('role');
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->enum('role', ['admin', 'user'])->default('user');
+            $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
+            $table->rememberToken();
             $table->softDeletes();
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'status', 'deleted_at']);
-        });
+        Schema::dropIfExists('users');
     }
 };

@@ -3,17 +3,17 @@
 @section('title', $company->name)
 
 @section('content')
-    <h1>{{ $company->name }} @if($company->end_date)<span style="color: red; font-size: 1rem;">(Deactivated)</span>@endif</h1>
+    <h1>{{ $company->name }} @if($company->deleted_at)<span style="color: red; font-size: 1rem;">(Deactivated)</span>@endif</h1>
     
     <div style="margin: 2rem 0;">
         <p><strong>Address:</strong> {{ $company->address }}</p>
         <p><strong>Currency:</strong> {{ $company->currency }}</p>
-        <p><strong>Start Date:</strong> {{ $company->start_date }}</p>
-        @if($company->end_date)
-            <p><strong>End Date:</strong> {{ $company->end_date }}</p>
+        <p><strong>Created At:</strong> {{ optional($company->created_at)->format('Y-m-d') }}</p>
+        @if($company->deleted_at)
+            <p><strong>Deleted At:</strong> {{ optional($company->deleted_at)->format('Y-m-d') }}</p>
         @endif
         <p><strong>Your Role:</strong> {{ $company->pivot->role }}</p>
-        @if(!$company->end_date)
+        @if(!$company->deleted_at)
             @if($company->pivot->role === 'owner')
                 <a href="/companies/{{ $company->id }}/edit">
                     <button type="button" style="margin-top: 0.5rem;">Manage Company</button>
@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    @if(!$company->end_date)
+    @if(!$company->deleted_at)
 
     <h2>Categories</h2>
     <a href="/companies/{{ $company->id }}/categories">

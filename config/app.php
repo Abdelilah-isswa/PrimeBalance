@@ -20,9 +20,9 @@ return [
     | Application Environment
     |--------------------------------------------------------------------------
     |
-    | This value determines the "environment" your application is currently
+    | This value determines the \"environment\" your application is currently
     | running in. This may determine how you prefer to configure various
-    | services the application utilizes. Set this in your ".env" file.
+    | services the application utilizes. Set this in your \".env\" file.
     |
     */
 
@@ -61,7 +61,7 @@ return [
     |
     | Here you may specify the default timezone for your application, which
     | will be used by the PHP date and date-time functions. The timezone
-    | is set to "UTC" by default as it is suitable for most use cases.
+    | is set to \"UTC\" by default as it is suitable for most use cases.
     |
     */
 
@@ -111,10 +111,10 @@ return [
     |--------------------------------------------------------------------------
     |
     | These configuration options determine the driver used to determine and
-    | manage Laravel's "maintenance mode" status. The "cache" driver will
+    | manage Laravel's \"maintenance mode\" status. The \"cache\" driver will
     | allow maintenance mode to be controlled across multiple machines.
     |
-    | Supported drivers: "file", "cache"
+    | Supported drivers: \"file\", \"cache\"
     |
     */
 

@@ -7,11 +7,12 @@ use App\Models\Bill;
 use App\Http\Requests\StoreBillRequest;
 use App\Http\Requests\UpdateBillRequest;
 use App\Http\Requests\PayBillRequest;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Traits\HasCompanyAuthorization;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
-class BillController extends Controller
+class BillController extends BaseController
 {
     use HasCompanyAuthorization;
     
@@ -25,79 +26,107 @@ class BillController extends Controller
     public function index($companyId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $bills = $company->bills()->with('supplier')->get();
+        $bills = $company->bills()->with('supplier')->orderByDesc('id')->get();
         
-        return view('bills.index', compact('company', 'bills'));
+        return $this->sendResponse(compact('company', 'bills'));
     }
 
     public function create($companyId, $supplierId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'create bills');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'create bills');
         $supplier = $company->suppliers()->findOrFail($supplierId);
 
-        return view('bills.create', compact('company', 'supplier'));
+        return $this->sendResponse(compact('company', 'supplier'));
     }
 
-    public function store(StoreBillRequest $request, $companyId, $supplierId)
+    public function store(StoreBillRequest $request, $companyId)
     {
+        $supplierId = $request->input('supplier_id');
         $data = array_merge($request->validated(), [
             'company_id' => $companyId,
             'supplier_id' => $supplierId,
         ]);
 
-        $this->billService->createBill($data);
+        $bill = $this->billService->createBill($data);
+        $bill->load('supplier');
 
-        return redirect()->route('companies.show', $companyId);
+        return $this->sendCreated($bill);
     }
 
     public function showPayment($companyId, $billId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'pay bills');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'pay bills');
         $bill = $company->bills()->findOrFail($billId);
         $accounts = $company->accounts()->where('is_active', true)->get();
         $categories = $company->categories;
 
-        return view('bills.pay', compact('company', 'bill', 'accounts', 'categories'));
+        return $this->sendResponse(compact('company', 'bill', 'accounts', 'categories'));
     }
 
     public function pay(PayBillRequest $request, $companyId, $billId)
     {
         $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->findOrFail($billId);
-        $this->billService->payBill($bill, $request->validated());
-        return redirect()->route('bills.index', $companyId)->with('success', 'Bill paid successfully');
+        try {
+            $this->billService->payBill($bill, $request->validated());
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
+        }
+
+        $bill->load('supplier');
+        return $this->sendResponse($bill->fresh(), 'Bill paid successfully');
     }
 
     public function show($companyId, $billId)
     {
         $company = $this->getCompanyForMember($companyId);
-        $bill = $company->bills()->with('supplier')->findOrFail($billId);
+        $bill = $company->bills()->with('supplier')->withCount('transactions')->findOrFail($billId);
         
-        return view('bills.show', compact('company', 'bill'));
+        return $this->sendResponse(compact('company', 'bill'));
     }
 
     public function edit($companyId, $billId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'edit bills');
-        $bill = $company->bills()->with('supplier')->findOrFail($billId);
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'edit bills');
+        $bill = $company->bills()->with('supplier')->withCount('transactions')->findOrFail($billId);
         
-        return view('bills.edit', compact('company', 'bill'));
+        return $this->sendResponse(compact('company', 'bill'));
     }
 
     public function update(UpdateBillRequest $request, $companyId, $billId)
     {
         $company = $this->getCompanyForMember($companyId);
         $bill = $company->bills()->findOrFail($billId);
-        $this->billService->updateBill($bill, $request->validated());
-        return redirect()->route('bills.show', [$companyId, $billId])->with('success', 'Bill updated successfully');
+        try {
+            $this->billService->updateBill($bill, $request->validated());
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
+        }
+
+        $bill->load('supplier');
+        return $this->sendResponse($bill->fresh(), 'Bill updated successfully');
     }
 
     public function destroy($companyId, $billId)
     {
-        $company = $this->getCompanyForOwner($companyId, 'delete bills');
+        $company = $this->getCompanyWithRole($companyId, ['owner', 'admin', 'accountant'], 'delete bills');
         $bill = $company->bills()->findOrFail($billId);
-        $this->billService->deleteBill($bill);
+        try {
+            $this->billService->deleteBill($bill);
+        } catch (\RuntimeException $e) {
+            return $this->sendError($e->getMessage(), 422);
+        }
 
-        return redirect()->route('bills.index', $companyId)->with('success', 'Bill deleted successfully');
+        return $this->sendResponse([], 'Bill deleted successfully');
+    }
+
+    public function downloadPdf($companyId, $billId)
+    {
+        $company = $this->getCompanyForMember($companyId);
+        $bill = $company->bills()->with('supplier')->findOrFail($billId);
+
+        $pdf = Pdf::loadView('bills.pdf', compact('company', 'bill'));
+        return $pdf->download('bill-' . $bill->id . '.pdf');
     }
 }
+

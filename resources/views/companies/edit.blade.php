@@ -9,20 +9,20 @@
         <p><strong>Name:</strong> <span id="display-name">{{ $company->name }}</span></p>
         <p><strong>Address:</strong> <span id="display-address">{{ $company->address }}</span></p>
         <p><strong>Currency:</strong> <span id="display-currency">{{ $company->currency }}</span></p>
-        <p><strong>Start Date:</strong> {{ $company->start_date }}</p>
-        @if($company->end_date)
-            <p><strong>End Date:</strong> {{ $company->end_date }} <span style="color: red;">(Deactivated)</span></p>
+        <p><strong>Created At:</strong> {{ optional($company->created_at)->format('Y-m-d') }}</p>
+        @if($company->deleted_at)
+            <p><strong>Deleted At:</strong> {{ optional($company->deleted_at)->format('Y-m-d') }} <span style="color: red;">(Deactivated)</span></p>
         @endif
         <button type="button" onclick="showEditMode()" style="margin-top: 1rem;">Update</button>
-        @if(!$company->end_date)
-            <form method="POST" action="/companies/{{ $company->id }}/deactivate" style="display: inline; margin-left: 0.5rem;" onsubmit="return confirm('Are you sure you want to deactivate this company? This will set the end date to today.')">
+        @if(!$company->deleted_at)
+            <form method="POST" action="/companies/{{ $company->id }}/deactivate" style="display: inline; margin-left: 0.5rem;" onsubmit="return confirm('Are you sure you want to deactivate this company?')">
                 @csrf
                 <button type="submit" style="background: #c62828;">Deactivate Company</button>
             </form>
         @endif
     </div>
 
-    @if(!$company->end_date)
+    @if(!$company->deleted_at)
     <h2 id="invite">Invite User</h2>
     <form method="POST" action="/companies/{{ $company->id }}/invite" style="margin: 1rem 0;">
         @csrf
@@ -33,9 +33,8 @@
         <div>
             <label>Role:</label>
             <select name="role" required>
-                <option value="owner">Owner</option>
+                <option value="admin">Admin</option>
                 <option value="accountant">Accountant</option>
-                <option value="standard_user">Standard User</option>
                 <option value="viewer">Viewer</option>
             </select>
         </div>
@@ -67,9 +66,8 @@
                         @csrf
                         @method('PUT')
                         <select name="role" onchange="this.form.submit()" style="padding: 0.25rem;">
-                            <option value="owner" {{ $user->pivot->role === 'owner' ? 'selected' : '' }}>Owner</option>
+                            <option value="admin" {{ $user->pivot->role === 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="accountant" {{ $user->pivot->role === 'accountant' ? 'selected' : '' }}>Accountant</option>
-                            <option value="standard_user" {{ $user->pivot->role === 'standard_user' ? 'selected' : '' }}>Standard User</option>
                             <option value="viewer" {{ $user->pivot->role === 'viewer' ? 'selected' : '' }}>Viewer</option>
                         </select>
                     </form>
