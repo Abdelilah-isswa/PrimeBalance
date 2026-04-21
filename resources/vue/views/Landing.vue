@@ -382,7 +382,7 @@ const syncActiveNavFromHash = () => {
     activeNav.value = 'features';
     return;
   }
-
+  
   if (window.location.hash === '#pricing') {
     activeNav.value = 'pricing';
     return;

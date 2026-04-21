@@ -46,9 +46,19 @@ const register = async () => {
   loading.value = true;
   error.value = '';
   try {
-    await axios.post('/register', form.value);
+    const res = await axios.post('/register', form.value);
+    const token = res.data?.data?.token;
+    if (token) {
+      // Persist token and set auth header like the login flow
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      await authStore.fetchUser();
+    }
+
     const invitation = route.query.invitation;
-    router.push(invitation ? `/invitations/${invitation}` : '/login');
+    // If there was an invitation, go to that page so the user can accept it,
+    // otherwise go to the dashboard.
+    router.push(invitation ? `/invitations/${invitation}` : '/dashboard');
   } catch (err) {
     error.value = err.response?.data?.message || 'Registration failed';
   } finally {

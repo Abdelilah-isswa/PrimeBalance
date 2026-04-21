@@ -40,6 +40,7 @@ const login = async () => {
   try {
     await authStore.login(form.value);
     const invitation = route.query.invitation;
+    
     router.push(invitation ? `/invitations/${invitation}` : '/dashboard');
   } catch (err) {
     error.value = err.response?.data?.message || 'Login failed';
